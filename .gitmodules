@@ -1,0 +1,3 @@
+[submodule "pandora-abi"]
+	path = pandora-abi
+	url = https://github.com/pandoraboxchain/pandora-abi
