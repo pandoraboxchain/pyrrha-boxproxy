@@ -1,0 +1,5 @@
+{
+  "port": 1111,
+  "node_url": "http://localhost:8545",
+  "pandoraContractAddress": "0x0af5e061288de9991372cfbbaf0bca2f89eebd37"
+}
