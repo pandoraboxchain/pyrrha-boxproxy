@@ -12,7 +12,7 @@ import PandoraABI from '../pandora-abi/Pandora.json';
 import WorkerNodeABI from '../pandora-abi/WorkerNode.json';
 import CognitiveJobABI from '../pandora-abi/CognitiveJob.json';
 
-import { getWorkers, getJobs, getKernels, getDatasets } from './function.js';
+import { getWorkers, getJobs, getKernels, getDataSets } from './function.js';
 
 // ABI's
 
@@ -60,4 +60,99 @@ app.get('/store', (req, res) => {
 
 app.get('/abi', (req, res) => {
     return res.json(finABI);
+});
+
+app.get('/workers', (req, res) => {
+    let workerNodesCount = PANContract.workerNodesCount();
+    let workersList = [];
+    for (let _count=0; _count < workerNodesCount; _count++) {
+        let jobsActive = PANContract.activeJobs(_count);
+        let singleWorker = {
+            'id': _count,
+            'address': PANContract.workerNodes(_count),
+            'status': Number.parseInt(WORContract.currentState([_count])),
+            'currentJob': jobsActive,
+            'currentJobStatus': Number.parseInt(COGContract.currentState([jobsActive]))
+        };
+        workersList.push(singleWorker);
+    }
+    let workers = {
+        'workers': workersList,
+        'workersTotal': workerNodesCount
+    };
+    return res.json(workers);
+});
+
+app.get('/workers/:id', (req, res) => {
+    let workerNodesCount = PANContract.workerNodesCount();
+    if (req.params.id >= workerNodesCount) {
+        res.send('Invalid worker ID!');
+    } else {
+        let jobsActive = PANContract.activeJobs(req.params.id);
+        let worker = {
+            'id': Number.parseInt(req.params.id),
+            'address': PANContract.workerNodes(req.params.id),
+            'status': Number.parseInt(WORContract.currentState([req.params.id])),
+            'currentJob': jobsActive,
+            'currentJobStatus': Number.parseInt(COGContract.currentState([jobsActive]))
+        };
+        return res.json(worker);
+    }
+});
+
+app.get('/jobs', (req, res) => {
+    let workerNodesCount = PANContract.workerNodesCount();
+    let jobsList = [];
+    for (let _count=0; _count < workerNodesCount; _count++) {
+        let jobsActive = PANContract.activeJobs(_count);
+        let singleJob = {
+            'id': _count,
+            'jobAddress': PANContract.activeJobs(_count),
+            'jobStatus': Number.parseInt(COGContract.currentState([jobsActive])),
+            'ipfs': 'ipfsString'
+        };
+        jobsList.push(singleJob);
+    }
+    let jobs = {
+        'jobs': jobsList
+    };
+    return res.json(jobs);
+});
+
+app.get('/kernels', (req, res) => {
+    let workerNodesCount = PANContract.workerNodesCount();
+    let jobsList = [];
+    for (let _count=0; _count < workerNodesCount; _count++) {
+        let jobsActive = PANContract.activeJobs(_count);
+        let singleJob = {
+            'id': _count,
+            'jobAddress': PANContract.activeJobs(_count),
+            'jobStatus': Number.parseInt(COGContract.currentState([jobsActive])),
+            'ipfs': 'ipfsString'
+        };
+        jobsList.push(singleJob);
+    }
+    let jobs = {
+        'jobs': jobsList
+    };
+    return res.json(jobs);
+});
+
+app.get('/datasets', (req, res) => {
+    let workerNodesCount = PANContract.workerNodesCount();
+    let jobsList = [];
+    for (let _count=0; _count < workerNodesCount; _count++) {
+        let jobsActive = PANContract.activeJobs(_count);
+        let singleJob = {
+            'id': _count,
+            'jobAddress': PANContract.activeJobs(_count),
+            'jobStatus': Number.parseInt(COGContract.currentState([jobsActive])),
+            'ipfs': 'ipfsString'
+        };
+        jobsList.push(singleJob);
+    }
+    let jobs = {
+        'jobs': jobsList
+    };
+    return res.json(jobs);
 });
