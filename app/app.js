@@ -12,7 +12,7 @@ import PandoraABI from '../pandora-abi/Pandora.json';
 import WorkerNodeABI from '../pandora-abi/WorkerNode.json';
 import CognitiveJobABI from '../pandora-abi/CognitiveJob.json';
 
-import { getWorkers, getJobs, getKernels, getDataSets } from './function.js';
+import { getWorkers, getJobs, getKernels, getDatasets } from './function.js';
 
 // ABI's
 
