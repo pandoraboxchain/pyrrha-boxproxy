@@ -8,7 +8,7 @@ const app = express();
 
 const web3 = new Web3(new Web3.providers.HttpProvider(config.node_url));
 
-import PandoraABI from '../pandora-abi/Pandora.json';
+import PandoraABI from '../pandora-abi/PandoraHooks.json';
 import WorkerNodeABI from '../pandora-abi/WorkerNode.json';
 import CognitiveJobABI from '../pandora-abi/CognitiveJob.json';
 
@@ -23,8 +23,6 @@ const serCogABI = CognitiveJobABI.abi;
 const pandoraContractAddr = config.pandoraContractAddress;
 
 const PANContract = web3.eth.contract(serPanABI).at(pandoraContractAddr);
-const WORContract = web3.eth.contract(serWorABI).at(pandoraContractAddr);
-const COGContract = web3.eth.contract(serCogABI).at(pandoraContractAddr);
 
 const port = config.port;
 
@@ -66,13 +64,16 @@ app.get('/workers', (req, res) => {
     let workerNodesCount = PANContract.workerNodesCount();
     let workersList = [];
     for (let _count=0; _count < workerNodesCount; _count++) {
-        let jobsActive = PANContract.activeJobs(_count);
+        let workerAddress = PANContract.workerNodes(_count);
+        let WORContract = web3.eth.contract(serWorABI).at(workerAddress)
+        let jobAddress = WORContract.activeJob()
+        let COGContract = (jobAddress == null) ? null : web3.eth.contract(serCogABI).at(jobAddress)
         let singleWorker = {
             'id': _count,
-            'address': PANContract.workerNodes(_count),
-            'status': Number.parseInt(WORContract.currentState([_count])),
-            'currentJob': jobsActive,
-            'currentJobStatus': Number.parseInt(COGContract.currentState([jobsActive]))
+            'address': workerAddress,
+            'status': Number.parseInt(WORContract.currentState()),
+            'currentJob': jobAddress,
+            'currentJobStatus': jobAddress ? -1 : Number.parseInt(COGContract.currentState())
         };
         workersList.push(singleWorker);
     }
