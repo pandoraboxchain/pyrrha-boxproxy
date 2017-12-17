@@ -60,6 +60,7 @@ export function getJobs() {
 export function getKernels() {
   let kernelMapping = {}
   let jobs = getJobs()
+  let _count = 0
   jobs.map(job => {
       let COGContract = web3.eth.contract(serCogABI).at(job['jobAddress'])
       kernelMapping[COGContract.kernel()] = true
@@ -67,6 +68,7 @@ export function getKernels() {
   return Object.keys(kernelMapping).map(kernelAddress => {
       let KERContract = web3.eth.contract(serKerABI).at(kernelAddress)
       return {
+        'id': _count++,
         'address': kernelAddress,
         'ipfs': KERContract.ipfsAddress(),
         'dim': KERContract.dataDim(),
@@ -79,6 +81,7 @@ export function getKernels() {
 export function getDatasets() {
   let datasetMapping = {}
   let jobs = getJobs()
+  let _count = 0
   jobs.map(job => {
     let COGContract = web3.eth.contract(serCogABI).at(job['jobAddress'])
     datasetMapping[COGContract.dataset()] = true
@@ -86,6 +89,7 @@ export function getDatasets() {
   return Object.keys(datasetMapping).map(datasetAddress => {
     let DATContract = web3.eth.contract(serDatABI).at(datasetAddress)
     return {
+      'id': _count++,
       'address': datasetAddress,
       'ipfs': DATContract.ipfsAddress(),
       'dim': DATContract.dataDim(),
