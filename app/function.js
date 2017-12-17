@@ -47,9 +47,9 @@ export function getJobs() {
       let singleJob = {
           'id': _count,
           'jobAddress': jobAddress,
-          'jobStatus': Number.parseInt(COGContract.currentState())
-        // No IPFS here
-        //  'ipfs': 'ipfsString'
+          'jobStatus': Number.parseInt(COGContract.currentState()),
+          'kernel': COGContract.kernel(),
+          'dataset': COGContract.dataset()
       };
       jobsList.push(singleJob);
   }
@@ -70,7 +70,7 @@ export function getKernels() {
         'address': kernelAddress,
         'ipfs': KERContract.ipfsAddress(),
         'dim': KERContract.dataDim(),
-        'price': KERContract.price(),
+        'price': KERContract.currentPrice(),
         'complexity': KERContract.complexity()
       }
   })
@@ -79,7 +79,7 @@ export function getKernels() {
 export function getDatasets() {
   let datasetMapping = {}
   let jobs = getJobs()
-  jobs.map(dataset => {
+  jobs.map(job => {
     let COGContract = web3.eth.contract(serCogABI).at(job['jobAddress'])
     datasetMapping[COGContract.dataset()] = true
   })
@@ -89,7 +89,7 @@ export function getDatasets() {
       'address': datasetAddress,
       'ipfs': DATContract.ipfsAddress(),
       'dim': DATContract.dataDim(),
-      'price': DATContract.price(),
+      'price': DATContract.currentPrice(),
       'samples': DATContract.samplesCount(),
       'batches': DATContract.batchesCount()
     }
