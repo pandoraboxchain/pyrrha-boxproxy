@@ -13,7 +13,7 @@ import WorkerNodeABI from '../pandora-abi/WorkerNode.json';
 import CognitiveJobABI from '../pandora-abi/CognitiveJob.json';
 
 import { getWorkers, getJobs, getKernels, getDatasets } from './function.js';
-
+import { wsServer } from './ws.js'
 // ABI's
 
 const serPanABI = PandoraABI.abi;

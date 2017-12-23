@@ -15,7 +15,8 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
-    "web3": "^0.18.4"
+    "web3": "^0.18.4",
+    "websocket": "1.0.24"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

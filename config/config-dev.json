@@ -1,5 +1,6 @@
 {
   "port": 1111,
+  "wsport": 1337,
   "node_url": "http://localhost:7545",
-  "pandoraContractAddress": "0x35b338b4ade005f25a8982a597638827b8617ad4"
+  "pandoraContractAddress": "0x2c2b9c9a4a25e24b174f26114e8926a9f2128fe4"
 }
