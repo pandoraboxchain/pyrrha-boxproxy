@@ -8,7 +8,8 @@ git submodule update --init --recursive
 docker build -t pyrrha-boxproxy -f ./Dockerfile .
 ```
 
+or just...
 ### Run a container
 ```
-docker run pyrrha-boxproxy
+docker-compose up --build
 ```

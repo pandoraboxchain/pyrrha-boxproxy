@@ -1,12 +1,12 @@
 FROM node:8.9.4
 
+VOLUME [ "/app", "/config", "/pandora-abi" ]
+
 COPY ./package.json /package.json
-COPY ./app /app
-COPY ./config /config
-COPY ./pandora-abi /pandora-abi
 
 WORKDIR /
-RUN npm i
+RUN npm i --global nodemon
+RUN npm i --quiet
 
 CMD [ "npm", "start" ]
 

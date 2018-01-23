@@ -1,0 +1,22 @@
+version: "2"
+services:
+
+  pyrrha_boxproxy:
+    container_name: "pyrrha_boxproxy"
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./app:/app
+      - ./config:/config
+      - ./pandora-abi:/pandora-abi
+    ports:
+      - "1111:1111"
+      - "1337:1337"
+    networks: 
+      main:
+        aliases:
+          - pyrrha_boxproxy    
+
+networks: 
+  main:
