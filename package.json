@@ -5,17 +5,17 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --watch ./app --watch ./config --watch ./pandora-abi ./app/app.js --exec babel-node --presets es2015,stage-2"
+    "build": "npx babel ./app --out-dir ./app-compiled --presets env --source-maps",
+    "start": "npm run build && node ./app-compiled/app.js",
+    "dev": "nodemon --delay 3 --watch ./app --watch ./config --watch ./pandora-abi --exec npm run start"
   },
   "author": "",
   "license": "ISC",
-  "presets": [
-    "env"
-  ],
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
-    "web3": "^0.18.4",
+    "web3": "^1.0.0-beta.29",
     "websocket": "1.0.24"
   },
   "devDependencies": {

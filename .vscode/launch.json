@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "cwd": "${workspaceFolder}/app",            
+            "program": "${workspaceFolder}/app/app.js",
+            "runtimeExecutable": "/home/kostysh/.nvm/versions/node/v9.4.0/bin/node"
+            
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Debug Remote Docker",
+            "address": "localhost",
+            "port": 5858,
+            "restart": true,
+            "sourceMaps": true,
+            "localRoot": "${workspaceRoot}/app/",
+            "remoteRoot": "/app-compiled/",
+            "protocol": "inspector"
+        }
+    ]
+}

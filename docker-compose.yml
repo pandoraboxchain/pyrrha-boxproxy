@@ -6,13 +6,15 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    volumes:
-      - ./app:/app
-      - ./config:/config
-      - ./pandora-abi:/pandora-abi
+    environment:
+      - WEB3_HOSTNAME=172.17.0.1
+      - PAN_ADDRESS=0x2c2b9c9a4a25e24b174f26114e8926a9f2128fe4
     ports:
       - "1111:1111"
       - "1337:1337"
+      - "5858:5858"
+    volumes:
+      - "./tmp:/logs"
     networks: 
       main:
         aliases:

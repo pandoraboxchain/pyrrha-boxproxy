@@ -1,15 +1,15 @@
-const config = require('../config/config-dev.json');
+const config = require('../config/config-dev');
 const Web3 = require('web3');
 
 const web3 = new Web3(new Web3.providers.HttpProvider(config.node_url));
 
-import PandoraABI from '../pandora-abi/PandoraHooks.json';
-import WorkerNodeABI from '../pandora-abi/WorkerNode.json';
-import CognitiveJobABI from '../pandora-abi/CognitiveJob.json';
-import KernelABI from '../pandora-abi/Kernel.json';
-import DatasetABI from '../pandora-abi/Dataset.json';
+const PandoraABI = require('../pandora-abi/PandoraHooks.json');
+const WorkerNodeABI = require('../pandora-abi/WorkerNode.json');
+const CognitiveJobABI = require('../pandora-abi/CognitiveJob.json');
+const KernelABI = require('../pandora-abi/Kernel.json');
+const DatasetABI = require('../pandora-abi/Dataset.json');
 
-import { pushToWS } from './ws.js'
+const { pushToWS } = require('./ws.js');
 
 const serPanABI = PandoraABI.abi;
 const serWorABI = WorkerNodeABI.abi;
@@ -18,78 +18,136 @@ const serKerABI = KernelABI.abi;
 const serDatABI = DatasetABI.abi;
 
 const pandoraContractAddr = config.pandoraContractAddress;
-const PANContract = web3.eth.contract(serPanABI).at(pandoraContractAddr);
+const PANContract = new web3.eth.Contract(serPanABI, pandoraContractAddr);
 
-export function getWorkers() {
-  let workerNodesCount = PANContract.workerNodesCount();
-  let workersList = [];
-  for (let _count=0; _count < workerNodesCount; _count++) {
-    let workerAddress = PANContract.workerNodes(_count);
-    let WORContract = web3.eth.contract(serWorABI).at(workerAddress)
-    let jobAddress = WORContract.activeJob()
-    let COGContract = (jobAddress == null) ? null : web3.eth.contract(serCogABI).at(jobAddress)
-    let singleWorker = {
-      'id': _count,
-      'address': workerAddress,
-      'status': Number.parseInt(WORContract.currentState()),
-      'currentJob': jobAddress,
-      'currentJobStatus': jobAddress ? -1 : Number.parseInt(COGContract.currentState())
-    };
-    workersList.push(singleWorker);
-  }
-  return workersList;
+function getWorkerById(id) {
+
 }
 
-export function getJobs() {
+function getWorkers() {
+  
+  return PANContract.methods
+    .workerNodesCount()
+    .call()
+    .then(workerNodesCount => {
+
+      let workersPromises = [];
+
+      for (let _count = 0; _count < workerNodesCount; _count++) {
+
+        workersPromises.push(
+          PANContract.methods
+            .workerNodes(_count)
+            .call()
+            .then(workerAddress => {
+
+              let WORContract = new web3.eth.Contract(serWorABI, workerAddress);
+              return WORContract.methods
+                .activeJob()
+                .call()
+                .then(jobAddress => {
+
+                  if (jobAddress) {
+
+                    return WORContract.methods
+                      .currentState()
+                      .call()
+                      .then(workerState => {
+
+                        let COGContract = new web3.eth.Contract(serCogABI, jobAddress);
+                        return COGContract.method
+                          .currentState()
+                          .call()
+                          .then(jobState => {
+                              _count,
+                              workerAddress,
+                              workerState
+                              jobAddress,
+                              jobState
+                          });
+                      });
+                  }
+
+                  return null;
+                });
+            })
+        );        
+      }
+
+      return Promise.all(workersPromises);
+    })
+    .then(result => {
+
+      let workersList = result.map(worker => {
+
+        if (worker) {
+
+          return {
+            'id': worker._count,
+            'address': worker.workerAddress,
+            'status': Number.parseInt(worker.workerState),
+            'currentJob': worker.jobAddress,
+            'currentJobStatus': worker.jobAddress ? -1 : Number.parseInt(worker.jobState)
+          }
+        }
+
+        return null;
+      });
+
+      return workersList.filter(worker => worker);
+    });
+}
+
+function getJobs() {
   let jobsCount = PANContract.activeJobsCount();
   let jobsList = [];
-  for (let _count=0; _count < jobsCount; _count++) {
-      let jobAddress = PANContract.activeJobs(_count);
-      let COGContract = web3.eth.contract(serCogABI).at(jobAddress)
-      let singleJob = {
-          'id': _count,
-          'jobAddress': jobAddress,
-          'jobStatus': Number.parseInt(COGContract.currentState()),
-          'kernel': COGContract.kernel(),
-          'dataset': COGContract.dataset()
-      };
-      jobsList.push(singleJob);
+  for (let _count = 0; _count < jobsCount; _count++) {
+    let jobAddress = PANContract.activeJobs(_count);
+    let COGContract = new web3.eth.Contract(serCogABI, jobAddress)
+    let singleJob = {
+      'id': _count,
+      'jobAddress': jobAddress,
+      'jobStatus': Number.parseInt(COGContract.currentState()),
+      'kernel': COGContract.kernel(),
+      'dataset': COGContract.dataset()
+    };
+    jobsList.push(singleJob);
   }
 
   return jobsList;
 }
 
-export function getKernels() {
+function getKernels() {
   let kernelMapping = {}
   let jobs = getJobs()
   let _count = 0
   jobs.map(job => {
-      let COGContract = web3.eth.contract(serCogABI).at(job['jobAddress'])
-      kernelMapping[COGContract.kernel()] = true
+    let COGContract = new web3.eth.Contract(serCogABI, job['jobAddress'])
+    kernelMapping[COGContract.kernel()] = true
   })
   return Object.keys(kernelMapping).map(kernelAddress => {
-      let KERContract = web3.eth.contract(serKerABI).at(kernelAddress)
-      return {
-        'id': _count++,
-        'address': kernelAddress,
-        'ipfs': KERContract.ipfsAddress(),
-        'dim': KERContract.dataDim(),
-        'price': KERContract.currentPrice(),
-        'complexity': KERContract.complexity()
-      }
+    let KERContract = new web3.eth.Contract(serKerABI, kernelAddress)
+    return {
+      'id': _count++,
+      'address': kernelAddress,
+      'ipfs': KERContract.ipfsAddress(),
+      'dim': KERContract.dataDim(),
+      'price': KERContract.currentPrice(),
+      'complexity': KERContract.complexity()
+    }
   })
 }
 
-export function getDatasets() {
+function getDatasets() {
   let datasetMapping = {}
   let jobs = getJobs()
   let _count = 0
   jobs.map(job => {
-    let COGContract = web3.eth.contract(serCogABI).at(job['jobAddress'])
+    let COGContract = new web3.eth.Contract(serCogABI, job['jobAddress'])
     datasetMapping[COGContract.dataset()] = true
   })
   return Object.keys(datasetMapping).map(datasetAddress => {
-    let DATContract = web3.eth.contract(serDatABI).at(datasetAddress)
+    let DATContract = new web3.eth.Contract(serDatABI, datasetAddress)
     return {
       'id': _count++,
       'address': datasetAddress,
@@ -104,32 +162,32 @@ export function getDatasets() {
 
 let workerNodesList = [];
 
-export function setEvents(push) {
+function setEvents(push) {
   /*PANContract.WorkerNodeCreated({fromBlock: 0}, function(err, res){
     console.log(res);
     console.log(err);
   });*/
-  PANContract.CognitiveJobCreated({fromBlock: 0}, function(err, res){
-    if(!err){
+  PANContract.events.CognitiveJobCreated({ fromBlock: 0 }, function (err, res) {
+    if (!err) {
       let jobAddress = res.args.cognitiveJob;
-      let COGContract = web3.eth.contract(serCogABI).at(jobAddress)
+      let COGContract = new web3.eth.Contract(serCogABI, jobAddress)
       let job = {
-          'jobAddress': jobAddress,
-          'jobStatus': Number.parseInt(COGContract.currentState()),
-          'kernel': COGContract.kernel(),
-          'dataset': COGContract.dataset(),
-          'type': 'created',
+        'jobAddress': jobAddress,
+        'jobStatus': Number.parseInt(COGContract.currentState()),
+        'kernel': COGContract.kernel(),
+        'dataset': COGContract.dataset(),
+        'type': 'created',
       };
-      COGContract.StateChanged({fromBlock: 0}, function(err, res){
-        if(!err){
+      COGContract.events.StateChanged({ fromBlock: 0 }, function (err, res) {
+        if (!err) {
           let jobAddress = res.address;
-          let COGContract = web3.eth.contract(serCogABI).at(jobAddress)
+          let COGContract = new web3.eth.Contract(serCogABI, jobAddress)
           let job = {
-              'jobAddress': jobAddress,
-              'jobStatus': Number.parseInt(COGContract.currentState()),
-              'kernel': COGContract.kernel(),
-              'dataset': COGContract.dataset(),
-              'type': 'changed',
+            'jobAddress': jobAddress,
+            'jobStatus': Number.parseInt(COGContract.currentState()),
+            'kernel': COGContract.kernel(),
+            'dataset': COGContract.dataset(),
+            'type': 'changed',
           };
           push({
             'jobs': [job],
@@ -140,7 +198,7 @@ export function setEvents(push) {
         }
       });
       let kernelAddress = COGContract.kernel()
-      let KERContract = web3.eth.contract(serKerABI).at(kernelAddress)
+      let KERContract = new web3.eth.Contract(serKerABI, kernelAddress)
       let kernel = {
         'address': kernelAddress,
         'ipfs': KERContract.ipfsAddress(),
@@ -149,7 +207,7 @@ export function setEvents(push) {
         'complexity': KERContract.complexity()
       }
       let datasetAddress = COGContract.dataset()
-      let DATContract = web3.eth.contract(serDatABI).at(datasetAddress)
+      let DATContract = new web3.eth.Contract(serDatABI, datasetAddress)
       let dataset = {
         'address': datasetAddress,
         'ipfs': DATContract.ipfsAddress(),
@@ -169,3 +227,9 @@ export function setEvents(push) {
 }
 
 setEvents(pushToWS)
+
+module.exports.getWorkers = getWorkers;
+module.exports.getJobs = getJobs;
+module.exports.getKernels = getKernels;
+module.exports.getDatasets = getDatasets;
+module.exports.setEvents = setEvents;

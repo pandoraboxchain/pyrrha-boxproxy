@@ -25,7 +25,7 @@ var wsServer = wsServer.on('request', function(request) {
   });
 });
 
-export function pushToWS(data){
+function pushToWS(data){
   connectionList.map(connection => {
     connection.sendUTF(
       JSON.stringify(data)
@@ -34,3 +34,4 @@ export function pushToWS(data){
 }
 
 exports.wsServer = wsServer;
+module.exports.pushToWS = pushToWS;
