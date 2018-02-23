@@ -1,8 +1,10 @@
 'use strict';
-const { getWorkers } = require('../workers/workers.service');
-const { getJobs } = require('../jobs/jobs.service');
-const { getKernels } = require('../kernels/kernels.service');
-const { getDatasets } = require('../datasets/datasets.service');
+const {
+    getWorkers,
+    getJobs,
+    getKernels,
+    getDatasets
+} = require('../../libs/pandora.lib');
 
 // @route /store
 module.exports.getStore = async (req, res ,next) => {

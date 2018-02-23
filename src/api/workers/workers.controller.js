@@ -3,7 +3,7 @@ const {
     getWorkerNodesCount,
     getWorkers,
     getWorkerById
-} = require('./workers.service');
+} = require('../../libs/pandora.lib');
 
 // @route /workers/count
 module.exports.getWorkerNodesCount = async (req, res, next) => {

@@ -3,7 +3,7 @@ const store = require('../../store');
 const { cog: cogAbi } = store.get('abis');
 const {
     getDatasets
-} = require('./datasets.service');
+} = require('../../libs/pandora.lib');
 
 // @route /datasets
 module.exports.getDatasets = async (req, res, next) => {

@@ -1,7 +1,7 @@
 'use strict';
 const {
     getJobs
-} = require('./jobs.service');
+} = require('../../libs/pandora.lib');
 
 // @route /jobs
 module.exports.getJobs = async (req, res, next) => {

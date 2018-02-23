@@ -1,7 +1,7 @@
 'use strict';
 const {
     getKernels
-} = require('./kernels.service');
+} = require('../../libs/pandora.lib');
 
 // @route /kernels
 module.exports.getKernels = async (req, res, next) => {
