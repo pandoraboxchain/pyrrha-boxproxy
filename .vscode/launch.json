@@ -8,9 +8,8 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "cwd": "${workspaceFolder}/app",            
-            "program": "${workspaceFolder}/app/app.js",
-            "runtimeExecutable": "/home/kostysh/.nvm/versions/node/v9.4.0/bin/node"
+            "cwd": "${workspaceFolder}/src",            
+            "program": "${workspaceFolder}/src/index.js"
             
         },
         {

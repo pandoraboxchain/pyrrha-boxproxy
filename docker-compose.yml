@@ -7,12 +7,12 @@ services:
       context: .
       dockerfile: ./Dockerfile
     environment:
-      - WEB3_HOSTNAME=172.17.0.1
-      - PAN_ADDRESS=0x2c2b9c9a4a25e24b174f26114e8926a9f2128fe4
+      - WEB3_PROTOCOL=https
+      - WEB3_HOSTNAME=ropsten.infura.io/Llc2pOEtpgzvopBH8dst
+      - WEB3_PORT=
+      - PAN_ADDRESS=0xb1746daa5260ba5d94c6b407b226b1cb190190ab
     ports:
       - "1111:1111"
-      - "1337:1337"
-      - "5858:5858"
     volumes:
       - "./tmp:/logs"
     networks: 

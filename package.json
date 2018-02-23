@@ -1,22 +1,27 @@
 {
   "name": "pandora-explorer-backend",
   "version": "1.0.0",
-  "description": "API Pandora Blockexplorer",
-  "main": "index.js",
+  "private": true,
+  "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx babel ./app --out-dir ./app-compiled --presets env --source-maps",
-    "start": "npm run build && node ./app-compiled/app.js",
-    "dev": "nodemon --delay 3 --watch ./app --watch ./config --watch ./pandora-abi --exec npm run start"
+    "build:docker": "docker-compose build --no-cache",
+    "start:docker": "docker-compose up -d --remove-orphans",
+    "stop:docker": "docker-compose down",
+    "start": "node ./src"
   },
-  "author": "",
-  "license": "ISC",
+  "contributors": [
+    "Maxim Orlovsky <orlovsky@pandora.foundation>",
+    "Kostiantyn Smyrnov <kostysh@gmail.com>"
+  ],
   "dependencies": {
     "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
-    "web3": "^1.0.0-beta.29",
-    "websocket": "1.0.24"
+    "helmet": "^3.11.0",
+    "web3": "^1.0.0-beta.30",
+    "websocket": "^1.0.25"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -24,7 +29,8 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
-    "nodemon": "^1.12.1",
-    "truffle-contract": "^3.0.0"
-  }
+    "eslint": "^4.18.1",
+    "eslint-config-google": "^0.9.1"
+  },
+  "license": "MIT"
 }

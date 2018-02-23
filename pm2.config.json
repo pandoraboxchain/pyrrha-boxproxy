@@ -1,15 +1,10 @@
 {
     "apps": [
         {
-            "script": "./app-compiled/app.js",
-            "interpreter_args": "--inspect-brk=0.0.0.0:5858",
-            "watch": false,
+            "script": "./src/index.js",
             "instances": 1,
             "exec_mode": "fork",
-            "name": "Pyrrha Boxproxy",
-            "env": {
-                "ENV": "PRODUCTION"
-            },
+            "name": "Pyrrha Boxproxy",            
             "max_restarts": 10,
             "log_file": "./logs/combined.outerr.log",
             "out_file": "./logs/out.log",
