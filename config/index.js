@@ -10,7 +10,7 @@ const hosts = {
         }
     },
     rsk: {
-        protocol: 'https',
+        protocol: 'http',
         host: 'bitcoin.pandora.network',
         port: 4444,
         contracts: {

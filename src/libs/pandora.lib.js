@@ -385,11 +385,11 @@ const getKernels = async () => {
     const jobs = await getJobs();
 
     const kernels = await Promise.all(jobs.map(async (jobAddress, index) => {
-        const kernelAddress = await exportsgetKernelAddressByJob(jobAddress);
-        const ipfsAddress = await exportsgetIpfsAddressByKernelAddress(kernelAddress);
-        const dataDim = await exportsgetDataDimByKernelAddress(kernelAddress);
-        const currentPrice = await exportsgetCurrentPriceByKernelAddress(kernelAddress);
-        const complexity = await exportsgetComplexityByKernelAddress(kernelAddress);
+        const kernelAddress = await getKernelAddressByJob(jobAddress);
+        const ipfsAddress = await getIpfsAddressByKernelAddress(kernelAddress);
+        const dataDim = await getDataDimByKernelAddress(kernelAddress);
+        const currentPrice = await getCurrentPriceByKernelAddress(kernelAddress);
+        const complexity = await getComplexityByKernelAddress(kernelAddress);
 
         return {
             id: index,
