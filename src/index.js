@@ -17,7 +17,7 @@ const KernelABI = require('../pandora-abi/Kernel.json');
 const DatasetABI = require('../pandora-abi/Dataset.json');
 
 // Init servers
-const web3 = new Web3(`${config.protocol}://${config.nodeHost}:${config.nodePort}`);
+const web3 = new Web3(`${config.protocol || 'http'}://${config.nodeHost || 'localhost'}:${config.nodePort || ''}`);
 const wsServer = require('./ws')(config);
 const app = require('./express')(config);
 

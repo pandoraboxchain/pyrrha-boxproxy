@@ -20,7 +20,7 @@ const {
  * 
  * @returns {integer} 
  */
-module.exports.getWorkerNodesCount = async () => {
+const getWorkerNodesCount = async () => {
     const count = await pan.methods
         .workerNodesCount()
         .call();
@@ -33,7 +33,7 @@ module.exports.getWorkerNodesCount = async () => {
  * @param {integer} id Worker Id
  * @returns {string} 
  */
-module.exports.getWorkerAddressById = async (id) => {
+const getWorkerAddressById = async (id) => {
     const address = await pan.methods
         .workerNodes(id)
         .call()
@@ -52,7 +52,7 @@ module.exports.getWorkerAddressById = async (id) => {
  * @param {integer} id 
  * @returns {string}
  */
-module.exports.getJobAddressByWorkerId = async (id) => {
+const getJobAddressByWorkerId = async (id) => {
     const job = await pan.methods
         .activeJobs(id)
         .call();
@@ -65,7 +65,7 @@ module.exports.getJobAddressByWorkerId = async (id) => {
  * @param {string} address 
  * @returns {string} 
  */
-module.exports.getJobAddressByWorkerAddress = async (address) => {
+const getJobAddressByWorkerAddress = async (address) => {
     const wor = new web3.eth.Contract(worAbi, address);
     const job = await wor.methods
         .activeJob()
@@ -79,7 +79,7 @@ module.exports.getJobAddressByWorkerAddress = async (address) => {
  * @param {string} address 
  * @returns {integer} 
  */
-module.exports.getJobStateByJobAddress = async (address) => {
+const getJobStateByJobAddress = async (address) => {
     const cog = new web3.eth.Contract(cogAbi, address);
     const state = await cog.methods
         .currentState()
@@ -92,15 +92,15 @@ module.exports.getJobStateByJobAddress = async (address) => {
  * 
  * @returns {Object[]} 
  */
-module.exports.getJobs = async () => {
+const getJobs = async () => {
 
-    const count = await module.exports.getWorkerNodesCount();
+    const count = await getWorkerNodesCount();
     let jobs = [];
 
     for (let i=0; i < count; i++) {
 
-        const activeJob = await module.exports.getJobAddressByWorkerId(i);
-        const jobState = await module.exports.getJobStateByJobAddress(activeJob);
+        const activeJob = await getJobAddressByWorkerId(i);
+        const jobState = await getJobStateByJobAddress(activeJob);
         
         jobs.push({
             id: i,
@@ -125,7 +125,7 @@ module.exports.getJobs = async () => {
  * @param {string} address 
  * @returns {integer}
  */
-module.exports.getWorkerStateByWorkerAddress = async (address) => {
+const getWorkerStateByWorkerAddress = async (address) => {
     const wor = new web3.eth.Contract(worAbi, address);
     const state = await wor.methods
         .currentState()
@@ -139,7 +139,7 @@ module.exports.getWorkerStateByWorkerAddress = async (address) => {
  * @param {integer} id 
  * @returns {integer}
  */
-module.exports.getWorkerById = async (id) => {
+const getWorkerById = async (id) => {
     const count = await getWorkerNodesCount();
 
     if (id >= count) {
@@ -168,13 +168,13 @@ module.exports.getWorkerById = async (id) => {
  * 
  * @returns {integer}
  */
-module.exports.getWorkers = async () => {
-    const count = await module.exports.getWorkerNodesCount();
+const getWorkers = async () => {
+    const count = await getWorkerNodesCount();
     let workers = [];
 
     for (let i = 0; i < count; i++) {
 
-        const worker = await module.exports.getWorkerById(i);
+        const worker = await getWorkerById(i);
         workers.push(worker);
     }
 
@@ -193,7 +193,7 @@ module.exports.getWorkers = async () => {
  * @param {Object} job
  * @returns {string}
  */
-module.exports.getDatasetAddressByJob = async (job) => {
+const getDatasetAddressByJob = async (job) => {
     const cog = new web3.eth.Contract(cogAbi, job);
     const address = await cog.methods
         .dataset()
@@ -207,7 +207,7 @@ module.exports.getDatasetAddressByJob = async (job) => {
  * @param {string} address
  * @returns {string}
  */
-module.exports.getIpfsAddressByDatasetAddress = async (address) => {
+const getIpfsAddressByDatasetAddress = async (address) => {
     const dat = new web3.eth.Contract(datAbi, address);
     const ipfsAddress = await dat.methods
         .ipfsAddress()
@@ -221,7 +221,7 @@ module.exports.getIpfsAddressByDatasetAddress = async (address) => {
  * @param {string} address
  * @returns {integer}
  */
-module.exports.getDataDimByDatasetAddress = async (address) => {
+const getDataDimByDatasetAddress = async (address) => {
     const dat = new web3.eth.Contract(datAbi, address);
     const dataDim = await dat.methods
         .dataDim()
@@ -235,7 +235,7 @@ module.exports.getDataDimByDatasetAddress = async (address) => {
  * @param {string} address
  * @returns {integer}
  */
-module.exports.getCurrentPriceByDatasetAddress = async (address) => {
+const getCurrentPriceByDatasetAddress = async (address) => {
     const dat = new web3.eth.Contract(datAbi, address);
     const currentPrice = await dat.methods
         .currentPrice()
@@ -249,7 +249,7 @@ module.exports.getCurrentPriceByDatasetAddress = async (address) => {
  * @param {string} address
  * @returns {integer}
  */
-module.exports.getSamplesCountByDatasetAddress = async (address) => {
+const getSamplesCountByDatasetAddress = async (address) => {
     const dat = new web3.eth.Contract(datAbi, address);
     const samplesCount = await dat.methods
         .samplesCount()
@@ -263,7 +263,7 @@ module.exports.getSamplesCountByDatasetAddress = async (address) => {
  * @param {string} address
  * @returns {integer}
  */
-module.exports.getBatchesCountByDatasetAddress = async (address) => {
+const getBatchesCountByDatasetAddress = async (address) => {
     const dat = new web3.eth.Contract(datAbi, address);
     const batchesCount = await dat.methods
         .batchesCount()
@@ -276,16 +276,16 @@ module.exports.getBatchesCountByDatasetAddress = async (address) => {
  * 
  * @returns {Object[]}
  */
-module.exports.getDatasets = async () => {    
-    const jobs = await module.exports.getJobs();
+const getDatasets = async () => {    
+    const jobs = await getJobs();
 
     const datasets = await Promise.all(jobs.map(async (jobAddress, index) => {
-        const datasetAddress = await module.exports.getDatasetAddressByJob(jobAddress);
-        const ipfsAddress = await module.exports.getIpfsAddressByDatasetAddress(datasetAddress);
-        const dataDim = await module.exports.getDataDimByDatasetAddress(datasetAddress);
-        const currentPrice = await module.exports.getCurrentPriceByDatasetAddress(datasetAddress);
-        const samplesCount = await module.exports.getSamplesCountByDatasetAddress(datasetAddress);
-        const batchesCount = await module.exports.getBatchesCountByDatasetAddress(datasetAddress);
+        const datasetAddress = await getDatasetAddressByJob(jobAddress);
+        const ipfsAddress = await getIpfsAddressByDatasetAddress(datasetAddress);
+        const dataDim = await getDataDimByDatasetAddress(datasetAddress);
+        const currentPrice = await getCurrentPriceByDatasetAddress(datasetAddress);
+        const samplesCount = await getSamplesCountByDatasetAddress(datasetAddress);
+        const batchesCount = await getBatchesCountByDatasetAddress(datasetAddress);
         
         return {
             id: index,
@@ -311,7 +311,7 @@ module.exports.getDatasets = async () => {
  * @param {Object} job
  * @returns {string}
  */
-module.exports.getKernelAddressByJob = async (job) => {
+const getKernelAddressByJob = async (job) => {
     const cog = new web3.eth.Contract(cogAbi, job);
     const address = await cog.methods
         .kernel()
@@ -325,7 +325,7 @@ module.exports.getKernelAddressByJob = async (job) => {
  * @param {string} address
  * @returns {string}
  */
-module.exports.getIpfsAddressByKernelAddress = async (address) => {
+const getIpfsAddressByKernelAddress = async (address) => {
     const ker = new web3.eth.Contract(kerAbi, address);
     const ipfsAddress = await ker.methods
         .ipfsAddress()
@@ -339,7 +339,7 @@ module.exports.getIpfsAddressByKernelAddress = async (address) => {
  * @param {string} address
  * @returns {integer}
  */
-module.exports.getDataDimByKernelAddress = async (address) => {
+const getDataDimByKernelAddress = async (address) => {
     const ker = new web3.eth.Contract(kerAbi, address);
     const dataDim = await ker.methods
         .dataDim()
@@ -353,7 +353,7 @@ module.exports.getDataDimByKernelAddress = async (address) => {
  * @param {string} address
  * @returns {integer}
  */
-module.exports.getCurrentPriceByKernelAddress = async (address) => {
+const getCurrentPriceByKernelAddress = async (address) => {
     const ker = new web3.eth.Contract(kerAbi, address);
     const currentPrice = await ker.methods
         .currentPrice()
@@ -367,7 +367,7 @@ module.exports.getCurrentPriceByKernelAddress = async (address) => {
  * @param {string} address
  * @returns {integer}
  */
-module.exports.getComplexityByKernelAddress = async (address) => {
+const getComplexityByKernelAddress = async (address) => {
     const ker = new web3.eth.Contract(kerAbi, address);
     const complexity = await ker.methods
         .complexity()
@@ -380,16 +380,16 @@ module.exports.getComplexityByKernelAddress = async (address) => {
  * 
  * @returns {Object[]} 
  */
-module.exports.getKernels = async () => {
+const getKernels = async () => {
 
-    const jobs = await module.exports.getJobs();
+    const jobs = await getJobs();
 
     const kernels = await Promise.all(jobs.map(async (jobAddress, index) => {
-        const kernelAddress = await module.exports.exportsgetKernelAddressByJob(jobAddress);
-        const ipfsAddress = await module.exports.exportsgetIpfsAddressByKernelAddress(kernelAddress);
-        const dataDim = await module.exports.exportsgetDataDimByKernelAddress(kernelAddress);
-        const currentPrice = await module.exports.exportsgetCurrentPriceByKernelAddress(kernelAddress);
-        const complexity = await module.exports.exportsgetComplexityByKernelAddress(kernelAddress);
+        const kernelAddress = await exportsgetKernelAddressByJob(jobAddress);
+        const ipfsAddress = await exportsgetIpfsAddressByKernelAddress(kernelAddress);
+        const dataDim = await exportsgetDataDimByKernelAddress(kernelAddress);
+        const currentPrice = await exportsgetCurrentPriceByKernelAddress(kernelAddress);
+        const complexity = await exportsgetComplexityByKernelAddress(kernelAddress);
 
         return {
             id: index,
@@ -403,4 +403,36 @@ module.exports.getKernels = async () => {
 
     return kernels;
 };
+
+///////////////////////////////////////
+// 
+// Exports
+//
+///////////////////////////////////////
+
+module.exports.getWorkerNodesCount = getWorkerNodesCount;
+module.exports.getWorkerAddressById = getWorkerAddressById;
+module.exports.getJobAddressByWorkerId = getJobAddressByWorkerId;
+module.exports.getJobAddressByWorkerAddress = getJobAddressByWorkerAddress;
+module.exports.getJobStateByJobAddress = getJobStateByJobAddress;
+module.exports.getJobs = getJobs;
+
+module.exports.getWorkerStateByWorkerAddress = getWorkerStateByWorkerAddress;
+module.exports.getWorkerById = getWorkerById;
+module.exports.getWorkers = getWorkers;
+
+module.exports.getDatasetAddressByJob = getDatasetAddressByJob;
+module.exports.getIpfsAddressByDatasetAddress = getIpfsAddressByDatasetAddress;
+module.exports.getDataDimByDatasetAddress = getDataDimByDatasetAddress;
+module.exports.getCurrentPriceByDatasetAddress = getCurrentPriceByDatasetAddress;
+module.exports.getSamplesCountByDatasetAddress = getSamplesCountByDatasetAddress;
+module.exports.getBatchesCountByDatasetAddress = getBatchesCountByDatasetAddress;
+module.exports.getDatasets = getDatasets;
+
+module.exports.getKernelAddressByJob = getKernelAddressByJob;
+module.exports.getIpfsAddressByKernelAddress = getIpfsAddressByKernelAddress;
+module.exports.getDataDimByKernelAddress = getDataDimByKernelAddress;
+module.exports.getCurrentPriceByKernelAddress = getCurrentPriceByKernelAddress;
+module.exports.getComplexityByKernelAddress = getComplexityByKernelAddress;
+module.exports.getKernels = getKernels;
 

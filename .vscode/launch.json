@@ -8,9 +8,38 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "cwd": "${workspaceFolder}/src",            
+            "cwd": "${workspaceFolder}/src",
             "program": "${workspaceFolder}/src/index.js"
-            
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Infura",
+            "cwd": "${workspaceFolder}/src",
+            "program": "${workspaceFolder}/src/index.js",
+            "env": {
+                "USE_HOST": "infura"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch RSK",
+            "cwd": "${workspaceFolder}/src",
+            "program": "${workspaceFolder}/src/index.js",
+            "env": {
+                "USE_HOST": "rsk"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Rinkeby",
+            "cwd": "${workspaceFolder}/src",
+            "program": "${workspaceFolder}/src/index.js",
+            "env": {
+                "USE_HOST": "rinkeby"
+            }
         },
         {
             "type": "node",
