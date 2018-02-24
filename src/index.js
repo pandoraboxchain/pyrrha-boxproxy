@@ -10,7 +10,7 @@ const Web3 = require('web3');
 const store = require('./store');
 
 // Contracts APIs
-const PandoraABI = require('../pandora-abi/PandoraHooks.json');
+const PandoraABI = require('../pandora-abi/Pandora.json');
 const WorkerNodeABI = require('../pandora-abi/WorkerNode.json');
 const CognitiveJobABI = require('../pandora-abi/CognitiveJob.json');
 const KernelABI = require('../pandora-abi/Kernel.json');
