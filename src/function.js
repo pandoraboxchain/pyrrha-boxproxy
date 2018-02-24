@@ -3,7 +3,7 @@ const Web3 = require('web3');
 
 const web3 = new Web3(new Web3.providers.HttpProvider(config.node_url));
 
-const PandoraABI = require('../pandora-abi/PandoraHooks.json');
+const PandoraABI = require('../pandora-abi/Pandora.json');
 const WorkerNodeABI = require('../pandora-abi/WorkerNode.json');
 const CognitiveJobABI = require('../pandora-abi/CognitiveJob.json');
 const KernelABI = require('../pandora-abi/Kernel.json');

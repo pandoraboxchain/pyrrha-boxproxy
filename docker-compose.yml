@@ -7,10 +7,10 @@ services:
       context: .
       dockerfile: ./Dockerfile
     environment:
-      - WEB3_PROTOCOL=https
-      - WEB3_HOSTNAME=ropsten.infura.io/Llc2pOEtpgzvopBH8dst
-      - WEB3_PORT=
-      - PAN_ADDRESS=0xb1746daa5260ba5d94c6b407b226b1cb190190ab
+      - WEB3_PROTOCOL=http
+      - WEB3_HOSTNAME=dockstation.pandora.network
+      - WEB3_PORT=8545
+      - PAN_ADDRESS=0x58e66b79928cfb362b53c185a6a1fded882bb07d
     ports:
       - "1111:1111"
     volumes:

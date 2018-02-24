@@ -52,9 +52,10 @@ const getWorkerAddressById = async (id) => {
  * @param {integer} id 
  * @returns {string}
  */
-const getJobAddressByWorkerId = async (id) => {
-    const job = await pan.methods
-        .activeJobs(id)
+const getJobAddressByWorkerId = async () => {
+    const wor = new web3.eth.Contract(worAbi, address);
+    const job = await wor.methods
+        .activeJob()
         .call();
     return job;
 };

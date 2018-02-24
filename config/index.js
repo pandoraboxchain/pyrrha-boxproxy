@@ -36,7 +36,7 @@ const hosts = {
     }
 };
 
-let defaultHost = process.env.USE_HOST || 'default';
+let defaultHost = process.env.USE_HOST || 'rinkeby';
 
 console.log('Used host:', hosts[defaultHost].host);
 
