@@ -11,6 +11,7 @@ const store = require('./store');
 
 // Contracts APIs
 const PandoraABI = require('../pandora-abi/Pandora.json');
+const PandoraMarketABI = require('../pandora-abi/PandoraMarket.json');
 const WorkerNodeABI = require('../pandora-abi/WorkerNode.json');
 const CognitiveJobABI = require('../pandora-abi/CognitiveJob.json');
 const KernelABI = require('../pandora-abi/Kernel.json');
@@ -24,6 +25,7 @@ const app = require('./express')(config);
 // ABI's
 const abis = {
     pan: PandoraABI.abi,
+    mar: PandoraMarketABI.abi,
     wor: WorkerNodeABI.abi,
     cog: CognitiveJobABI.ab,
     ker: KernelABI.abi,
@@ -32,7 +34,8 @@ const abis = {
 
 // Contracts
 const contracts = {
-    pan: new web3.eth.Contract(abis.pan, config.pandoraAddress)
+    pan: new web3.eth.Contract(abis.pan, config.pandoraAddress),
+    mar: new web3.eth.Contract(abis.pan, config.marketAddress)
 };
 
 // Set global app variables

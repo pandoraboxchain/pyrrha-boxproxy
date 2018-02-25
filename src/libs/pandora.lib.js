@@ -1,7 +1,7 @@
 'use strict';
 const store = require('../store');
 const web3 = store.get('web3');
-const { pan } = store.get('contracts');
+const { pan, mar } = store.get('contracts');
 const { 
     wor: worAbi, 
     cog: cogAbi,
@@ -11,7 +11,7 @@ const {
 
 ///////////////////////////////////////
 //
-// Common methods
+// Workers related methods
 //
 ///////////////////////////////////////
 
@@ -24,7 +24,7 @@ const getWorkerNodesCount = async () => {
     const count = await pan.methods
         .workerNodesCount()
         .call();
-    return count;
+    return Number.parseInt(count);
 };
 
 /**
@@ -37,88 +37,8 @@ const getWorkerAddressById = async (id) => {
     const address = await pan.methods
         .workerNodes(id)
         .call()
-    return address;
+    return String(address);
 };
-
-///////////////////////////////////////
-//
-// Jobs related methods
-//
-///////////////////////////////////////
-
-/**
- * Get active job address from Pandora contract by worker id
- * 
- * @param {integer} id 
- * @returns {string}
- */
-const getJobAddressByWorkerId = async () => {
-    const wor = new web3.eth.Contract(worAbi, address);
-    const job = await wor.methods
-        .activeJob()
-        .call();
-    return job;
-};
-
-/**
- * Get active job address from Worker contract by the worker address
- * 
- * @param {string} address 
- * @returns {string} 
- */
-const getJobAddressByWorkerAddress = async (address) => {
-    const wor = new web3.eth.Contract(worAbi, address);
-    const job = await wor.methods
-        .activeJob()
-        .call();
-    return job;
-};
-
-/**
- * Get job state from CognitiveJob contract by the job address
- * 
- * @param {string} address 
- * @returns {integer} 
- */
-const getJobStateByJobAddress = async (address) => {
-    const cog = new web3.eth.Contract(cogAbi, address);
-    const state = await cog.methods
-        .currentState()
-        .call();
-    return state;
-};
-
-/**
- * Get all jobs
- * 
- * @returns {Object[]} 
- */
-const getJobs = async () => {
-
-    const count = await getWorkerNodesCount();
-    let jobs = [];
-
-    for (let i=0; i < count; i++) {
-
-        const activeJob = await getJobAddressByWorkerId(i);
-        const jobState = await getJobStateByJobAddress(activeJob);
-        
-        jobs.push({
-            id: i,
-            jobAddress: activeJob,
-            jobStatus: jobState,
-            ipfs: 'ipfsString'// @todo Get ipfs url
-        });
-    }
-
-    return jobs;
-};
-
-///////////////////////////////////////
-//
-// Workers related methods
-//
-///////////////////////////////////////
 
 /**
  * Get worker state from Worker contract by the worker address
@@ -131,14 +51,42 @@ const getWorkerStateByWorkerAddress = async (address) => {
     const state = await wor.methods
         .currentState()
         .call();
-    return state;
+    return Number.parseInt(state);
 };
 
 /**
- * Get worker by the worker`s id
+ * Get worker reputation from Worker contract by the worker address
+ * 
+ * @param {string} address 
+ * @returns {integer}
+ */
+const getWorkerReputationByWorkerAddress = async (address) => {
+    const wor = new web3.eth.Contract(worAbi, address);
+    const reputation = await wor.methods
+        .reputation()
+        .call();
+    return Number.parseInt(reputation);
+};
+
+/**
+ * Get worker's active job from Worker contract by the worker address
+ * 
+ * @param {string} address 
+ * @returns {string}
+ */
+const getActiveJobAddressByWorkerAddress = async (address) => {
+    const wor = new web3.eth.Contract(worAbi, address);
+    const activeJob = await wor.methods
+        .activeJob()
+        .call();
+    return String(activeJob);
+};
+
+/**
+ * Get worker by the worker's id
  * 
  * @param {integer} id 
- * @returns {integer}
+ * @returns {Object}
  */
 const getWorkerById = async (id) => {
     const count = await getWorkerNodesCount();
@@ -152,15 +100,27 @@ const getWorkerById = async (id) => {
 
     const workerAddress = await getWorkerAddressById(id);
     const workerState = await getWorkerStateByWorkerAddress(workerAddress);
-    const jobAddress = await getJobAddressByWorkerId(id);
-    const jobState = await getJobStateByJobAddress(jobAddress);
+    const reputation = await getWorkerReputationByWorkerAddress(workerAddress);
+
+    let activeJob = await getActiveJobAddressByWorkerAddress(workerAddress);
+    let jobState;
+
+    // Check is not 0x0
+    if (+activeJob !== 0) {
+
+        jobState = await getJobStateByJobAddress(jobAddress);
+    } else {
+        activeJob = null;
+        jobState = -1;
+    }
 
     return {
-        id: Number.parseInt(id),
+        id: id,
         address: workerAddress,
-        status: Number.parseInt(workerState),
+        currentState: workerState,
+        reputation: reputation,
         currentJob: activeJob,
-        currentJobStatus: jobState || -1
+        currentJobStatus: jobState
     };
 };
 
@@ -184,120 +144,153 @@ const getWorkers = async () => {
 
 ///////////////////////////////////////
 //
-// Datasets related methods
+// Jobs related methods
 //
 ///////////////////////////////////////
 
 /**
- * Get dataset address from Cognitive contract by the job
+ * Get active job count from Pandora contract
  * 
- * @param {Object} job
+ * @returns {integer} 
+ */
+const getActiveJobsCount = async () => {
+    const count = await pan.methods
+        .activeJobsCount()
+        .call();
+    return Number.parseInt(count);
+};
+
+/**
+ * Get worker by the worker's id
+ * 
+ * @param {integer} id 
  * @returns {string}
  */
-const getDatasetAddressByJob = async (job) => {
-    const cog = new web3.eth.Contract(cogAbi, job);
-    const address = await cog.methods
+const getJobAddressById = async (id) => {
+    const jobAddress = await pan.methods
+        .activeJobs(id)
+        .call();
+    return String(jobAddress);
+};
+
+/**
+ * Get job state from Cognitive Job contract by the job address
+ * 
+ * @param {string} address 
+ * @returns {integer} 
+ */
+const getJobStateByJobAddress = async (address) => {
+    const cog = new web3.eth.Contract(cogAbi, address);
+    const state = await cog.methods
+        .currentState()
+        .call();
+    return Number.parseInt(state);
+};
+
+/**
+ * Get job kernel from Cognitive Job contract by the job address
+ * 
+ * @param {string} address 
+ * @returns {string} 
+ */
+const getJobKernelByJobAddress = async (address) => {
+    const cog = new web3.eth.Contract(cogAbi, address);
+    const kernel = await cog.methods
+        .kernel()
+        .call();
+    return String(kernel);
+};
+
+/**
+ * Get job dataset from Cognitive Job contract by the job address
+ * 
+ * @param {string} address 
+ * @returns {string} 
+ */
+const getJobDatasetByJobAddress = async (address) => {
+    const cog = new web3.eth.Contract(cogAbi, address);
+    const dataset = await cog.methods
         .dataset()
         .call();
-    return address;
+    return String(dataset);
 };
 
 /**
- * Get IPFS address from Dataset contract by the dataset address
+ * Get job batches from Cognitive Job contract by the job address
  * 
- * @param {string} address
- * @returns {string}
+ * @param {string} address 
+ * @returns {integer} 
  */
-const getIpfsAddressByDatasetAddress = async (address) => {
-    const dat = new web3.eth.Contract(datAbi, address);
-    const ipfsAddress = await dat.methods
-        .ipfsAddress()
+const getJobBatchesByJobAddress = async (address) => {
+    const cog = new web3.eth.Contract(cogAbi, address);
+    const batches = await cog.methods
+        .batches()
         .call();
-    return ipfsAddress;
+    return Number.parseInt(batches);
 };
 
 /**
- * Get data dim from Dataset contract by the dataset address
+ * Get job progress from Cognitive Job contract by the job address
  * 
- * @param {string} address
- * @returns {integer}
+ * @param {string} address 
+ * @returns {integer} 
  */
-const getDataDimByDatasetAddress = async (address) => {
-    const dat = new web3.eth.Contract(datAbi, address);
-    const dataDim = await dat.methods
-        .dataDim()
+const getJobProgressByJobAddress = async (address) => {
+    const cog = new web3.eth.Contract(cogAbi, address);
+    const progress = await cog.methods
+        .progress()
         .call();
-    return dataDim;
+    return Number.parseInt(progress);
 };
 
 /**
- * Get current price from Dataset contract by the dataset address
+ * Get job's ipfsResults from Cognitive Job contract by the job address
  * 
- * @param {string} address
- * @returns {integer}
+ * @param {string} address 
+ * @returns {string[]} 
  */
-const getCurrentPriceByDatasetAddress = async (address) => {
-    const dat = new web3.eth.Contract(datAbi, address);
-    const currentPrice = await dat.methods
-        .currentPrice()
+const getJobIpfsResultsByJobAddress = async (address) => {
+    const cog = new web3.eth.Contract(cogAbi, address);
+    const ipfsResults = await cog.methods
+        .ipfsResults()
         .call();
-    return currentPrice;
+    return ipfsResults;
 };
 
 /**
- * Get data samples count from Dataset contract by the dataset address
+ * Get all jobs
  * 
- * @param {string} address
- * @returns {integer}
+ * @returns {Object[]} 
  */
-const getSamplesCountByDatasetAddress = async (address) => {
-    const dat = new web3.eth.Contract(datAbi, address);
-    const samplesCount = await dat.methods
-        .samplesCount()
-        .call();
-    return samplesCount;
-};
+const getJobs = async () => {
 
-/**
- * Get data batches count from Dataset contract by the dataset address
- * 
- * @param {string} address
- * @returns {integer}
- */
-const getBatchesCountByDatasetAddress = async (address) => {
-    const dat = new web3.eth.Contract(datAbi, address);
-    const batchesCount = await dat.methods
-        .batchesCount()
-        .call();
-    return batchesCount;
-};
+    const count = await getActiveJobsCount();
+    let jobs = [];
 
-/**
- * Get all datasets
- * 
- * @returns {Object[]}
- */
-const getDatasets = async () => {    
-    const jobs = await getJobs();
+    for (let i=0; i < count; i++) {
 
-    const datasets = await Promise.all(jobs.map(async (jobAddress, index) => {
-        const datasetAddress = await getDatasetAddressByJob(jobAddress);
-        const ipfsAddress = await getIpfsAddressByDatasetAddress(datasetAddress);
-        const dataDim = await getDataDimByDatasetAddress(datasetAddress);
-        const currentPrice = await getCurrentPriceByDatasetAddress(datasetAddress);
-        const samplesCount = await getSamplesCountByDatasetAddress(datasetAddress);
-        const batchesCount = await getBatchesCountByDatasetAddress(datasetAddress);
+        const address = await getJobAddressById(i);
+        const state = await getJobStateByJobAddress(address);
+        const kernel = await getJobKernelByJobAddress(address);
+        const dataset = await getJobDatasetByJobAddress(address);
+        const batches = await getJobBatchesByJobAddress(address);
+        const progress = await getJobProgressByJobAddress(address);
+        const ipfsResults = await getJobIpfsResultsByJobAddress(address);
         
-        return {
-            id: index,
-            address: datasetAddress,
-            ipfs: ipfsAddress,
-            dim: dataDim,
-            price: currentPrice,
-            samples: samplesCount,
-            batches: batchesCount
-        };
-    }));
+        jobs.push({
+            id: i,
+            address: address,
+            jobStatus: state,
+            kernel: kernel,
+            dataset: dataset,
+            batches: batches,
+            progress: progress,
+            ipfsResults: ipfsResults,
+            activeWorkersCount: batches
+        });
+    }
+
+    return jobs;
 };
 
 ///////////////////////////////////////
@@ -305,20 +298,6 @@ const getDatasets = async () => {
 // Kernels related methods
 //
 ///////////////////////////////////////
-
-/**
- * Get kernel address from Cognitive contract by the job
- * 
- * @param {Object} job
- * @returns {string}
- */
-const getKernelAddressByJob = async (job) => {
-    const cog = new web3.eth.Contract(cogAbi, job);
-    const address = await cog.methods
-        .kernel()
-        .call();
-    return address;
-};
 
 /**
  * Get IPFS address from Kernel contract by the kernel address
@@ -331,7 +310,7 @@ const getIpfsAddressByKernelAddress = async (address) => {
     const ipfsAddress = await ker.methods
         .ipfsAddress()
         .call();
-    return ipfsAddress;
+    return String(ipfsAddress);
 };
 
 /**
@@ -345,7 +324,7 @@ const getDataDimByKernelAddress = async (address) => {
     const dataDim = await ker.methods
         .dataDim()
         .call();
-    return dataDim;
+    return Number.parseInt(dataDim);
 };
 
 /**
@@ -359,7 +338,7 @@ const getCurrentPriceByKernelAddress = async (address) => {
     const currentPrice = await ker.methods
         .currentPrice()
         .call();
-    return currentPrice;
+    return Number.parseInt(currentPrice);
 };
 
 /**
@@ -373,7 +352,7 @@ const getComplexityByKernelAddress = async (address) => {
     const complexity = await ker.methods
         .complexity()
         .call();
-    return complexity;
+    return Number.parseInt(complexity);
 };
 
 /**
@@ -383,26 +362,139 @@ const getComplexityByKernelAddress = async (address) => {
  */
 const getKernels = async () => {
 
-    const jobs = await getJobs();
+    const count = await getActiveJobsCount();
+    let kernels = [];
 
-    const kernels = await Promise.all(jobs.map(async (jobAddress, index) => {
-        const kernelAddress = await getKernelAddressByJob(jobAddress);
+    for (let i=0; i < count; i++) {
+
+        const jobAddress = await getJobAddressById(i);
+        const kernelAddress = await getJobKernelByJobAddress(jobAddress);
         const ipfsAddress = await getIpfsAddressByKernelAddress(kernelAddress);
         const dataDim = await getDataDimByKernelAddress(kernelAddress);
         const currentPrice = await getCurrentPriceByKernelAddress(kernelAddress);
         const complexity = await getComplexityByKernelAddress(kernelAddress);
 
-        return {
+        kernels.push({
             id: index,
             address: kernelAddress,
             ipfs: ipfsAddress,
             dim: dataDim,
             price: currentPrice,
             complexity: complexity
-        };
-    }));
+        });
+    }
 
     return kernels;
+};
+
+///////////////////////////////////////
+//
+// Datasets related methods
+//
+///////////////////////////////////////
+
+/**
+ * Get IPFS address from Dataset contract by the dataset address
+ * 
+ * @param {string} address
+ * @returns {string}
+ */
+const getIpfsAddressByDatasetAddress = async (address) => {
+    const dat = new web3.eth.Contract(datAbi, address);
+    const ipfsAddress = await dat.methods
+        .ipfsAddress()
+        .call();
+    return String(ipfsAddress);
+};
+
+/**
+ * Get data dim from Dataset contract by the dataset address
+ * 
+ * @param {string} address
+ * @returns {integer}
+ */
+const getDataDimByDatasetAddress = async (address) => {
+    const dat = new web3.eth.Contract(datAbi, address);
+    const dataDim = await dat.methods
+        .dataDim()
+        .call();
+    return Number.parseInt(dataDim);
+};
+
+/**
+ * Get current price from Dataset contract by the dataset address
+ * 
+ * @param {string} address
+ * @returns {integer}
+ */
+const getCurrentPriceByDatasetAddress = async (address) => {
+    const dat = new web3.eth.Contract(datAbi, address);
+    const currentPrice = await dat.methods
+        .currentPrice()
+        .call();
+    return Number.parseInt(currentPrice);
+};
+
+/**
+ * Get data samples count from Dataset contract by the dataset address
+ * 
+ * @param {string} address
+ * @returns {integer}
+ */
+const getSamplesCountByDatasetAddress = async (address) => {
+    const dat = new web3.eth.Contract(datAbi, address);
+    const samplesCount = await dat.methods
+        .samplesCount()
+        .call();
+    return Number.parseInt(samplesCount);
+};
+
+/**
+ * Get data batches count from Dataset contract by the dataset address
+ * 
+ * @param {string} address
+ * @returns {integer}
+ */
+const getBatchesCountByDatasetAddress = async (address) => {
+    const dat = new web3.eth.Contract(datAbi, address);
+    const batchesCount = await dat.methods
+        .batchesCount()
+        .call();
+    return Number.parseInt(batchesCount);
+};
+
+/**
+ * Get all datasets
+ * 
+ * @returns {Object[]}
+ */
+const getDatasets = async () => {
+    
+    const count = await getActiveJobsCount();
+    let datasets = [];
+
+    for (let i=0; i < count; i++) {
+
+        const jobAddress = await getJobAddressById(i);
+        const datasetAddress = await getJobDatasetByJobAddress(jobAddress);
+        const ipfsAddress = await getIpfsAddressByDatasetAddress(datasetAddress);
+        const dataDim = await getDataDimByDatasetAddress(datasetAddress);
+        const currentPrice = await getCurrentPriceByDatasetAddress(datasetAddress);
+        const samplesCount = await getSamplesCountByDatasetAddress(datasetAddress);
+        const batchesCount = await getBatchesCountByDatasetAddress(datasetAddress);
+
+        datasets.push({
+            id: index,
+            address: datasetAddress,
+            ipfsAddress: ipfsAddress,
+            dataDim: dataDim,
+            currentPrice: currentPrice,
+            samplesCount: samplesCount,
+            batchesCount: batchesCount
+        });
+    }
+
+    return datasets;
 };
 
 ///////////////////////////////////////
@@ -413,27 +505,31 @@ const getKernels = async () => {
 
 module.exports.getWorkerNodesCount = getWorkerNodesCount;
 module.exports.getWorkerAddressById = getWorkerAddressById;
-module.exports.getJobAddressByWorkerId = getJobAddressByWorkerId;
-module.exports.getJobAddressByWorkerAddress = getJobAddressByWorkerAddress;
-module.exports.getJobStateByJobAddress = getJobStateByJobAddress;
-module.exports.getJobs = getJobs;
-
 module.exports.getWorkerStateByWorkerAddress = getWorkerStateByWorkerAddress;
+module.exports.getWorkerReputationByWorkerAddress = getWorkerReputationByWorkerAddress;
+module.exports.getActiveJobAddressByWorkerAddress = getActiveJobAddressByWorkerAddress;
 module.exports.getWorkerById = getWorkerById;
 module.exports.getWorkers = getWorkers;
 
-module.exports.getDatasetAddressByJob = getDatasetAddressByJob;
-module.exports.getIpfsAddressByDatasetAddress = getIpfsAddressByDatasetAddress;
-module.exports.getDataDimByDatasetAddress = getDataDimByDatasetAddress;
-module.exports.getCurrentPriceByDatasetAddress = getCurrentPriceByDatasetAddress;
-module.exports.getSamplesCountByDatasetAddress = getSamplesCountByDatasetAddress;
-module.exports.getBatchesCountByDatasetAddress = getBatchesCountByDatasetAddress;
-module.exports.getDatasets = getDatasets;
+module.exports.getActiveJobsCount= getActiveJobsCount;
+module.exports.getJobAddressById = getJobAddressById;
+module.exports.getJobStateByJobAddress = getJobStateByJobAddress;
+module.exports.getJobKernelByJobAddress = getJobKernelByJobAddress;
+module.exports.getJobDatasetByJobAddress = getJobDatasetByJobAddress;
+module.exports.getJobBatchesByJobAddress = getJobBatchesByJobAddress;
+module.exports.getJobProgressByJobAddress = getJobProgressByJobAddress;
+module.exports.getJobIpfsResultsByJobAddress = getJobIpfsResultsByJobAddress;
+module.exports.getJobs = getJobs;
 
-module.exports.getKernelAddressByJob = getKernelAddressByJob;
 module.exports.getIpfsAddressByKernelAddress = getIpfsAddressByKernelAddress;
 module.exports.getDataDimByKernelAddress = getDataDimByKernelAddress;
 module.exports.getCurrentPriceByKernelAddress = getCurrentPriceByKernelAddress;
 module.exports.getComplexityByKernelAddress = getComplexityByKernelAddress;
 module.exports.getKernels = getKernels;
 
+module.exports.getIpfsAddressByDatasetAddress = getIpfsAddressByDatasetAddress;
+module.exports.getDataDimByDatasetAddress = getDataDimByDatasetAddress;
+module.exports.getCurrentPriceByDatasetAddress = getCurrentPriceByDatasetAddress;
+module.exports.getSamplesCountByDatasetAddress = getSamplesCountByDatasetAddress;
+module.exports.getBatchesCountByDatasetAddress = getBatchesCountByDatasetAddress;
+module.exports.getDatasets = getDatasets;

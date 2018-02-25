@@ -11,6 +11,7 @@ services:
       - WEB3_HOSTNAME=dockstation.pandora.network
       - WEB3_PORT=8545
       - PAN_ADDRESS=0x58e66b79928cfb362b53c185a6a1fded882bb07d
+      - MARKET_ADDRESS=0x6142029abb21ef2e0bffde8d43f15c64f3750fe6
     ports:
       - "1111:1111"
     volumes:

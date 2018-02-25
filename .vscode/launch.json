@@ -14,11 +14,11 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Infura",
+            "name": "Launch Ropsten",
             "cwd": "${workspaceFolder}/src",
             "program": "${workspaceFolder}/src/index.js",
             "env": {
-                "USE_HOST": "infura"
+                "USE_HOST": "ropsten"
             }
         },
         {
