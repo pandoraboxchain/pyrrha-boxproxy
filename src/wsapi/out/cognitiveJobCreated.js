@@ -6,6 +6,13 @@ const {
     getDatasetByDatasetAddress
 } = require('../../libs/pandora.lib');
 
+/**
+ * Get created/changed job store
+ * 
+ * @param {string} address 
+ * @param {string} type 'created'|'changed'
+ * @returns {Object}
+ */
 const getJobStore = async (address, type) => {
     const job = await getJobByJobAddress(res.args.cognitiveJob);
     const kernel = await getIpfsAddressByKernelAddress(job.kernel);
@@ -14,7 +21,7 @@ const getJobStore = async (address, type) => {
     return {
         jobs: [
             {
-                type: type,
+                type,
                 ...job
             }
         ],
