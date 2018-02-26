@@ -9,7 +9,7 @@
     "build:docker": "docker-compose build --no-cache",
     "start:docker": "docker-compose up -d --remove-orphans",
     "stop:docker": "docker-compose down",
-    "start": "node $NODE_DEBUG_OPTION ./src"
+    "start": "node ./src"
   },
   "contributors": [
     "Kostiantyn Smyrnov <kostysh@gmail.com>",
