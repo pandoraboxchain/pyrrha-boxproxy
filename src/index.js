@@ -44,7 +44,8 @@ store.set('ws', wsServer);
 store.set('abis', abis);
 store.set('contracts', contracts);
 
-// Init RESTful API
+// Init RESTful and WS APIs
 require('./routes')(app);
+require('./wsapi')(wsServer);
 
 module.exports = app;

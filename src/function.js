@@ -20,72 +20,73 @@ const serDatABI = DatasetABI.abi;
 const pandoraContractAddr = config.pandoraContractAddress;
 const PANContract = new web3.eth.Contract(serPanABI, pandoraContractAddr);
 
-
-
-let workerNodesList = [];
-
+/**
+ * 
+ * 
+ * @param {any} push 
+ */
 function setEvents(push) {
-  // /*PANContract.WorkerNodeCreated({fromBlock: 0}, function(err, res){
-  //   console.log(res);
-  //   console.log(err);
-  // });*/
-  PANContract.events.CognitiveJobCreated({ fromBlock: 0 }, function (err, res) {
-    if (!err) {
-      let jobAddress = res.args.cognitiveJob;
-      let COGContract = new web3.eth.Contract(serCogABI, jobAddress)
-      let job = {
-        'jobAddress': jobAddress,
-        'jobStatus': Number.parseInt(COGContract.currentState()),
-        'kernel': COGContract.kernel(),
-        'dataset': COGContract.dataset(),
-        'type': 'created',
-      };
-      COGContract.events.StateChanged({ fromBlock: 0 }, function (err, res) {
+    // /*PANContract.WorkerNodeCreated({fromBlock: 0}, function(err, res){
+    //   console.log(res);
+    //   console.log(err);
+    // });*/
+    PANContract.events.CognitiveJobCreated({ fromBlock: 0 }, function (err, res) {
         if (!err) {
-          let jobAddress = res.address;
-          let COGContract = new web3.eth.Contract(serCogABI, jobAddress)
-          let job = {
-            'jobAddress': jobAddress,
-            'jobStatus': Number.parseInt(COGContract.currentState()),
-            'kernel': COGContract.kernel(),
-            'dataset': COGContract.dataset(),
-            'type': 'changed',
-          };
-          push({
-            'jobs': [job],
-            'kernels': [],
-            'datasets': [],
-            'workers': [],
-          });
+            let jobAddress = res.args.cognitiveJob;
+            let COGContract = new web3.eth.Contract(serCogABI, jobAddress)
+            let job = {
+                'jobAddress': jobAddress,
+                'jobStatus': Number.parseInt(COGContract.currentState()),
+                'kernel': COGContract.kernel(),
+                'dataset': COGContract.dataset(),
+                'type': 'created',
+            };
+            COGContract.events.StateChanged({ fromBlock: 0 }, function (err, res) {
+                if (!err) {
+                    let jobAddress = res.address;
+                    let COGContract = new web3.eth.Contract(serCogABI, jobAddress)
+                    let job = {
+                        'jobAddress': jobAddress,
+                        'jobStatus': Number.parseInt(COGContract.currentState()),
+                        'kernel': COGContract.kernel(),
+                        'dataset': COGContract.dataset(),
+                        'type': 'changed',
+                    };
+                    push({
+                        'jobs': [job],
+                        'kernels': [],
+                        'datasets': [],
+                        'workers': [],
+                    });
+                }
+            });
+            let kernelAddress = COGContract.kernel()
+            let KERContract = new web3.eth.Contract(serKerABI, kernelAddress)
+            let kernel = {
+                'address': kernelAddress,
+                'ipfs': KERContract.ipfsAddress(),
+                'dim': KERContract.dataDim(),
+                'price': KERContract.currentPrice(),
+                'complexity': KERContract.complexity()
+            }
+            let datasetAddress = COGContract.dataset()
+            let DATContract = new web3.eth.Contract(serDatABI, datasetAddress)
+            let dataset = {
+                'address': datasetAddress,
+                'ipfs': DATContract.ipfsAddress(),
+                'dim': DATContract.dataDim(),
+                'price': DATContract.currentPrice(),
+                'samples': DATContract.samplesCount(),
+                'batches': DATContract.batchesCount()
+            }
+            push({
+                'jobs': [job],
+                'kernels': [kernel],
+                'datasets': [dataset],
+                'workers': [],
+            });
         }
-      });
-      let kernelAddress = COGContract.kernel()
-      let KERContract = new web3.eth.Contract(serKerABI, kernelAddress)
-      let kernel = {
-        'address': kernelAddress,
-        'ipfs': KERContract.ipfsAddress(),
-        'dim': KERContract.dataDim(),
-        'price': KERContract.currentPrice(),
-        'complexity': KERContract.complexity()
-      }
-      let datasetAddress = COGContract.dataset()
-      let DATContract = new web3.eth.Contract(serDatABI, datasetAddress)
-      let dataset = {
-        'address': datasetAddress,
-        'ipfs': DATContract.ipfsAddress(),
-        'dim': DATContract.dataDim(),
-        'price': DATContract.currentPrice(),
-        'samples': DATContract.samplesCount(),
-        'batches': DATContract.batchesCount()
-      }
-      push({
-        'jobs': [job],
-        'kernels': [kernel],
-        'datasets': [dataset],
-        'workers': [],
-      });
-    }
-  });
+    });
 }
 
 setEvents(pushToWS)

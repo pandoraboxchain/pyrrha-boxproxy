@@ -258,6 +258,32 @@ const getJobIpfsResultsByJobAddress = async (address) => {
 };
 
 /**
+ * Get job by the job address
+ * 
+ * @param {string} address 
+ * @returns {Object} 
+ */
+const getJobByJobAddress = async (address) => {
+    const state = await getJobStateByJobAddress(address);
+    const kernel = await getJobKernelByJobAddress(address);
+    const dataset = await getJobDatasetByJobAddress(address);
+    const batches = await getJobBatchesByJobAddress(address);
+    const progress = await getJobProgressByJobAddress(address);
+    const ipfsResults = await getJobIpfsResultsByJobAddress(address);
+    
+    return {
+        address: address,
+        jobStatus: state,
+        kernel: kernel,
+        dataset: dataset,
+        batches: batches,
+        progress: progress,
+        ipfsResults: ipfsResults,
+        activeWorkersCount: batches
+    };
+};
+
+/**
  * Get all jobs
  * 
  * @returns {Object[]} 
@@ -270,23 +296,11 @@ const getJobs = async () => {
     for (let i=0; i < count; i++) {
 
         const address = await getJobAddressById(i);
-        const state = await getJobStateByJobAddress(address);
-        const kernel = await getJobKernelByJobAddress(address);
-        const dataset = await getJobDatasetByJobAddress(address);
-        const batches = await getJobBatchesByJobAddress(address);
-        const progress = await getJobProgressByJobAddress(address);
-        const ipfsResults = await getJobIpfsResultsByJobAddress(address);
+        const job = await getJobByJobAddress(address);
         
         jobs.push({
             id: i,
-            address: address,
-            jobStatus: state,
-            kernel: kernel,
-            dataset: dataset,
-            batches: batches,
-            progress: progress,
-            ipfsResults: ipfsResults,
-            activeWorkersCount: batches
+            ...job
         });
     }
 
@@ -369,6 +383,27 @@ const getComplexityByKernelAddress = async (address) => {
 };
 
 /**
+ * Get Kernel by the kernel address
+ * 
+ * @param {string} address
+ * @returns {Object}
+ */
+const getKernelByKernelAddress = async (address) => {
+    const ipfsAddress = await getIpfsAddressByKernelAddress(address);
+    const dataDim = await getDataDimByKernelAddress(address);
+    const currentPrice = await getCurrentPriceByKernelAddress(address);
+    const complexity = await getComplexityByKernelAddress(address);
+
+    return {
+        address: address,
+        ipfs: ipfsAddress,
+        dim: dataDim,
+        price: currentPrice,
+        complexity: complexity
+    };
+};
+
+/**
  * Get all kernels
  * 
  * @returns {Object[]} 
@@ -393,18 +428,11 @@ const getKernels = async () => {
         }
 
         const kernelAddress = kernel;
-        const ipfsAddress = await getIpfsAddressByKernelAddress(kernelAddress);
-        const dataDim = await getDataDimByKernelAddress(kernelAddress);
-        const currentPrice = await getCurrentPriceByKernelAddress(kernelAddress);
-        const complexity = await getComplexityByKernelAddress(kernelAddress);
+        const kernelObj = await getKernelByKernelAddress(kernelAddress);
 
         kernels.push({
             id: id,
-            address: kernelAddress,
-            ipfs: ipfsAddress,
-            dim: dataDim,
-            price: currentPrice,
-            complexity: complexity
+            ...kernelObj
         });
     }
 
@@ -501,6 +529,29 @@ const getBatchesCountByDatasetAddress = async (address) => {
 };
 
 /**
+ * Get dataset by the dataset address
+ * 
+ * @param {string} address
+ * @returns {Object}
+ */
+const getDatasetByDatasetAddress = async (address) => {
+    const ipfsAddress = await getIpfsAddressByDatasetAddress(address);
+    const dataDim = await getDataDimByDatasetAddress(address);
+    const currentPrice = await getCurrentPriceByDatasetAddress(address);
+    const samplesCount = await getSamplesCountByDatasetAddress(address);
+    const batchesCount = await getBatchesCountByDatasetAddress(address);
+
+    return {
+        address: address,
+        ipfsAddress: ipfsAddress,
+        dataDim: dataDim,
+        currentPrice: currentPrice,
+        samplesCount: samplesCount,
+        batchesCount: batchesCount
+    };
+};
+
+/**
  * Get all datasets
  * 
  * @returns {Object[]}
@@ -525,20 +576,11 @@ const getDatasets = async () => {
         }
 
         const datasetAddress = dataset;
-        const ipfsAddress = await getIpfsAddressByDatasetAddress(datasetAddress);
-        const dataDim = await getDataDimByDatasetAddress(datasetAddress);
-        const currentPrice = await getCurrentPriceByDatasetAddress(datasetAddress);
-        const samplesCount = await getSamplesCountByDatasetAddress(datasetAddress);
-        const batchesCount = await getBatchesCountByDatasetAddress(datasetAddress);
+        const datasetObj = await getDatasetByDatasetAddress(datasetAddress);
 
         datasets.push({
             id: id,
-            address: datasetAddress,
-            ipfsAddress: ipfsAddress,
-            dataDim: dataDim,
-            currentPrice: currentPrice,
-            samplesCount: samplesCount,
-            batchesCount: batchesCount
+            ...datasetObj
         });
     }
 
@@ -551,6 +593,7 @@ const getDatasets = async () => {
 //
 ///////////////////////////////////////
 
+// Workers
 module.exports.getWorkerNodesCount = getWorkerNodesCount;
 module.exports.getWorkerAddressById = getWorkerAddressById;
 module.exports.getWorkerStateByWorkerAddress = getWorkerStateByWorkerAddress;
@@ -559,6 +602,7 @@ module.exports.getActiveJobAddressByWorkerAddress = getActiveJobAddressByWorkerA
 module.exports.getWorkerById = getWorkerById;
 module.exports.getWorkers = getWorkers;
 
+// Jobs
 module.exports.getActiveJobsCount= getActiveJobsCount;
 module.exports.getJobAddressById = getJobAddressById;
 module.exports.getJobStateByJobAddress = getJobStateByJobAddress;
@@ -567,14 +611,19 @@ module.exports.getJobDatasetByJobAddress = getJobDatasetByJobAddress;
 module.exports.getJobBatchesByJobAddress = getJobBatchesByJobAddress;
 module.exports.getJobProgressByJobAddress = getJobProgressByJobAddress;
 module.exports.getJobIpfsResultsByJobAddress = getJobIpfsResultsByJobAddress;
+module.exports.getJobByJobAddress = getJobByJobAddress;
 module.exports.getJobs = getJobs;
 
+// Kernels
+module.exports.getKernelByKernelAddress = getKernelByKernelAddress;
 module.exports.getIpfsAddressByKernelAddress = getIpfsAddressByKernelAddress;
 module.exports.getDataDimByKernelAddress = getDataDimByKernelAddress;
 module.exports.getCurrentPriceByKernelAddress = getCurrentPriceByKernelAddress;
 module.exports.getComplexityByKernelAddress = getComplexityByKernelAddress;
 module.exports.getKernels = getKernels;
 
+// Datasets
+module.exports.getDatasetByDatasetAddress = getDatasetByDatasetAddress;
 module.exports.getIpfsAddressByDatasetAddress = getIpfsAddressByDatasetAddress;
 module.exports.getDataDimByDatasetAddress = getDataDimByDatasetAddress;
 module.exports.getCurrentPriceByDatasetAddress = getCurrentPriceByDatasetAddress;
