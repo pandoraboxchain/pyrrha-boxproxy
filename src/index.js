@@ -35,7 +35,7 @@ const abis = {
 // Contracts
 const contracts = {
     pan: new web3.eth.Contract(abis.pan, config.pandoraAddress),
-    mar: new web3.eth.Contract(abis.pan, config.marketAddress)
+    mar: new web3.eth.Contract(abis.mar, config.marketAddress)
 };
 
 // Set global app variables

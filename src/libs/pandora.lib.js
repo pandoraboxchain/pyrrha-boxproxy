@@ -300,6 +300,19 @@ const getJobs = async () => {
 ///////////////////////////////////////
 
 /**
+ * Get Kernel address by kernel id
+ * 
+ * @param {integer} id
+ * @returns {string}
+ */
+const getKernelAddressById = async (id) => {
+    const kernelContract = await mar.methods
+        .kernels(id)
+        .call();
+    return kernelContract;
+};
+
+/**
  * Get IPFS address from Kernel contract by the kernel address
  * 
  * @param {string} address
@@ -362,20 +375,31 @@ const getComplexityByKernelAddress = async (address) => {
  */
 const getKernels = async () => {
 
-    const count = await getActiveJobsCount();
+    let id = 0;
     let kernels = [];
 
-    for (let i=0; i < count; i++) {
+    while (true) {
+        
+        let kernel = '0x0';
 
-        const jobAddress = await getJobAddressById(i);
-        const kernelAddress = await getJobKernelByJobAddress(jobAddress);
+        try {
+            kernel = await getKernelAddressById(id++);// can be 0x0
+        } catch(err) {
+            // @todo Add method getKernelsCount to the PandoraMarket contract for avoid iterating with "try catch"
+        }
+        
+        if (+kernel === 0) {
+            break;
+        }
+
+        const kernelAddress = kernel;
         const ipfsAddress = await getIpfsAddressByKernelAddress(kernelAddress);
         const dataDim = await getDataDimByKernelAddress(kernelAddress);
         const currentPrice = await getCurrentPriceByKernelAddress(kernelAddress);
         const complexity = await getComplexityByKernelAddress(kernelAddress);
 
         kernels.push({
-            id: index,
+            id: id,
             address: kernelAddress,
             ipfs: ipfsAddress,
             dim: dataDim,
@@ -392,6 +416,19 @@ const getKernels = async () => {
 // Datasets related methods
 //
 ///////////////////////////////////////
+
+/**
+ * Get Dataset address by kernel id
+ * 
+ * @param {integer} id
+ * @returns {string}
+ */
+const getDatasetAddressById = async (id) => {
+    const datasetContract = await mar.methods
+        .dataset(id)
+        .call();
+    return datasetContract;
+};
 
 /**
  * Get IPFS address from Dataset contract by the dataset address
@@ -469,14 +506,25 @@ const getBatchesCountByDatasetAddress = async (address) => {
  * @returns {Object[]}
  */
 const getDatasets = async () => {
-    
-    const count = await getActiveJobsCount();
+
+    let id = 0;
     let datasets = [];
 
-    for (let i=0; i < count; i++) {
+    while (true) {
+        
+        let dataset = '0x0';
 
-        const jobAddress = await getJobAddressById(i);
-        const datasetAddress = await getJobDatasetByJobAddress(jobAddress);
+        try {
+            dataset = await getDatasetAddressById(id++);// can be 0x0
+        } catch(err) {
+            // @todo Add method getDatasetsCount to the PandoraMarket contract for avoid iterating with "try catch"
+        }
+        
+        if (+dataset === 0) {
+            break;
+        }
+
+        const datasetAddress = dataset;
         const ipfsAddress = await getIpfsAddressByDatasetAddress(datasetAddress);
         const dataDim = await getDataDimByDatasetAddress(datasetAddress);
         const currentPrice = await getCurrentPriceByDatasetAddress(datasetAddress);
@@ -484,7 +532,7 @@ const getDatasets = async () => {
         const batchesCount = await getBatchesCountByDatasetAddress(datasetAddress);
 
         datasets.push({
-            id: index,
+            id: id,
             address: datasetAddress,
             ipfsAddress: ipfsAddress,
             dataDim: dataDim,
