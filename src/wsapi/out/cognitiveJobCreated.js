@@ -32,13 +32,8 @@ const getJobStore = async (address, type) => {
 
 module.exports = push => {
     const web3 = store.get('web3');
-    const { pan, mar } = store.get('contracts');
-    const { 
-        wor: worAbi, 
-        cog: cogAbi,
-        dat: datAbi,
-        ker: kerAbi
-    } = store.get('abis');
+    const { pan } = store.get('contracts');
+    const { cog: cogAbi } = store.get('abis');
 
     pan.events.CognitiveJobCreated({
         fromBlock: 0
