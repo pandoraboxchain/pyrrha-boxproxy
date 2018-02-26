@@ -425,7 +425,7 @@ const getKernels = async () => {
  */
 const getDatasetAddressById = async (id) => {
     const datasetContract = await mar.methods
-        .dataset(id)
+        .datasets(id)
         .call();
     return datasetContract;
 };

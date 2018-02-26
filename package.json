@@ -12,8 +12,9 @@
     "start": "node $NODE_DEBUG_OPTION ./src"
   },
   "contributors": [
+    "Kostiantyn Smyrnov <kostysh@gmail.com>",
     "Maxim Orlovsky <orlovsky@pandora.foundation>",
-    "Kostiantyn Smyrnov <kostysh@gmail.com>"
+    "Vladimir <voldemar2277@gmail.com>"
   ],
   "dependencies": {
     "body-parser": "^1.18.2",
