@@ -535,56 +535,71 @@ const getBatchesCountByDatasetAddress = async (address) => {
  * @returns {Object}
  */
 const getDatasetByDatasetAddress = async (address) => {
-    const ipfsAddress = await getIpfsAddressByDatasetAddress(address);
-    const dataDim = await getDataDimByDatasetAddress(address);
-    const currentPrice = await getCurrentPriceByDatasetAddress(address);
-    const samplesCount = await getSamplesCountByDatasetAddress(address);
-    const batchesCount = await getBatchesCountByDatasetAddress(address);
 
-    return {
-        address: address,
-        ipfsAddress: ipfsAddress,
-        dataDim: dataDim,
-        currentPrice: currentPrice,
-        samplesCount: samplesCount,
-        batchesCount: batchesCount
-    };
+    try {
+
+        const ipfsAddress = await getIpfsAddressByDatasetAddress(address);
+        const dataDim = await getDataDimByDatasetAddress(address);
+        const currentPrice = await getCurrentPriceByDatasetAddress(address);
+        const samplesCount = await getSamplesCountByDatasetAddress(address);
+        const batchesCount = await getBatchesCountByDatasetAddress(address);
+
+        return {
+            address: address,
+            ipfsAddress: ipfsAddress,
+            dataDim: dataDim,
+            currentPrice: currentPrice,
+            samplesCount: samplesCount,
+            batchesCount: batchesCount
+        };
+    } catch(err) {
+        return Promise.reject(err);
+    }
 };
 
 /**
  * Get all datasets
  * 
- * @returns {Object[]}
+ * @returns {[Object]}
  */
 const getDatasets = async () => {
 
     let id = 0;
     let datasets = [];
+    let errors = [];
 
-    while (true) {
-        
-        let dataset = '0x0';
+    try {
 
-        try {
-            dataset = await getDatasetAddressById(id++);// can be 0x0
-        } catch(err) {
-            // @todo Add method getDatasetsCount to the PandoraMarket contract for avoid iterating with "try catch"
-        }
-        
-        if (+dataset === 0) {
-            break;
-        }
+        // @todo Add method getDatasetsCount to the PandoraMarket contract for avoid iterating with "while"
+        while (true) {
 
-        const datasetAddress = dataset;
-        const datasetObj = await getDatasetByDatasetAddress(datasetAddress);
+            const datasetAddress = await getDatasetAddressById(id++);// can be 0x0
 
-        datasets.push({
-            id: id,
-            ...datasetObj
-        });
-    }
+            if (+datasetAddress === 0) {
+                break;
+            }
+            
+            try {
 
-    return datasets;
+                const datasetObj = await getDatasetByDatasetAddress(datasetAddress);
+                datasets.push({
+                    id: id,
+                    ...datasetObj
+                });
+            } catch(err) {
+                
+                errors.push({
+                    address: datasetAddress,
+                    error: err.message
+                });
+            }        
+        }        
+    } catch(err) {}
+
+    return {
+        datasets,
+        errors
+    };
 };
 
 ///////////////////////////////////////

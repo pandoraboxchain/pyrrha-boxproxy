@@ -10,10 +10,11 @@ module.exports.getDatasets = async (req, res, next) => {
 
     try {
 
-        const datasets = await getDatasets();
+        const { datasets, errors } = await getDatasets();
 
         res.status(200).json({
             datasets,
+            errors,
             datasetsTotal: datasets.length
         });
     } catch (err) {
