@@ -13,9 +13,9 @@ module.exports.getDatasets = async (req, res, next) => {
         const { datasets, errors } = await getDatasets();
 
         res.status(200).json({
-            datasets,
+            datasets: datasets.datasets,
             errors,
-            datasetsTotal: datasets.length
+            datasetsTotal: datasets.datasets.length
         });
     } catch (err) {
         next(err);
