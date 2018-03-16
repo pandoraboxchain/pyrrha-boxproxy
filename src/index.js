@@ -8,14 +8,15 @@ process.on('uncaughtException', (err) => {
 const config = require('../config');
 const Web3 = require('web3');
 const store = require('./store');
+const Pjs = require('pyrrha-js');
 
 // Contracts APIs
-const PandoraABI = require('../pandora-abi/Pandora.json');
-const PandoraMarketABI = require('../pandora-abi/PandoraMarket.json');
-const WorkerNodeABI = require('../pandora-abi/WorkerNode.json');
-const CognitiveJobABI = require('../pandora-abi/CognitiveJob.json');
-const KernelABI = require('../pandora-abi/Kernel.json');
-const DatasetABI = require('../pandora-abi/Dataset.json');
+const Pandora = require('../pandora-abi/Pandora.json');
+const PandoraMarket = require('../pandora-abi/PandoraMarket.json');
+const WorkerNode = require('../pandora-abi/WorkerNode.json');
+const CognitiveJob = require('../pandora-abi/CognitiveJob.json');
+const Kernel = require('../pandora-abi/Kernel.json');
+const Dataset = require('../pandora-abi/Dataset.json');
 
 // Init servers
 const web3 = new Web3(`${config.protocol || 'http'}://${config.nodeHost || 'localhost'}:${config.nodePort || ''}`);
@@ -24,12 +25,12 @@ const app = require('./express')(config);
 
 // ABI's
 const abis = {
-    pan: PandoraABI.abi,
-    mar: PandoraMarketABI.abi,
-    wor: WorkerNodeABI.abi,
-    cog: CognitiveJobABI.ab,
-    ker: KernelABI.abi,
-    dat: DatasetABI.abi
+    pan: Pandora.abi,
+    mar: PandoraMarket.abi,
+    wor: WorkerNode.abi,
+    cog: CognitiveJob.ab,
+    ker: Kernel.abi,
+    dat: Dataset.abi
 };
 
 // Contracts
@@ -38,11 +39,28 @@ const contracts = {
     mar: new web3.eth.Contract(abis.mar, config.marketAddress)
 };
 
+const pjs = new Pjs({
+    web3,
+    contracts: {
+        Pandora,
+        PandoraMarket,
+        WorkerNode,
+        CognitiveJob,
+        Kernel,
+        Dataset
+    },
+    addresses: {
+        pandora: config.pandoraAddress,
+        market: config.marketAddress
+    }
+});
+
 // Set global app variables
 store.set('web3', web3);
 store.set('ws', wsServer);
 store.set('abis', abis);
 store.set('contracts', contracts);
+store.set('pjs', pjs);
 
 // Init RESTful and WS APIs
 require('./routes')(app);

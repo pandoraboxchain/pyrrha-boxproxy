@@ -1,18 +1,18 @@
 'use strict';
-const {
-    getKernels
-} = require('../../libs/pandora.lib');
+const store = require('../../store');
+const { kernels: { fetchAll } } = store.get('pjs');
 
 // @route /kernels
 module.exports.getKernels = async (req, res, next) => {
 
     try {
 
-        const kernels = await getKernels();
+        const { records, error } = await fetchAll();
         
         res.status(200).json({
-            kernels,
-            kernelsTotal: kernels.length
+            kernels: records,
+            error,
+            kernelsTotal: records.length
         });
     } catch(err) {
         next(err);

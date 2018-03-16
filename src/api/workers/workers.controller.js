@@ -1,16 +1,19 @@
 'use strict';
-const {
-    getWorkerNodesCount,
-    getWorkers,
-    getWorkerById
-} = require('../../libs/pandora.lib');
+const store = require('../../store');
+const { 
+    workers: {
+        fetchCount,
+        fetchAll,
+        fetchWorkerById
+    } 
+} = store.get('pjs');
 
 // @route /workers/count
 module.exports.getWorkerNodesCount = async (req, res, next) => {
 
     try {
 
-        const count = await getWorkerNodesCount();
+        const count = await fetchCount();
         res.status(200).json({ count });
     } catch(err) {
         next(err);
@@ -22,11 +25,12 @@ module.exports.getWorkers = async (req, res, next) => {
 
     try {
 
-        const workers = await getWorkers();
+        const { records, error } = await fetchAll();
 
         res.status(200).json({
-            workers,
-            workersTotal: workers.length
+            workers: records,
+            error,
+            workersTotal: records.length
         });
     } catch (err) {
         next(err);
@@ -38,7 +42,7 @@ module.exports.getWorkerById = async (req, res, next) => {
 
     try {
 
-        const worker = await getWorkerById(req.params.id);        
+        const worker = await fetchWorkerById(req.params.id);        
 
         res.status(200).json(worker);
     } catch (err) {

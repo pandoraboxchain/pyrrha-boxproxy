@@ -1,6 +1,6 @@
 {
   "name": "pandora-explorer-backend",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
   "main": "./src/index.js",
@@ -18,13 +18,14 @@
   ],
   "dependencies": {
     "body-parser": "^1.18.2",
-    "express": "^4.16.2",
-    "helmet": "^3.11.0",
-    "web3": "^1.0.0-beta.30",
-    "websocket": "^1.0.25"
+    "express": "^4.16.3",
+    "helmet": "^3.12.0",
+    "pyrrha-js": "git@github.com:pandoraboxchain/pyrrha-js.git#v1.2.1",
+    "websocket": "^1.0.25",
+    "web3": "1.0.0-beta.30"
   },
   "devDependencies": {
-    "eslint": "^4.18.1",
+    "eslint": "^4.18.2",
     "eslint-config-google": "^0.9.1"
   },
   "license": "MIT"
