@@ -11,6 +11,7 @@
     "stop:docker": "docker-compose down",
     "start": "node ./src"
   },
+  "author": "Kostiantyn Smyrnov <kostysh@gmail.com>",
   "contributors": [
     "Kostiantyn Smyrnov <kostysh@gmail.com>",
     "Maxim Orlovsky <orlovsky@pandora.foundation>",
@@ -20,7 +21,7 @@
     "body-parser": "^1.18.2",
     "express": "^4.16.3",
     "helmet": "^3.12.0",
-    "pyrrha-js": "git@github.com:pandoraboxchain/pyrrha-js.git#v1.2.1",
+    "pyrrha-js": "git@github.com:pandoraboxchain/pyrrha-js.git#v1.2.2",
     "websocket": "^1.0.25",
     "web3": "1.0.0-beta.30"
   },

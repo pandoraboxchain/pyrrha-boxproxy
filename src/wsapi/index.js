@@ -19,7 +19,6 @@ module.exports = server => {
 
     // Output API
     [
-        require('./out/pyrrhaJsVersion'),
         require('./out/cognitiveJobCreated'),
         require('./out/workerNodeCreated'),
         require('./out/datasetAdded'),

@@ -23,22 +23,6 @@ const web3 = new Web3(`${config.protocol || 'http'}://${config.nodeHost || 'loca
 const wsServer = require('./ws')(config);
 const app = require('./express')(config);
 
-// ABI's
-const abis = {
-    pan: Pandora.abi,
-    mar: PandoraMarket.abi,
-    wor: WorkerNode.abi,
-    cog: CognitiveJob.ab,
-    ker: Kernel.abi,
-    dat: Dataset.abi
-};
-
-// Contracts
-const contracts = {
-    pan: new web3.eth.Contract(abis.pan, config.pandoraAddress),
-    mar: new web3.eth.Contract(abis.mar, config.marketAddress)
-};
-
 const pjs = new Pjs({
     web3,
     contracts: {
@@ -58,8 +42,6 @@ const pjs = new Pjs({
 // Set global app variables
 store.set('web3', web3);
 store.set('ws', wsServer);
-store.set('abis', abis);
-store.set('contracts', contracts);
 store.set('pjs', pjs);
 
 // Init RESTful and WS APIs

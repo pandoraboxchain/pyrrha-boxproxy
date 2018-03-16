@@ -3,7 +3,6 @@
 module.exports = (app) => {
 
     // API routes
-    app.use('/abi', require('./api/abi'));
     app.use('/workers', require('./api/workers'));
     app.use('/jobs', require('./api/jobs'));
     app.use('/datasets', require('./api/datasets'));

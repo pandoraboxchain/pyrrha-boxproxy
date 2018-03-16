@@ -16,7 +16,11 @@ module.exports = config => {
         let connection = request.accept(null, request.origin);
         connectionList.push(connection);
         connection.on('message', (message) => {
-            if (message.type === 'utf8') { }
+            
+            if (message.type === 'utf8') {
+
+                console.log(message)
+            }
         });
 
         connection.on('close', connection => {            
@@ -28,12 +32,12 @@ module.exports = config => {
         });
     });
 
+    wsServer.push = data => {
+
+        connectionList.map(connection => connection.sendUTF(
+            JSON.stringify(data)
+        ));
+    };
+
     return wsServer;
-};
-
-module.exports.push = data => {
-
-    connectionList.map(connection => connection.sendUTF(
-        JSON.stringify(data)
-    ));
 };
