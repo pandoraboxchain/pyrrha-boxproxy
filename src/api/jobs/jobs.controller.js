@@ -18,3 +18,16 @@ module.exports.getJobs = async (req, res, next) => {
         next(err);
     }
 };
+
+// @route /jobs:address
+module.exports.getJobByAddress = async (req, res, next) => {
+
+    try {
+
+        const job = await fetchDataset(req.params.address);
+        
+        res.status(200).json(job);
+    } catch(err) {
+        next(err);
+    }
+};

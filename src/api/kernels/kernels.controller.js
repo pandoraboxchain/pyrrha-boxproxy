@@ -1,6 +1,6 @@
 'use strict';
 const store = require('../../store');
-const { kernels: { fetchAll } } = store.get('pjs');
+const { kernels: { fetchAll, fetchKernel } } = store.get('pjs');
 
 // @route /kernels
 module.exports.getKernels = async (req, res, next) => {
@@ -14,6 +14,19 @@ module.exports.getKernels = async (req, res, next) => {
             error,
             kernelsTotal: records.length
         });
+    } catch(err) {
+        next(err);
+    }
+};
+
+// @route /kernels/:address
+module.exports.getKernelByAddress = async (req, res, next) => {
+
+    try {
+
+        const kernel = await fetchKernel(req.params.address);
+        
+        res.status(200).json(kernel);
     } catch(err) {
         next(err);
     }

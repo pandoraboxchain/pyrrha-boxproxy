@@ -4,7 +4,8 @@ const {
     workers: {
         fetchCount,
         fetchAll,
-        fetchWorkerById
+        fetchWorkerById,
+        fetchWorker
     } 
 } = store.get('pjs');
 
@@ -46,6 +47,19 @@ module.exports.getWorkerById = async (req, res, next) => {
 
         res.status(200).json(worker);
     } catch (err) {
+        next(err);
+    }
+};
+
+// @route /workers:address
+module.exports.getWorkerByAddress = async (req, res, next) => {
+
+    try {
+
+        const worker = await fetchWorker(req.params.address);
+        
+        res.status(200).json(worker);
+    } catch(err) {
         next(err);
     }
 };
