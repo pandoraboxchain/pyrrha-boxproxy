@@ -5,8 +5,10 @@ process.on('uncaughtException', (err) => {
     process.exit(1);
 });
 
+// For the Pjs pleasure
+global.window = {};
+
 const config = require('../config');
-const Web3 = require('web3');
 const store = require('./store');
 const Pjs = require('pyrrha-js');
 
@@ -19,12 +21,15 @@ const Kernel = require('../pandora-abi/Kernel.json');
 const Dataset = require('../pandora-abi/Dataset.json');
 
 // Init servers
-const web3 = new Web3(`${config.protocol || 'http'}://${config.nodeHost || 'localhost'}:${config.nodePort || ''}`);
 const wsServer = require('./ws')(config);
 const app = require('./express')(config);
 
 const pjs = new Pjs({
-    web3,
+    eth: {
+        protocol: config.protocol,
+        host: config.nodeHost,
+        port: config.nodePort
+    },
     contracts: {
         Pandora,
         PandoraMarket,
@@ -40,7 +45,7 @@ const pjs = new Pjs({
 });
 
 // Set global app variables
-store.set('web3', web3);
+store.set('web3', pjs.api.web3);
 store.set('ws', wsServer);
 store.set('pjs', pjs);
 
