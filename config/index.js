@@ -30,7 +30,7 @@ const hosts = {
     },
     rinkeby: {
         protocol: 'http',
-        host: 'dockstation.pandora.network',
+        host: 'rinkeby.pandora.network',
         port: 8545,
         contracts: {
             pandora: '0x58e66b79928cfb362b53c185a6a1fded882bb07d',
