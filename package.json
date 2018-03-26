@@ -1,6 +1,6 @@
 {
-  "name": "pandora-explorer-backend",
-  "version": "1.2.1",
+  "name": "pyrrha-boxproxy",
+  "version": "1.2.2",
   "private": true,
   "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
   "main": "./src/index.js",
