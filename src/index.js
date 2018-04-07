@@ -13,12 +13,12 @@ const store = require('./store');
 const Pjs = require('pyrrha-js');
 
 // Contracts APIs
-const Pandora = require('../pandora-abi/Pandora.json');
-const PandoraMarket = require('../pandora-abi/PandoraMarket.json');
-const WorkerNode = require('../pandora-abi/WorkerNode.json');
-const CognitiveJob = require('../pandora-abi/CognitiveJob.json');
-const Kernel = require('../pandora-abi/Kernel.json');
-const Dataset = require('../pandora-abi/Dataset.json');
+const Pandora = require('../pyrrha-consensus/build/contracts/Pandora.json');
+const PandoraMarket = require('../pyrrha-consensus/build/contracts/PandoraMarket.json');
+const WorkerNode = require('../pyrrha-consensus/build/contracts/WorkerNode.json');
+const CognitiveJob = require('../pyrrha-consensus/build/contracts/CognitiveJob.json');
+const Kernel = require('../pyrrha-consensus/build/contracts/Kernel.json');
+const Dataset = require('../pyrrha-consensus/build/contracts/Dataset.json');
 
 // Init servers
 const wsServer = require('./ws')(config);
@@ -26,9 +26,7 @@ const app = require('./express')(config);
 
 const pjs = new Pjs({
     eth: {
-        protocol: config.protocol,
-        host: config.nodeHost,
-        port: config.nodePort
+        provider: new Pjs.Web3.providers.WebsocketProvider(`ws://${config.nodeHost}:${config.nodePort}`)
     },
     contracts: {
         Pandora,
@@ -39,8 +37,8 @@ const pjs = new Pjs({
         Dataset
     },
     addresses: {
-        pandora: config.pandoraAddress,
-        market: config.marketAddress
+        Pandora: config.pandoraAddress,
+        PandoraMarket: config.marketAddress
     }
 });
 

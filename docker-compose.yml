@@ -10,8 +10,8 @@ services:
       - WEB3_PROTOCOL=http
       - WEB3_HOSTNAME=rinkeby.pandora.network
       - WEB3_PORT=8545
-      - PAN_ADDRESS=0x58e66b79928cfb362b53c185a6a1fded882bb07d
-      - MARKET_ADDRESS=0x6142029abb21ef2e0bffde8d43f15c64f3750fe6
+      - PAN_ADDRESS=0x9f301cfd1217fd60e4244a12b1edffe458e8b9bd
+      - MARKET_ADDRESS=0xaff19fee75b1443b41f0acbf54c83e2dab57eb82
     ports:
       - "1111:1111"
     volumes:

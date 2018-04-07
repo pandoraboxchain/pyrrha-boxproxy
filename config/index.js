@@ -6,8 +6,8 @@ const hosts = {
         host: 'localhost',
         port: 8545,
         contracts: {
-            pandora: '',
-            market: ''
+            Pandora: '',
+            PandoraMarket: ''
         }
     },
     rsk: {
@@ -15,8 +15,8 @@ const hosts = {
         host: 'bitcoin.pandora.network',
         port: 4444,
         contracts: {
-            pandora: '0xfeb13c11b476601dcba42e6eb502aa6047fe4b78',
-            market: ''
+            Pandora: '0xfeb13c11b476601dcba42e6eb502aa6047fe4b78',
+            PandoraMarket: ''
         }
     },
     ropsten: {
@@ -24,8 +24,8 @@ const hosts = {
         host: 'ropsten.infura.io/Llc2pOEtpgzvopBH8dst',
         port: '',
         contracts: {
-            pandora: '0xb1746daa5260ba5d94c6b407b226b1cb190190ab',
-            market: '0xb452c5abf6a0ddc5f6afe8598e1e3e6ebeaf558c'
+            Pandora: '0xb1746daa5260ba5d94c6b407b226b1cb190190ab',
+            PandoraMarket: '0xb452c5abf6a0ddc5f6afe8598e1e3e6ebeaf558c'
         }
     },
     rinkeby: {
@@ -33,8 +33,8 @@ const hosts = {
         host: 'rinkeby.pandora.network',
         port: 8545,
         contracts: {
-            pandora: '0x58e66b79928cfb362b53c185a6a1fded882bb07d',
-            market: '0x6142029abb21ef2e0bffde8d43f15c64f3750fe6'
+            Pandora: '0x9f301cfd1217fd60e4244a12b1edffe458e8b9bd',
+            PandoraMarket: '0xaff19fee75b1443b41f0acbf54c83e2dab57eb82'
         }        
     }
 };
@@ -49,6 +49,6 @@ module.exports = {
     protocol: process.env.WEB3_PROTOCOL || hosts[defaultHost].protocol,
     nodePort: process.env.WEB3_PORT || hosts[defaultHost].port,
     nodeHost: process.env.WEB3_HOSTNAME || hosts[defaultHost].host,
-    pandoraAddress: process.env.PAN_ADDRESS || hosts[defaultHost].contracts.pandora,
-    marketAddress: process.env.MARKET_ADDRESS || hosts[defaultHost].contracts.market
+    pandoraAddress: process.env.PAN_ADDRESS || hosts[defaultHost].contracts.Pandora,
+    marketAddress: process.env.MARKET_ADDRESS || hosts[defaultHost].contracts.PandoraMarket
 };
