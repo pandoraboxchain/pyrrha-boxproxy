@@ -1,18 +1,18 @@
 'use strict';
 const store = require('../../store');
 
-const { 
+const {
     kernels: {
         eventKernelAdded
-    } 
+    }
 } = store.get('pjs');
 
 module.exports = push => {
 
     // Listen for new KernelAdded
-    eventKernelAdded(
-        caddedKernelStore => push(caddedKernelStore), 
-        err => push({
+    eventKernelAdded()
+        .then(addedKernelStore => push(addedKernelStore))
+        .catch(err => push({
             error: err.message,
             event: 'PandoraMarket.KernelAdded'
         }));

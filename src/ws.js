@@ -19,7 +19,7 @@ module.exports = config => {
             
             if (message.type === 'utf8') {
 
-                console.log(message)
+                console.log(message);
             }
         });
 
@@ -34,9 +34,16 @@ module.exports = config => {
 
     wsServer.push = data => {
 
+        console.log('wsdata===', data);
+
         connectionList.map(connection => connection.sendUTF(
             JSON.stringify(data)
         ));
+    };
+
+    wsServer.close = (callback = () => {}) => {
+        wsServer.shutDown();
+        server.close(callback);
     };
 
     return wsServer;

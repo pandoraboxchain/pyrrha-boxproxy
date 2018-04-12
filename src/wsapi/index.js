@@ -19,6 +19,7 @@ module.exports = server => {
 
     // Output API
     [
+        require('./out/newBlockHeaders'),
         require('./out/cognitiveJobCreated'),
         require('./out/workerNodeCreated'),
         require('./out/datasetAdded'),

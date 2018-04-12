@@ -11,18 +11,20 @@ const {
 module.exports = push => {
 
     // Listen for new WorkerNode created
-    eventWorkerNodeCreated(createdWorkerStore => {
-        push(createdWorkerStore);
+    eventWorkerNodeCreated()
+        .then(createdWorkerStore => {
+            push(createdWorkerStore);
 
-        // And then listen for changes on this worker
-        eventWorkerNodeStateChanged(createdWorkerStore.address, 
-            changedWorkerStore => push(changedWorkerStore), 
-            err => push({
-                error: err.message,
-                event: 'WorkerNode.StateChanged'
-            }));
-    }, err => push({
-        error: err.message,
-        event: 'Pandora.WorkerNodeCreated'
-    }));
+            // And then listen for changes on this worker
+            eventWorkerNodeStateChanged(createdWorkerStore.address)
+                .then(changedWorkerStore => push(changedWorkerStore))
+                .catch(err => push({
+                    error: err.message,
+                    event: 'WorkerNode.StateChanged'
+                }));
+        })
+        .catch(err => push({
+            error: err.message,
+            event: 'Pandora.WorkerNodeCreated'
+        }));
 };

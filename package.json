@@ -1,11 +1,15 @@
 {
   "name": "pyrrha-boxproxy",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "private": true,
   "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
   "main": "./src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:build": "docker build --tag pyrrha_boxproxy_tests --file ./tests/Dockerfile .",
+    "pretest": "npm run test:build",
+    "pretest-with-coverage": "npm run test:build",
+    "test": "docker run -e WITH_COVERAGE=0 -it pyrrha_boxproxy_tests",
+    "test-with-coverage": "docker run -e WITH_COVERAGE=1 -it pyrrha_boxproxy_tests",
     "build:docker": "docker-compose build --no-cache",
     "start:docker": "docker-compose up -d --remove-orphans",
     "stop:docker": "docker-compose down",
@@ -14,14 +18,14 @@
   "author": "Kostiantyn Smyrnov <kostysh@gmail.com>",
   "contributors": [
     "Kostiantyn Smyrnov <kostysh@gmail.com>",
-    "Maxim Orlovsky <orlovsky@pandora.foundation>",
-    "Vladimir <voldemar2277@gmail.com>"
+    "Maxim Orlovsky <orlovsky@pandora.foundation>"
   ],
   "dependencies": {
     "body-parser": "^1.18.2",
+    "debug": "^3.1.0",
     "express": "^4.16.3",
     "helmet": "^3.12.0",
-    "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.4.0",
+    "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.4.4",
     "websocket": "^1.0.25"
   },
   "devDependencies": {

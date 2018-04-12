@@ -1,0 +1,18 @@
+{
+    "presets": [
+        [
+            "@babel/preset-env",
+            {
+                "targets": {
+                    "node": "current"                    
+                },
+                "useBuiltIns": "usage"
+            }
+        ]
+    ],
+    "plugins":[
+        "@babel/plugin-syntax-object-rest-spread",
+        "@babel/plugin-proposal-object-rest-spread"
+    ],
+    "sourceMaps": "inline"
+}

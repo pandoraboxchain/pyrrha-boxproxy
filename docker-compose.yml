@@ -7,9 +7,9 @@ services:
       context: .
       dockerfile: ./Dockerfile
     environment:
-      - WEB3_PROTOCOL=http
+      - WEB3_PROTOCOL=ws
       - WEB3_HOSTNAME=rinkeby.pandora.network
-      - WEB3_PORT=8545
+      - WEB3_PORT=8546
       - PAN_ADDRESS=0x9f301cfd1217fd60e4244a12b1edffe458e8b9bd
       - MARKET_ADDRESS=0xaff19fee75b1443b41f0acbf54c83e2dab57eb82
     ports:

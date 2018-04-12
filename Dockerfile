@@ -3,7 +3,7 @@ FROM node:9
 COPY ./package.json /package.json
 COPY ./src /src
 COPY ./config /config
-COPY ./pandora-abi /pandora-abi
+COPY ./pyrrha-consensus /pyrrha-consensus
 COPY ./pm2.config.json /pm2.config.json
 
 WORKDIR /
