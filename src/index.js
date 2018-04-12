@@ -1,8 +1,9 @@
 'use strict';
+const debug = require('debug')('boxproxy');
 
 // For better PM2 experience
 process.on('uncaughtException', (err) => {
-    console.log('An error has occured', err);
+    debug('An error has occured', err);
     process.exit(1);
 });
 
