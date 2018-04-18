@@ -23,15 +23,10 @@ describe('Boxproxy tests:', () => {
             return node;
         })
         .then(node => {
-            store = boxproxy(config);
+            store = boxproxy.createServer(config);
         }));
 
-    after(done => {
-        store.get('ws').close(() => 
-            store.get('express').close(() => {
-                setTimeout(() => server.close(done), 50);
-            }));       
-    });
+    after(done => boxproxy.close(() => server.close(done)));
 
     it('#store should should have a property "app"', () => {
         expect(store.get('app')).to.be.a('function');

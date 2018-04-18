@@ -2,9 +2,6 @@ FROM node:9
 
 LABEL maintainer="kostysh@gmail.com"
 
-ARG WITH_COVERAGE=0
-ENV WITH_COVERAGE=$WITH_COVERAGE
-
 RUN mkdir /pyrrha-boxproxy
 COPY ./package.json /pyrrha-boxproxy/package.json
 
@@ -40,6 +37,11 @@ COPY ./tests/.babelrc /pyrrha-boxproxy/.babelrc
 COPY ./.git /pyrrha-boxproxy/.git
 COPY ./tests/tests-runner.sh /pyrrha-boxproxy/tests-runner.sh
 
-ENV DEBUG=boxproxy,boxproxy:events
+ARG WITH_COVERAGE=0
+ARG LOG_LEVEL=error
+ENV WITH_COVERAGE=$WITH_COVERAGE
+ENV LOG_LEVEL=$LOG_LEVEL
+ENV DEBUG=boxproxy
+
 WORKDIR /pyrrha-boxproxy
 CMD [ "/pyrrha-boxproxy/tests-runner.sh" ]

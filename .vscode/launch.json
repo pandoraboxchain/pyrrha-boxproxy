@@ -7,28 +7,14 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "cwd": "${workspaceFolder}/src",
-            "program": "${workspaceFolder}/src/index.js"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Ropsten",
+            "name": "Launch Localhost",
             "cwd": "${workspaceFolder}/src",
             "program": "${workspaceFolder}/src/index.js",
+            "console": "integratedTerminal",
             "env": {
-                "USE_HOST": "ropsten"
-            }
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch RSK",
-            "cwd": "${workspaceFolder}/src",
-            "program": "${workspaceFolder}/src/index.js",
-            "env": {
-                "USE_HOST": "rsk"
+                "USE_HOST": "default",
+                "DEBUG": "boxproxy",
+                "LOG_LEVEL": "debug"
             }
         },
         {
@@ -37,8 +23,11 @@
             "name": "Launch Rinkeby",
             "cwd": "${workspaceFolder}/src",
             "program": "${workspaceFolder}/src/index.js",
+            "console": "integratedTerminal",
             "env": {
-                "USE_HOST": "rinkeby"
+                "USE_HOST": "rinkeby",
+                "DEBUG": "boxproxy",
+                "LOG_LEVEL": "debug"
             }
         },
         {
