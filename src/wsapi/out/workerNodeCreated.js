@@ -11,7 +11,15 @@ const {
 module.exports = push => {
 
     // Listen for new WorkerNode created
-    eventWorkerNodeCreated()
+    const options = {};
+    const fromBlock = store.get('lastBlock');
+
+    if (fromBlock) {
+
+        options.fromBlock = fromBlock;
+    }
+
+    eventWorkerNodeCreated(options)
         .then(createdWorkerStore => {
             push(createdWorkerStore);
 

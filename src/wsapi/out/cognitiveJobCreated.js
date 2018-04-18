@@ -11,7 +11,15 @@ const {
 module.exports = push => {
 
     // Listen for new Jobs created
-    eventCognitiveJobCreated()
+    const options = {};
+    const fromBlock = store.get('lastBlock');
+
+    if (fromBlock) {
+
+        options.fromBlock = fromBlock;
+    }
+
+    eventCognitiveJobCreated(options)
         .then(createdJobStore => {
             push(createdJobStore);
 

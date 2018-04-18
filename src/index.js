@@ -1,12 +1,12 @@
 'use strict';
-const debug = require('debug')('boxproxy');
+const log = require('./logger');
 
 // For better PM2 experience
 process.on('uncaughtException', (err) => {
-    debug('An error has occured', err);
+    log.error('An error has occured', err);
     process.exit(1);
 });
 
 const config = require('../config');
 
-require('./server')(config);
+require('./server').createServer(config);

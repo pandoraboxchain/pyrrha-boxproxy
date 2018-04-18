@@ -1,5 +1,5 @@
 'use strict';
-const debug = require('debug')('boxproxy');
+const log = require('./logger');
 const express = require('express');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
@@ -20,7 +20,7 @@ module.exports = (config) => {
     app.use(helmet());
 
     const server = app.listen(config.port, () => {
-        debug(`Server running at ${config.port} port`);
+        log.info(`Server running at ${config.port} port`);
     });
     store.set('express', server);
 

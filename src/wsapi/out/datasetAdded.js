@@ -10,7 +10,15 @@ const {
 module.exports = push => {
 
     // Listen for new DatasetAdded
-    eventDatasetAdded()
+    const options = {};
+    const fromBlock = store.get('lastBlock');
+
+    if (fromBlock) {
+
+        options.fromBlock = fromBlock;
+    }
+
+    eventDatasetAdded(options)
         .then(addedDatasetStore => push(addedDatasetStore))
         .catch(err => push({
             error: err.message,

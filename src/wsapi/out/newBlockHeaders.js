@@ -1,5 +1,5 @@
 'use strict';
-const debug = require('debug')('boxproxy:events');
+const log = require('../../logger');
 const store = require('../../store');
 
 const {
@@ -10,9 +10,12 @@ const {
 
 module.exports = push => {
 
-    // we need to subscribe to new block headers 
-    // to prevent websocket disconnecting in case of long inactivity of boxproxy
-    web3.eth.subscribe('newBlockHeaders')
-        .on('data', () => {})
-        .on('error', debug);    
+    web3.eth.getBlockNumber()
+        .then(number => {
+            store.set('lastBlock', number);
+            web3.eth.subscribe('newBlockHeaders')
+                .on('data', data => store.set('lastBlock', data.number))
+                .on('error', log.debug);
+        })
+        .catch(log.error);
 };

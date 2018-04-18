@@ -1,5 +1,5 @@
 'use strict';
-const debug = require('debug')('boxproxy');
+const log = require('./logger');
 const WebSocketServer = require('websocket').server;
 const http = require('http');
 const server = http.createServer();
@@ -20,7 +20,7 @@ module.exports = config => {
             
             if (message.type === 'utf8') {
 
-                debug(message);
+                log.info(message);
             }
         });
 
@@ -35,7 +35,7 @@ module.exports = config => {
 
     wsServer.push = data => {
 
-        debug('ws:data:', data);
+        log.debug('ws:data', data);
 
         connectionList.map(connection => connection.sendUTF(
             JSON.stringify(data)

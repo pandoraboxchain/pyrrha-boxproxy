@@ -10,7 +10,15 @@ const {
 module.exports = push => {
 
     // Listen for new KernelAdded
-    eventKernelAdded()
+    const options = {};
+    const fromBlock = store.get('lastBlock');
+
+    if (fromBlock) {
+
+        options.fromBlock = fromBlock;
+    }
+
+    eventKernelAdded(options)
         .then(addedKernelStore => push(addedKernelStore))
         .catch(err => push({
             error: err.message,
