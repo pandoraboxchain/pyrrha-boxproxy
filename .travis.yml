@@ -1,0 +1,30 @@
+sudo: required
+
+language: node_js
+node_js:
+  - "9"
+
+services:
+  - docker
+jobs:
+  include:
+    - stage: test master
+      if: branch = master
+      script:
+        - npm run test-with-coverage
+
+    - stage: test develop
+      if: branch = develop
+      script:
+        - npm test
+    
+    - stage: build docker image
+      if: branch = master AND type IN (push) AND tag =~ ^v
+      script:
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker build --tag pyrrha_boxproxy .
+        - docker images
+        - docker tag pyrrha_boxproxy pandoraboxchain/pyrrha_boxproxy:latest
+        - docker push pandoraboxchain/pyrrha_boxproxy:latest
+
+
