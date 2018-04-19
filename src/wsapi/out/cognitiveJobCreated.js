@@ -20,18 +20,18 @@ module.exports = push => {
     }
 
     eventCognitiveJobCreated(options)
-        .then(createdJobStore => {
+        .data(createdJobStore => {
             push(createdJobStore);
 
             // And then listen for changes on this job
             eventCognitiveJobStateChanged(createdJobStore.address)
-                .then(changedJobStore => push(changedJobStore))
-                .catch(err => push({
+                .data(changedJobStore => push(changedJobStore))
+                .error(err => push({
                     error: err.message,
                     event: 'CognitiveJob.StateChanged'
                 }));
         })
-        .catch(err => push({
+        .error(err => push({
             error: err.message,
             event: 'Pandora.CognitiveJobCreated'
         }));

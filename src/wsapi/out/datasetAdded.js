@@ -19,8 +19,8 @@ module.exports = push => {
     }
 
     eventDatasetAdded(options)
-        .then(addedDatasetStore => push(addedDatasetStore))
-        .catch(err => push({
+        .data(addedDatasetStore => push(addedDatasetStore))
+        .error(err => push({
             error: err.message,
             event: 'PandoraMarket.DatasetAdded'
         }));

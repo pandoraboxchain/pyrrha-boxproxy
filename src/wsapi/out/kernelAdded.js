@@ -19,8 +19,8 @@ module.exports = push => {
     }
 
     eventKernelAdded(options)
-        .then(addedKernelStore => push(addedKernelStore))
-        .catch(err => push({
+        .data(addedKernelStore => push(addedKernelStore))
+        .error(err => push({
             error: err.message,
             event: 'PandoraMarket.KernelAdded'
         }));
