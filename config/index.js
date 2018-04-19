@@ -14,8 +14,8 @@ const hosts = {
         host: 'localhost',
         port: 8545,
         contracts: {
-            Pandora: '0x74e9868e21b2c05643414a4e12ebda93f986c94f',
-            PandoraMarket: '0xfbc0dd4dd5c4d45e0962a92bbca0f52954418dc5'
+            Pandora: '0x9561c133dd8580860b6b7e504bc5aa500f0f06a7',
+            PandoraMarket: '0x2612af3a521c2df9eaf28422ca335b04adf3ac66'
         }
     },
     rinkeby: {

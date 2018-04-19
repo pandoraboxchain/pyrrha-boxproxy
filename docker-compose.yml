@@ -14,6 +14,7 @@ services:
       - MARKET_ADDRESS=0xaff19fee75b1443b41f0acbf54c83e2dab57eb82
     ports:
       - "1111:1111"
+      - "1337:1337"
     volumes:
       - "./tmp:/logs"
     networks: 
