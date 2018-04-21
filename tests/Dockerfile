@@ -7,8 +7,7 @@ COPY ./package.json /pyrrha-boxproxy/package.json
 
 # Installing of dependencies
 WORKDIR /pyrrha-boxproxy
-RUN npm i --silent && npm i \
-        pyrrha-js@https://github.com/pandoraboxchain/pyrrha-js.git#v1.4.4 \
+RUN npm i --save-dev --silent \
         @babel/cli@7.0.0-beta.44 \
         @babel/core@7.0.0-beta.44 \
         @babel/plugin-proposal-object-rest-spread@7.0.0-beta.44 \
@@ -22,7 +21,8 @@ RUN npm i --silent && npm i \
         mocha-lcov-reporter \
         chai \
         istanbul@1.1.0-alpha.1 \
-        codacy-coverage --silent
+        codacy-coverage && \
+    npm i --silent
 
 # Fetching of contracts sources
 WORKDIR /

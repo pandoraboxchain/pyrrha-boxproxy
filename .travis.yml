@@ -13,11 +13,6 @@ jobs:
       script:
         - npm run test-with-coverage
 
-    - stage: test develop
-      if: branch = develop
-      script:
-        - npm test
-    
     - stage: build docker image
       if: branch = master AND type IN (push) AND tag =~ ^v
       script:

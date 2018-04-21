@@ -1,6 +1,6 @@
 {
   "name": "pyrrha-boxproxy",
-  "version": "1.5.1",
+  "version": "1.5.3",
   "private": true,
   "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
   "main": "./src/index.js",
@@ -17,8 +17,7 @@
   },
   "author": "Kostiantyn Smyrnov <kostysh@gmail.com>",
   "contributors": [
-    "Kostiantyn Smyrnov <kostysh@gmail.com>",
-    "Maxim Orlovsky <orlovsky@pandora.foundation>"
+    "Kostiantyn Smyrnov <kostysh@gmail.com>"
   ],
   "dependencies": {
     "body-parser": "^1.18.2",
