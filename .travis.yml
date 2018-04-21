@@ -9,12 +9,12 @@ services:
 jobs:
   include:
     - stage: test master
-      if: branch = master AND tag =~ ^v
+      if: (branch = master) AND (tag =~ ^v[0-9.]+$)
       script:
         - npm run test-with-coverage
 
     - stage: build docker image
-      if: branch = master AND tag =~ ^v
+      if: (branch = master) AND (tag =~ ^v[0-9.]+$)
       script:
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - docker build --tag pyrrha_boxproxy .
