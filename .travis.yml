@@ -6,17 +6,18 @@ node_js:
 
 services:
   - docker
+  
 jobs:
   include:
     - stage: test master
-      if: (branch = master) AND (tag =~ ^v[0-9.]+$)
+      if: branch = master
       script:
         - npm run test-with-coverage
 
     - stage: build docker image
-      if: (branch = master) AND (tag =~ ^v[0-9.]+$)
+      if: (branch = master) AND (tag IS present)
       script:
-        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
         - docker build --tag pyrrha_boxproxy .
         - docker images
         - docker tag pyrrha_boxproxy pandoraboxchain/pyrrha_boxproxy:latest
