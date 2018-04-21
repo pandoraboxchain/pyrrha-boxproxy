@@ -9,12 +9,12 @@ services:
 jobs:
   include:
     - stage: test master
-      if: branch = master
+      if: branch = master AND tag =~ ^v
       script:
         - npm run test-with-coverage
 
     - stage: build docker image
-      if: branch = master AND type IN (push) AND tag =~ ^v
+      if: branch = master AND tag =~ ^v
       script:
         - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
         - docker build --tag pyrrha_boxproxy .
