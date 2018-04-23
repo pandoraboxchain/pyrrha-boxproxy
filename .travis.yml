@@ -4,29 +4,30 @@ node_js:
 - '9'
 services:
 - docker
+before_install:
+- openssl aes-256-cbc -K $encrypted_9c3be0b76b35_key -iv $encrypted_9c3be0b76b35_iv -in ./tests/key.enc -out ./tests/key -d
 jobs:
   include:
-    - if: "(branch = master) AND (tag IS present)"
-    - stage: test master
-      script:
-        - npm run test-with-coverage
-    - stage: build docker image
-      script:
-        - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-        - docker build --tag pyrrha_boxproxy .
-        - docker images
-        - docker tag pyrrha_boxproxy pandoraboxchain/pyrrha_boxproxy:latest
-        - docker push pandoraboxchain/pyrrha_boxproxy:latest
-    - stage: deploy
-      script:
-        - openssl aes-256-cbc -K $encrypted_9c3be0b76b35_key -iv $encrypted_9c3be0b76b35_iv -in ./tests/key.enc -out ~\/.ssh/key -d
-        - ssh pandora.network
-        - echo $SERVER_PASSWORD | sudo su
-        - cd /home/orlovsky/pyrrha
-        - git reset --hard
-        - git pull
-        - cd /home/orlovsky/pyrrha/containers
-        - docker-compose pull
-        - docker-compose down
-        - docker-compose up -d
-        - exit
+  - stage: test master
+    if: "(branch = master) AND (tag IS present)"
+    script:
+    - npm run test-with-coverage
+  - stage: build docker image
+    script:
+    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+    - docker build --tag pyrrha_boxproxy .
+    - docker images
+    - docker tag pyrrha_boxproxy pandoraboxchain/pyrrha_boxproxy:latest
+    - docker push pandoraboxchain/pyrrha_boxproxy:latest
+  - stage: deploy
+    script:
+    - ssh -i ./tests/key pandora.network
+    - echo $SERVER_PASSWORD | sudo su
+    - cd /home/orlovsky/pyrrha
+    - git reset --hard
+    - git pull
+    - cd /home/orlovsky/pyrrha/containers
+    - docker-compose pull
+    - docker-compose down
+    - docker-compose up -d
+    - exit
