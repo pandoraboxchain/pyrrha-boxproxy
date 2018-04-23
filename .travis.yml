@@ -33,13 +33,15 @@ jobs:
       install: skip
       script:
       - openssl aes-256-cbc -K $encrypted_9c3be0b76b35_key -iv $encrypted_9c3be0b76b35_iv -in ./tests/key.enc -out ./tests/key -d
-      - ssh -o "StrictHostKeyChecking no" -i ./tests/key pandora.network
-      - echo $SERVER_PASSWORD | sudo su
-      - cd /home/orlovsky/pyrrha
-      - git reset --hard
-      - git pull
-      - cd /home/orlovsky/pyrrha/containers
-      - docker-compose pull
-      - docker-compose down
-      - docker-compose up -d
-      - exit
+      - chmod 600 ./tests/key
+      - ssh-add ./tests/key
+      - ssh -o "StrictHostKeyChecking no" -i ./tests/key pandora.network <<EOF
+          echo $SERVER_PASSWORD | sudo su
+          cd /home/orlovsky/pyrrha
+          git reset --hard
+          git pull
+          cd /home/orlovsky/pyrrha/containers
+          docker-compose pull
+          docker-compose down
+          docker-compose up -d
+        EOF
