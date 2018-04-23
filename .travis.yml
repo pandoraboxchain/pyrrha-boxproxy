@@ -1,26 +1,31 @@
 sudo: required
-
 language: node_js
 node_js:
-  - "9"
-
+- '9'
 services:
-  - docker
-  
+- docker
 jobs:
   include:
-    - stage: test master
-      if: branch = master
-      script:
-        - npm run test-with-coverage
-
-    - stage: build docker image
-      if: (branch = master) AND (tag IS present)
-      script:
-        - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-        - docker build --tag pyrrha_boxproxy .
-        - docker images
-        - docker tag pyrrha_boxproxy pandoraboxchain/pyrrha_boxproxy:latest
-        - docker push pandoraboxchain/pyrrha_boxproxy:latest
-
-
+  - stage: test master
+    if: branch = master
+    script:
+    - npm run test-with-coverage
+  - stage: build docker image
+    if: "(branch = master) AND (tag IS present)"
+    script:
+    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+    - docker build --tag pyrrha_boxproxy .
+    - docker images
+    - docker tag pyrrha_boxproxy pandoraboxchain/pyrrha_boxproxy:latest
+    - docker push pandoraboxchain/pyrrha_boxproxy:latest
+  - stage: deploy
+    if: "(branch = master) AND (tag IS present)"
+    script:
+    - openssl aes-256-cbc -K $encrypted_9c3be0b76b35_key -iv $encrypted_9c3be0b76b35_iv -in ./tests/key.enc -out ~\/.ssh/key -d
+    - ssh pandora.network
+    - cd /home/orlovsky/pyrrha/containers
+    - echo $SERVER_PASSWORD | sudo su
+    - docker-compose pull
+    - docker-compose down
+    - docker-compose up -d
+    - exit
