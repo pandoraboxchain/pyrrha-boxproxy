@@ -34,5 +34,5 @@ jobs:
       script:
       - openssl aes-256-cbc -K $encrypted_9c3be0b76b35_key -iv $encrypted_9c3be0b76b35_iv -in ./key.enc -out ./key -d
       - chmod 600 ./key
-      - sed -i 's/\$SERVER_PASSWORD/"$SERVER_PASSWORD"/g' ./deploy.sh
-      - ssh -o "StrictHostKeyChecking no" -i ./key pandora.network 'bash -s' < ./deploy.sh
+      - sed -i 's/\$SERVER_PASSWORD/'"$SERVER_PASSWORD"'/g' ./deploy.sh
+      - ssh -o "StrictHostKeyChecking no" -i ./key kostysh@pandora.network 'bash -s' < ./deploy.sh
