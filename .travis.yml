@@ -4,15 +4,16 @@ node_js:
 - '9'
 services:
 - docker
-install: false
 jobs:
   include:
   - stage: test master
     if: "(branch = master) AND (tag IS present)"
+    install: skip
     script:
     - npm run test-with-coverage
   - stage: build docker image
     if: "(branch = master) AND (tag IS present)"
+    install: skip
     script:
     - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
     - docker build --tag pyrrha_boxproxy .
@@ -21,6 +22,7 @@ jobs:
     - docker push pandoraboxchain/pyrrha_boxproxy:latest
   - stage: deploy
     if: "(branch = master) AND (tag IS present)"
+    install: skip
     script:
     - openssl aes-256-cbc -K $encrypted_9c3be0b76b35_key -iv $encrypted_9c3be0b76b35_iv -in ./tests/key.enc -out ./tests/key -d
     - ssh -o "StrictHostKeyChecking no" -i ./tests/key pandora.network
