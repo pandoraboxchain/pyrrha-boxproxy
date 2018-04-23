@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "$SERVER_PASSWORD" | sudo su
+echo "$SERVER_PASSWORD" | sudo -S su
 cd /home/orlovsky/pyrrha
 git reset --hard
 git pull
