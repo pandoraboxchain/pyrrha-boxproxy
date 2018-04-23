@@ -15,7 +15,6 @@ stages:
 jobs:
   include:
     - stage: test
-      if: tag IS present
       install: skip
       script:
       - npm run test-with-coverage
