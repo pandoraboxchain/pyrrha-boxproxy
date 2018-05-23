@@ -5,6 +5,8 @@ COPY ./src /src
 COPY ./config /config
 COPY ./pyrrha-consensus /pyrrha-consensus
 COPY ./pm2.config.json /pm2.config.json
+COPY ./.gitmodules /.gitmodules
+COPY ./.git /.git
 
 WORKDIR /
 RUN npm i pm2 -g --quiet
