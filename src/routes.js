@@ -2,6 +2,9 @@
 
 module.exports = (app) => {
 
+    // System endpoints
+    app.use('/system', require('./api/system'));
+
     // API routes
     app.use('/workers', require('./api/workers'));
     app.use('/jobs', require('./api/jobs'));
