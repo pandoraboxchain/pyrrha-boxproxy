@@ -23,8 +23,8 @@ const hosts = {
         host: 'rinkeby.pandora.network',
         port: 8546,
         contracts: {
-            Pandora: '0x9f301cfd1217fd60e4244a12b1edffe458e8b9bd',
-            PandoraMarket: '0xaff19fee75b1443b41f0acbf54c83e2dab57eb82'
+            Pandora: '0x40211d2982951a0bfdfde20a0a0000f3ee5299ac',
+            PandoraMarket: '0xf3037d5b0a6077a1098f99d2c5b74cbed0ddef1a'
         }
     }
 };
