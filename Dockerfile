@@ -9,6 +9,7 @@ COPY ./pm2.config.json /pm2.config.json
 WORKDIR /
 RUN npm i pm2 -g --quiet
 RUN npm i --quiet
+RUN git submodule update --init --recursive --remote
 
 EXPOSE 1111
 

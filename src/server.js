@@ -3,6 +3,7 @@
 const log = require('./logger');
 const Pjs = require('pyrrha-js');
 const store = require('./store');
+const pack = require('../package.json');
 
 let watchInterval;
 let connectionTimeout;
@@ -118,6 +119,7 @@ module.exports.createServer = config => {
     log.info(`Connected to: ${config.provider.connection.url}`);
 
     // Set global app variables
+    store.set('version', pack.version);
     store.set('app', app);
     store.set('web3', pjs.api.web3);
     store.set('ws', wsServer);
