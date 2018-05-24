@@ -120,6 +120,7 @@ module.exports.createServer = config => {
 
     // Set global app variables
     store.set('version', pack.version);
+    store.set('config', config);
     store.set('app', app);
     store.set('web3', pjs.api.web3);
     store.set('ws', wsServer);

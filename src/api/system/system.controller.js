@@ -8,4 +8,9 @@ module.exports.getVersion = (req, res, next) => {
     res.status(200).json({ version });
 };
 
+// @route /system/addresses
+module.exports.getAddresses = (req, res, next) => {
 
+    const addresses = store.get('config').addresses;
+    res.status(200).json(addresses);
+};
