@@ -32,6 +32,19 @@
         },
         {
             "type": "node",
+            "request": "launch",
+            "name": "Launch Infura Rinkeby",
+            "cwd": "${workspaceFolder}/src",
+            "program": "${workspaceFolder}/src/index.js",
+            "console": "integratedTerminal",
+            "env": {
+                "USE_HOST": "infura_rinkeby",
+                "DEBUG": "boxproxy",
+                "LOG_LEVEL": "debug"
+            }
+        },
+        {
+            "type": "node",
             "request": "attach",
             "name": "Debug Remote Docker",
             "address": "localhost",
