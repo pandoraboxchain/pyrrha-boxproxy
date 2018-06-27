@@ -14,8 +14,8 @@ const hosts = {
         host: 'localhost',
         port: 8545,
         contracts: {
-            Pandora: '0x9561c133dd8580860b6b7e504bc5aa500f0f06a7',
-            PandoraMarket: '0x2612af3a521c2df9eaf28422ca335b04adf3ac66'
+            Pandora: '0x41ceb4bd1b8abeb1b036f7448a8a3a525fb5de56',
+            PandoraMarket: '0x019ccc2e2789eb3ddeed50caab32b408ac18969b'
         }
     },
     rinkeby: {
@@ -23,8 +23,8 @@ const hosts = {
         host: 'rinkeby.pandora.network',
         port: 8546,
         contracts: {
-            Pandora: '0xa04dbdd6114ec21ec75629f6cc2c582bd78bb007',
-            PandoraMarket: '0x08b3e1813a8da52e61239d048183e2fb862ded5d'
+            Pandora: '0x41ceb4bd1b8abeb1b036f7448a8a3a525fb5de56',
+            PandoraMarket: '0x019ccc2e2789eb3ddeed50caab32b408ac18969b'
         }
     }
 };
