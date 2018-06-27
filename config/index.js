@@ -49,5 +49,6 @@ module.exports = {
     addresses: {
         Pandora: process.env.PAN_ADDRESS || hosts[defaultHost].contracts.Pandora,
         PandoraMarket: process.env.MARKET_ADDRESS || hosts[defaultHost].contracts.PandoraMarket
-    }
+    },
+    database: {}
 };
