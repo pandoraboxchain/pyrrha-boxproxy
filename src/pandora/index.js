@@ -9,11 +9,12 @@ class PandoraSync extends EventEmitter {
         super();
         this.worker = null;
         this.initialized = false;
+        this.paused = false;
         this.options = {
             execArgv: process.env.NODE_ENV === 'development' ? {
                 execArgv: ['--inspect-brk=47977']
             } : undefined
-        };        
+        };
     }
 
     _messageManager(message) {
@@ -28,6 +29,7 @@ class PandoraSync extends EventEmitter {
                 break;
 
             case 'paused':
+                this.paused = true;
                 this.emit('paused');
                 break;
 

@@ -1,5 +1,6 @@
 'use strict';
 const { EventEmitter } = require('events');
+const expect = require('../utils/expect');
 const db = require('./db');
 const systemModel = require('./models/system');
 const configModel = require('./models/config');
@@ -8,13 +9,29 @@ const migrations = require('./seeders');
 const api = require('./api');
 
 class PandoraDb extends EventEmitter {
+
+    get api() {
+        return api;
+    };
     
     constructor() {
         super();
         this.initialized = false;
-        this.options = {
-            readOnly: false
-        };        
+        this.tasks = [];// tasks config
+        this.options = {};
+
+        this.once('initialized', this._setupTasks);
+    }
+
+    _setupTasks() {
+        this.tasks.map(task => {
+
+            const endpoint = task.action.split('.').reduce((acc, part) => {
+                return acc && acc[part] !== undefined ? acc[part] : null;
+            }, this.api);
+
+            task.source.on(task.event, data => endpoint(data))
+        });
     }
 
     // Initialize the DB
@@ -56,6 +73,29 @@ class PandoraDb extends EventEmitter {
         } catch(err) {
             this.emit('error', err);        
         }
+    }
+
+    addtask(options = {}) {
+        expect.all(options, {
+            name: {
+                type: 'string'
+            },
+            source: {
+                type: 'object'
+            },
+            event: {
+                type: 'string'
+            },
+            action: {
+                type: 'member',
+                provider: this.api
+            },
+            initCmd: {
+                type: 'string'
+            }
+        });
+
+        this.tasks.push(options);
     }
 }
 
