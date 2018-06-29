@@ -100,7 +100,8 @@ module.exports.all = (options = {}, model = {}) => {
 
             default:
                 
-                if (typeof value !== model[key].type) {
+                if (typeof value !== model[key].type && 
+                    (model[key].required === true || model[key].required === undefined)) {
 
                     throw new ExpectError(WRONG_TYPE, {
                         expected: model[key].type,

@@ -21,6 +21,27 @@ process.on('message', message => {
             });
             break;
 
+        case 'getKernelsRecords':
+            
+            if (message.options.baseline) {
+
+                process.send({
+                    cmd: 'kernelsRecords',
+                    records: [],
+                    baseline: true
+                });
+            }
+
+            break;
+
+        case 'subscribeKernels':
+            process.send({
+                cmd: 'kernelsRecords',
+                records: [],
+                baseline: false
+            });
+            break;
+
         default: 
             process.send({
                 cmd: 'error',

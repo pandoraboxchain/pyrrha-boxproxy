@@ -19,16 +19,30 @@ pandora.on('started', () => log.info('Pandora synchronization has been started')
 pandora.on('paused', () => log.info('Pandora synchronization has been paused'));
 pandora.on('stopped', () => log.info('Pandora synchronization has been stopped'));
 pandora.on('initialized', () => log.info('Pandora synchronizer initialized'));
+pandora.start(config);
 
 db.addtask({
-    name: 'addKernels',
+    name: 'addKernelsBaseline',
     source: pandora,
-    event: 'kernelsRecords',
-    action: 'kernels.addKernels',
-    initCmd: 'getKernels'
+    event: 'kernelsRecords',// Listen this event on source
+    action: 'kernels.add',// Run this action on event
+    init: async () => {
+        const isBaseline = await db.api.kernels.isBaseline();
+        
+        if (isBaseline) {
+
+            return pandora.emit('subscribeKernels');
+        }
+
+        pandora.emit('getKernels', { baseline: true });
+    },
 });
 
+// db.addtask({
+//     name: '',
+//     source: pandora
+// });
+
 db.init(config.database);
-pandora.start(config);
 
 setInterval(_ => {}, 1000);

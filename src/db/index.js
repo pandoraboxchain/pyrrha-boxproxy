@@ -30,7 +30,19 @@ class PandoraDb extends EventEmitter {
                 return acc && acc[part] !== undefined ? acc[part] : null;
             }, this.api);
 
-            task.source.on(task.event, data => endpoint(data))
+            // Subscribe on provider event
+            task.source.on(task.event, data => endpoint(data, {
+                ...task.actionOptions,
+                source: task.source
+            }));
+            
+            if (task.init) {
+
+                // Send event to provider
+                task.source.initialized ? 
+                    task.init() :
+                    task.source.once('initialized', () => task.init());
+            }
         });
     }
 
@@ -90,8 +102,13 @@ class PandoraDb extends EventEmitter {
                 type: 'member',
                 provider: this.api
             },
-            initCmd: {
-                type: 'string'
+            actionOptions: {
+                type: 'object',
+                required: false
+            },
+            init: {
+                type: 'function',
+                required: false
             }
         });
 

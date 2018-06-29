@@ -15,6 +15,8 @@ class PandoraSync extends EventEmitter {
                 execArgv: ['--inspect-brk=47977']
             } : undefined
         };
+
+        this._setupOperationsHandlers();
     }
 
     _messageManager(message) {
@@ -33,9 +35,37 @@ class PandoraSync extends EventEmitter {
                 this.emit('paused');
                 break;
 
+            case 'kernelsRecords':
+                this.emit('kernelsRecords', {
+                    records: message.records || [],
+                    baseline: message.baseline || false
+                });
+                break;
+
             default:
                 this.emit('error', new Error('Unknown worker command'));
         }
+    }
+
+    _setupOperationsHandlers() {
+
+        this.on('getKernels', (options = {}) => {
+
+            console.log('!!!!! recieve getKernels', options);
+
+            this.worker.send({
+                cmd: 'getKernelsRecords',
+                options
+            });
+        });
+
+        this.on('subscribeKernels', () => {
+            console.log('!!!!! recieve subscribeKernels');
+
+            this.worker.send({
+                cmd: 'subscribeKernels'
+            });
+        });
     }
 
     async start(options = {}) {
