@@ -2,14 +2,33 @@
 const { EventEmitter } = require('events');
 const expect = require('../utils/expect');
 const db = require('./db');
-const systemModel = require('./models/system');
-const configModel = require('./models/config');
 const migrator = require('./migrator');
 const migrations = require('./seeders');
 const api = require('./api');
 
+// Models
+const systemModel = require('./models/system');
+const configModel = require('./models/config');
+const kernelsModel = require('./models/kernels');
+
+/**
+ * Pandora database manager
+ *
+ * @class PandoraDb
+ * @extends {EventEmitter}
+ * @event initialized
+ * @event action
+ * @event stopped
+ * @event error
+ */
 class PandoraDb extends EventEmitter {
 
+    /**
+     * Api reference getter
+     *
+     * @readonly
+     * @memberof PandoraDb
+     */
     get api() {
         return api;
     };
@@ -20,41 +39,75 @@ class PandoraDb extends EventEmitter {
         this.tasks = [];// tasks config
         this.options = {};
 
-        this.once('initialized', this._setupTasks);
+        this.once('initialized', () => this.tasks.map(this._setupTask));
     }
 
-    _setupTasks() {
-        this.tasks.map(task => {
+    // Setup a task by config
+    _setupTask(task) {
+        const endpoint = task.action.split('.').reduce((acc, part) => {
+            return acc && acc[part] !== undefined ? acc[part] : null;
+        }, this.api);
 
-            const endpoint = task.action.split('.').reduce((acc, part) => {
-                return acc && acc[part] !== undefined ? acc[part] : null;
-            }, this.api);
+        if (task.source && task.event && endpoint) {
 
             // Subscribe on provider event
-            task.source.on(task.event, data => endpoint(data, {
-                ...task.actionOptions,
-                source: task.source
-            }));
-            
-            if (task.init) {
+            task.source.on(task.event, async (data) => {
 
-                // Send event to provider
-                task.source.initialized ? 
-                    task.init() :
-                    task.source.once('initialized', () => task.init());
-            }
-        });
+                try {
+
+                    this.emit('action', {
+                        name: task.name,
+                        event: task.event,
+                        data
+                    });
+                    
+                    // Run task action
+                    await endpoint(data, {
+                        ...task.actionOptions,
+                        source: task.source
+                    });
+                } catch (err) {
+
+                    this.emit('error', err);
+                }
+            });
+        }
+
+        // Handle the initialization callback
+        if (task.init && task.initEvent) {
+
+            if (task.isInitialized) {
+
+                if (task.source[task.isInitialized]) {
+
+                    task.init();
+                } else {
+
+                    task.source.once(task.initEvent, task.init);                    
+                }                
+            } else {
+
+                task.source.once(task.initEvent, task.init);                    
+            }            
+        }
     }
 
-    // Initialize the DB
-    async init(options = {}) {
+    /**
+     * Initialize the DB
+     *
+     * @param {Object} options Manager config
+     * @returns {Promise}
+     * @memberof PandoraDb
+     */
+    async initialize(options = {}) {
 
         try {
             Object.assign(this.options , options);
 
             await Promise.all([
                 systemModel,
-                configModel
+                configModel,
+                kernelsModel
             ].map(model => model.sync()));
 
             await db.authenticate();
@@ -62,6 +115,7 @@ class PandoraDb extends EventEmitter {
 
             if (!alreadySeeded) {
 
+                // Seeed some initial data
                 await migrator({ migrations }).up();
             }
             
@@ -75,7 +129,11 @@ class PandoraDb extends EventEmitter {
         return this;
     }
 
-    // Gracefully stop the DB
+    /**
+     * Gracefully stop the DB
+     *
+     * @memberof PandoraDb
+     */
     async stop() {
 
         try {
@@ -87,7 +145,13 @@ class PandoraDb extends EventEmitter {
         }
     }
 
-    addtask(options = {}) {
+    /**
+     * Add manager task
+     *
+     * @param {Object} options Task configuration
+     * @memberof PandoraDb
+     */
+    addTask(options = {}) {
         expect.all(options, {
             name: {
                 type: 'string'
@@ -96,14 +160,24 @@ class PandoraDb extends EventEmitter {
                 type: 'object'
             },
             event: {
-                type: 'string'
+                type: 'string',
+                required: false
             },
             action: {
                 type: 'member',
-                provider: this.api
+                provider: this.api,
+                required: false
             },
             actionOptions: {
                 type: 'object',
+                required: false
+            },
+            isInitialized: {
+                type: 'string',
+                required: false
+            },
+            initEvent: {
+                type: 'string',
                 required: false
             },
             init: {
@@ -113,6 +187,11 @@ class PandoraDb extends EventEmitter {
         });
 
         this.tasks.push(options);
+
+        if (this.initialized) {
+
+            this._setupTask(options);
+        }
     }
 }
 

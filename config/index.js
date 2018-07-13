@@ -23,8 +23,17 @@ const hosts = {
         host: 'rinkeby.pandora.network',
         port: 8546,
         contracts: {
-            Pandora: '0xa04dbdd6114ec21ec75629f6cc2c582bd78bb007',
-            PandoraMarket: '0x08b3e1813a8da52e61239d048183e2fb862ded5d'
+            Pandora: '0x6f76ecc921da8c2a42a71681e5dd84186cd90402',
+            PandoraMarket: '0xde4207d9501c3cde90232082687e35eaf989c861'
+        }
+    },
+    rinkeby_infura: {
+        protocol: 'wss',
+        host: 'rinkeby.infura.io/ws',
+        port: 8546,
+        contracts: {
+            Pandora: '0x6f76ecc921da8c2a42a71681e5dd84186cd90402',
+            PandoraMarket: '0xde4207d9501c3cde90232082687e35eaf989c861'
         }
     }
 };
@@ -34,7 +43,7 @@ let defaultHost = process.env.USE_HOST || 'rinkeby';
 module.exports = {
     port: 1111,
     wsport: 1337,
-    wstimeout: 5000,
+    wstimeout: hosts[defaultHost].wstimeout || 5000,
     protocol: process.env.WEB3_PROTOCOL || hosts[defaultHost].protocol,
     nodePort: process.env.WEB3_PORT || hosts[defaultHost].port,
     nodeHost: process.env.WEB3_HOSTNAME || hosts[defaultHost].host,

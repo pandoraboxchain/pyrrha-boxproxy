@@ -1,10 +1,26 @@
+'use strict';
 const path = require('path');
 const { EventEmitter } = require('events');
 const { fork } = require('child_process');
 const log = require('../logger');
 
+/**
+ * Pandora synchronizer
+ *
+ * @class PandoraSync
+ * @extends {EventEmitter}
+ * @event error
+ * @event started
+ * @event stopped
+ * @event kernelsRecords
+ * @event blockNumber
+ */
 class PandoraSync extends EventEmitter {
-
+    
+    /**
+     *Creates an instance of PandoraSync.
+     * @memberof PandoraSync
+     */
     constructor() {
         super();
         this.worker = null;
@@ -19,6 +35,7 @@ class PandoraSync extends EventEmitter {
         this._setupOperationsHandlers();
     }
 
+    // IPC messages manager (from worker)
     _messageManager(message) {
 
         switch(message.cmd) {
@@ -27,18 +44,26 @@ class PandoraSync extends EventEmitter {
                 break;
 
             case 'started':
+                this.initialized = true;
                 this.emit('started');
                 break;
 
-            case 'paused':
-                this.paused = true;
-                this.emit('paused');
+            case 'stopped':
+                this.initialized = false;
+                this.emit('stopped');
                 break;
 
             case 'kernelsRecords':
                 this.emit('kernelsRecords', {
                     records: message.records || [],
+                    blockNumber: message.blockNumber,
                     baseline: message.baseline || false
+                });
+                break;
+
+            case 'blockNumber':
+                this.emit('blockNumber', {
+                    blockNumber: message.blockNumber
                 });
                 break;
 
@@ -47,11 +72,10 @@ class PandoraSync extends EventEmitter {
         }
     }
 
+    // Pandora synchronizer events handlers
     _setupOperationsHandlers() {
 
         this.on('getKernels', (options = {}) => {
-
-            console.log('!!!!! recieve getKernels', options);
 
             this.worker.send({
                 cmd: 'getKernelsRecords',
@@ -60,17 +84,23 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeKernels', () => {
-            console.log('!!!!! recieve subscribeKernels');
-
+            
             this.worker.send({
                 cmd: 'subscribeKernels'
             });
         });
     }
 
+    /**
+     * Start synchronizer
+     *
+     * @param {Object} options
+     * @returns {Promise}
+     * @memberof PandoraSync
+     */
     async start(options = {}) {
 
-        if (this.initialized) {
+        if (this.started) {
 
             this.worker.send({
                 cmd: 'start'
@@ -79,15 +109,17 @@ class PandoraSync extends EventEmitter {
 
             Object.assign(this.options , options);
 
+            const workerOptions = {
+                stdio: ['ipc']
+            };
+
             this.worker = fork(path.resolve(__dirname, 'worker.js'),
                 this.options.execArgv, 
-                {
-                    stdio: ['ipc']
-                });
+                workerOptions);
 
             this.worker.on('error', err => this.emit('error', err));
             this.worker.on('exit', () => {
-                this.initialized = false;
+                this.started = false;
                 this.emit('stopped');
             });
             this.worker.on('message', message => this._messageManager(message));
@@ -95,18 +127,17 @@ class PandoraSync extends EventEmitter {
             this.worker.send({
                 cmd: 'start'
             });
-            this.initialized = true;
-            this.emit('initialized');
         }
     }
 
-    pause() {
-        this.worker.send({
-            cmd: 'pause'
-        });
-    }
-
-    stop() {
+    /**
+     * Stop synchronizer
+     *
+     * @param {Function} onStop callback
+     * @memberof PandoraSync
+     */
+    stop(onStop = () => {}) {
+        this.once('stopped', onStop);
         this.worker.send({
             cmd: 'stop'
         });

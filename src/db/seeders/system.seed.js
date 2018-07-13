@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 module.exports = {
     name: 'systems',
     up: (queryInterface, Sequelize) => {
@@ -6,6 +8,18 @@ module.exports = {
             {
                 name: 'alreadySeeded',
                 value: 'yes'
+            },
+            {
+                name: 'kernelsBaseline',
+                value: 'no'
+            },
+            {
+                name: 'datasetsBaseline',
+                value: 'no'
+            },
+            {
+                name: 'blockNumber',
+                value: '0'
             }
         ]);
     },
@@ -14,7 +28,14 @@ module.exports = {
 
         return queryInterface.bulkDelete('systems', {
             where: {
-                name: 'alreadySeeded'
+                name: {
+                    [Op.or]: [
+                        'alreadySeeded',
+                        'kernelsBaseline',
+                        'datasetsBaseline',
+                        'blockNumber'
+                    ]
+                }
             }
         });
     }

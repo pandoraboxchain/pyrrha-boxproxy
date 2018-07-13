@@ -1,24 +1,6 @@
 'use strict';
 const winston = require('winston');
 
-const stringifyCircular = obj => {
-    let seen = [];
-    
-    return JSON.stringify(obj, function(key, val) {
-        
-        if (val !== null && typeof val === 'object') {
-            
-            if (seen.indexOf(val) >= 0) {
-                return;
-            }
-            
-            seen.push(val);
-        }
-
-        return val;
-    });
-};
-
 const config = {
     format: winston.format.combine(
         winston.format.timestamp(),
@@ -30,8 +12,10 @@ const config = {
 };
 
 if (process.env.LOG_LEVEL) {
+
     config.level = process.env.LOG_LEVEL;
 } else {
+    
     config.silent = true;
 }
 

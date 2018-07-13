@@ -5,44 +5,59 @@ process.on('uncaughtException', err => {
     process.exit(1);
 });
 
+const { safeObject } = require('./utils/json');
 const config = require('../config');
 const log = require('./logger');
 const db = require('./db');
 const pandora = require('./pandora');
 
-db.on('error', err => log.error('A database error has occured', err));
-db.once('initialized', () => log.info(`Database initialized`));
+pandora.on('error', err => log.error('A pandora error has occured', safeObject(err)));
+pandora.on('started', () => log.info('Pandora synchronizer has been started'));
+pandora.on('stopped', () => log.info('Pandora synchronizer has been stopped'));
+
+db.on('error', err => log.error('A database error has occured', safeObject(err)));
+db.once('initialized', () => {
+    log.info(`Database initialized`);
+    pandora.start(config);
+});
 db.once('stopped', () => log.info(`Database stopped`));
 
-pandora.on('error', err => log.error('A pandora error has occured', err));
-pandora.on('started', () => log.info('Pandora synchronization has been started'));
-pandora.on('paused', () => log.info('Pandora synchronization has been paused'));
-pandora.on('stopped', () => log.info('Pandora synchronization has been stopped'));
-pandora.on('initialized', () => log.info('Pandora synchronizer initialized'));
-pandora.start(config);
-
-db.addtask({
+// Kernels baseline and subscription task
+db.addTask({
     name: 'addKernelsBaseline',
     source: pandora,
     event: 'kernelsRecords',// Listen this event on source
     action: 'kernels.add',// Run this action on event
+    initEvent: 'started',
+    isInitialized: 'initialized',
     init: async () => {
-        const isBaseline = await db.api.kernels.isBaseline();
+
+        try {
+
+            const isBaseline = await db.api.kernels.isBaseline();
         
-        if (isBaseline) {
+            if (isBaseline) {
 
-            return pandora.emit('subscribeKernels');
-        }
+                const blockNumber = await db.api.system.getBlockNumber();
+                return pandora.emit('subscribeKernels', { blockNumber });
+            }
 
-        pandora.emit('getKernels', { baseline: true });
+            pandora.emit('getKernels');
+        } catch (err) {
+
+            db.emit('error', err);
+        }        
     },
 });
 
-// db.addtask({
-//     name: '',
-//     source: pandora
-// });
+// Last block number watching taks
+db.addTask({
+    name: 'watchBlockNumber',
+    source: pandora,
+    event: 'blockNumber',
+    action: 'system.saveBlockNumber'
+});
 
-db.init(config.database);
+db.initialize(config.database);
 
 setInterval(_ => {}, 1000);
