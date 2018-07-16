@@ -28,7 +28,7 @@
     "websocket": "1.0.26",
     "winston": "3.0.0",
     "sequelize": "4.38.0",
-    "sqlite3": "4.0.1"
+    "sqlite3": "4.0.2"
   },
   "devDependencies": {
     "eslint": "^5.0.1",
