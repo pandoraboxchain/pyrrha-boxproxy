@@ -2,7 +2,6 @@
 const path = require('path');
 const { EventEmitter } = require('events');
 const { fork } = require('child_process');
-const log = require('../logger');
 
 /**
  * Pandora synchronizer
@@ -61,6 +60,30 @@ class PandoraSync extends EventEmitter {
                 });
                 break;
 
+            case 'kernelsRecordsRemove':
+                this.emit('kernelsRecordsRemove', {
+                    records: message.records || [],
+                    blockNumber: message.blockNumber,
+                    baseline: message.baseline || false
+                });
+                break;
+
+            case 'datasetsRecords':
+                this.emit('datasetsRecords', {
+                    records: message.records || [],
+                    blockNumber: message.blockNumber,
+                    baseline: message.baseline || false
+                });
+                break;
+
+            case 'datasetsRecordsRemove':
+                this.emit('datasetsRecordsRemove', {
+                    records: message.records || [],
+                    blockNumber: message.blockNumber,
+                    baseline: message.baseline || false
+                });
+                break;
+
             case 'blockNumber':
                 this.emit('blockNumber', {
                     blockNumber: message.blockNumber
@@ -83,10 +106,25 @@ class PandoraSync extends EventEmitter {
             });
         });
 
+        this.on('getDatasets', (options = {}) => {
+
+            this.worker.send({
+                cmd: 'getDatasetsRecords',
+                options
+            });
+        });
+
         this.on('subscribeKernels', () => {
             
             this.worker.send({
                 cmd: 'subscribeKernels'
+            });
+        });
+
+        this.on('subscribeDatasets', () => {
+            
+            this.worker.send({
+                cmd: 'subscribeDatasets'
             });
         });
     }

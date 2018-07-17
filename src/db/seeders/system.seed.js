@@ -18,6 +18,14 @@ module.exports = {
                 value: 'no'
             },
             {
+                name: 'workersBaseline',
+                value: 'no'
+            },
+            {
+                name: 'jobsBaseline',
+                value: 'no'
+            },
+            {
                 name: 'blockNumber',
                 value: '0'
             }
@@ -33,6 +41,8 @@ module.exports = {
                         'alreadySeeded',
                         'kernelsBaseline',
                         'datasetsBaseline',
+                        'workersBaseline',
+                        'jobsBaseline',
                         'blockNumber'
                     ]
                 }

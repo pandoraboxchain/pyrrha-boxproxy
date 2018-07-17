@@ -3,6 +3,7 @@ const StateManager = require('./stateManager');
 const config = require('../../config');
 const { safeObject } = require('../utils/json');
 const kernelsApi = require('./api/kernels');
+const datasetsApi = require('./api/datasets');
 const pjs = require('./pjsConnector');
 const {
     PJS_STOPPED,
@@ -21,6 +22,10 @@ const PAN_STARTED = 'PAN_STARTED';
 const PAN_KERNELS_BASELINE = 'PAN_KERNELS_BASELINE';
 const PAN_KERNELS_SUBSCRIBED = 'PAN_KERNELS_SUBSCRIBED';
 
+// Datasets states
+const PAN_DATASETS_BASELINE = 'PAN_DATASETS_BASELINE';
+const PAN_DATASETS_SUBSCRIBED = 'PAN_DATASETS_SUBSCRIBED';
+
 // Worker state model
 const stateModel = {
     pjs: {
@@ -35,6 +40,10 @@ const stateModel = {
     kernels: {
         [PAN_KERNELS_BASELINE]: [PAN_KERNELS_SUBSCRIBED],
         [PAN_KERNELS_SUBSCRIBED]: [PAN_KERNELS_BASELINE]
+    },
+    datasets: {
+        [PAN_DATASETS_BASELINE]: [PAN_DATASETS_SUBSCRIBED],
+        [PAN_DATASETS_SUBSCRIBED]: [PAN_DATASETS_BASELINE]
     }
 };
 
@@ -47,6 +56,10 @@ const stateConditions = {
     [PAN_KERNELS_SUBSCRIBED]: {
         pan: [PAN_STARTED],
         pjs: [PJS_CONNECTED]
+    },
+    [PAN_DATASETS_SUBSCRIBED]: {
+        pan: [PAN_STARTED],
+        pjs: [PJS_CONNECTED]
     }
 };
 
@@ -56,7 +69,8 @@ const state = new StateManager({
     state: {
         pjs: PJS_STOPPED,
         pan: PAN_STOPPED,
-        kernels: PAN_KERNELS_BASELINE
+        kernels: PAN_KERNELS_BASELINE,
+        datasets: PAN_DATASETS_BASELINE
     }
 });
 
@@ -166,6 +180,58 @@ const messageManager = async (message) => {
 
                 await state.set({
                     kernels: PAN_KERNELS_SUBSCRIBED
+                });
+
+                break;
+
+            // Fetch datasets baseline
+            case 'getDatasetsRecords':
+                
+                const datasetsRecordsResult = await datasetsApi.getDatasetsRecords(pjs);
+
+                await state.set({
+                    datasets: PAN_DATASETS_BASELINE
+                });
+
+                process.send({
+                    cmd: 'datasetsRecords',
+                    records: datasetsRecordsResult.records,
+                    blockNumber: datasetsRecordsResult.blockNumber,
+                    baseline: true
+                });
+    
+                break;
+            
+            // Subscribe to datasets updates
+            case 'subscribeDatasets':
+                
+                subscriptions.push(message.cmd);
+
+                await datasetsApi.subscribeDatasetAdded(pjs, {
+                    blockNumber: message.blockNumber || undefined
+                }, result => process.send({
+                    cmd: 'datasetsRecords',
+                    records: result.records,
+                    blockNumber: result.blockNumber,
+                    baseline: false
+                }), err => process.send({
+                    cmd: 'error',
+                    error: safeObject(err)
+                }));
+
+                await datasetsApi.subscribeDatasetRemoved(pjs, {
+                    blockNumber: message.blockNumber || undefined
+                }, result => process.send({
+                    cmd: 'datasetsRecordsRemove',
+                    records: result.records,
+                    blockNumber: result.blockNumber
+                }), err => process.send({
+                    cmd: 'error',
+                    error: safeObject(err)
+                }));
+
+                await state.set({
+                    datasets: PAN_DATASETS_SUBSCRIBED
                 });
 
                 break;

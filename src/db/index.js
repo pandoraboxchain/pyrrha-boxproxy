@@ -10,6 +10,13 @@ const api = require('./api');
 const systemModel = require('./models/system');
 const configModel = require('./models/config');
 const kernelsModel = require('./models/kernels');
+const datasetsModel = require('./models/datasets');
+const allModels = [
+    systemModel,
+    configModel,
+    kernelsModel,
+    datasetsModel
+];
 
 /**
  * Pandora database manager
@@ -39,7 +46,7 @@ class PandoraDb extends EventEmitter {
         this.tasks = [];// tasks config
         this.options = {};
 
-        this.once('initialized', () => this.tasks.map(this._setupTask));
+        this.once('initialized', () => this.tasks.map(task => this._setupTask(task)));
     }
 
     // Setup a task by config
@@ -104,11 +111,7 @@ class PandoraDb extends EventEmitter {
         try {
             Object.assign(this.options , options);
 
-            await Promise.all([
-                systemModel,
-                configModel,
-                kernelsModel
-            ].map(model => model.sync()));
+            await Promise.all(allModels.map(model => model.sync()));
 
             await db.authenticate();
             const alreadySeeded = await api.system.isAlreadySeeded();

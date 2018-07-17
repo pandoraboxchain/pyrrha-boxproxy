@@ -10,6 +10,7 @@
 
 const OPTIONS_REQUIRED = 'Options are required';
 const MODEL_REQUIRED = 'Model is required';
+const MODEL_TYPE_OPTIONS_REQUIRED = 'MODEL_TYPE_OPTIONS_REQUIRED';
 const WRONG_TYPE = 'Wrong type of the property';
 const ADDRESS_REQUIRED = 'Address required';
 
@@ -62,6 +63,30 @@ module.exports.all = (options = {}, model = {}) => {
         }, options);
 
         switch (model[key].type) {
+            case 'enum':
+
+                if (!model[key].values || !Array.isArray(model[key].values)) {
+
+                    throw new ExpectError(MODEL_TYPE_OPTIONS_REQUIRED, {
+                        expected: 'enum',
+                        values: model[key].values,
+                        key,
+                        value
+                    });
+                }
+
+                if (!model[key].values.includes(value)) {
+
+                    throw new ExpectError(WRONG_TYPE, {
+                        expected: 'enum',
+                        values: model[key].values,
+                        key,
+                        value
+                    });
+                }
+
+                break;
+
             case 'address':
 
                 if (!new RegExp('^0x[a-fA-F0-9]{40}$').test(value)) {

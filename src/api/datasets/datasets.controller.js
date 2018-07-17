@@ -1,20 +1,21 @@
 'use strict';
 const store = require('../../store');
-const { datasets: { fetchAll, fetchDataset } } = store.get('pjs');
+const { getAll } = require('../../db/api/datasets');
 
 // @route /datasets
 module.exports.getDatasets = async (req, res, next) => {
 
     try {
 
-        const { records, error } = await fetchAll();
-
+        const { rows, count } = await getAll(req.query);
+        
         res.status(200).json({
-            datasets: records,
-            error,
-            datasetsTotal: records.length
+            records: rows,
+            count,
+            limit: req.query.limit || 5,
+            page: req.query.page || 1
         });
-    } catch (err) {
+    } catch(err) {
         next(err);
     }
 };
@@ -24,9 +25,14 @@ module.exports.getDatasetByAddress = async (req, res, next) => {
 
     try {
 
-        const dataset = await fetchDataset(req.params.address);
+        const { rows, count } = await getAll({
+            filterBy: `address:eq:${req.params.address}`
+        });
         
-        res.status(200).json(dataset);
+        res.status(200).json({
+            records: rows,
+            count
+        });
     } catch(err) {
         next(err);
     }
