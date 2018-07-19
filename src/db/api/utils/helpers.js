@@ -131,12 +131,12 @@ module.exports.extractFilerQuery = (options = {}) => {
 
                 case 'ne':
                     operator = Op.ne;
-                    value = parsedFilter[2];
+                    value = parsedFilter[3] === 'number' ? Number(parsedFilter[2]) : parsedFilter[2];
                     break;
 
                 case 'eq':
                     operator = Op.eq;
-                    value = parsedFilter[2];
+                    value = parsedFilter[3] === 'number' ? Number(parsedFilter[2]) : parsedFilter[2];
                     break;                    
 
                 case 'not':
@@ -152,6 +152,16 @@ module.exports.extractFilerQuery = (options = {}) => {
                 case 'notLike':
                     operator = Op.notLike;
                     value = `%${String(parsedFilter[2])}%`;
+                    break;
+
+                case 'in':
+                    operator = Op.in;
+                    value = parsedFilter[2].split(',').map(val => parsedFilter[3] === 'number' ? Number(val) : val);
+                    break;
+
+                case 'notIn':
+                    operator = Op.notIn;
+                    value = parsedFilter[2].split(',').map(val => parsedFilter[3] === 'number' ? Number(val) : val);
                     break;
 
                 default:

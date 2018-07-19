@@ -3,7 +3,6 @@ const log = require('./logger');
 const express = require('express');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
-const store = require('./store');
 
 module.exports = (config) => {
     const app = express();
@@ -22,7 +21,6 @@ module.exports = (config) => {
     const server = app.listen(config.port, () => {
         log.info(`Server running at ${config.port} port`);
     });
-    store.set('express', server);
 
     return app;
 };

@@ -11,11 +11,13 @@ const systemModel = require('./models/system');
 const configModel = require('./models/config');
 const kernelsModel = require('./models/kernels');
 const datasetsModel = require('./models/datasets');
+const jobsModel = require('./models/jobs');
 const allModels = [
     systemModel,
     configModel,
     kernelsModel,
-    datasetsModel
+    datasetsModel,
+    jobsModel
 ];
 
 /**

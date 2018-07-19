@@ -1,15 +1,16 @@
 'use strict';
+const { safeObject } = require('./utils/json');
+const log = require('./logger');
+
 // For better PM2 experience
 process.on('uncaughtException', err => {
-    log.error('An error has occured %o', err);
+    log.error('An error has occured %o', safeObject(err));
     process.exit(1);
 });
 
 const express = require('./express');
 const routes = require('./routes');
-const { safeObject } = require('./utils/json');
 const config = require('../config');
-const log = require('./logger');
 const db = require('./db');
 const pandora = require('./pandora');
 
@@ -103,6 +104,48 @@ db.addTask({
     source: pandora,
     event: 'datasetsRecordsRemove',
     action: 'datasets.remove'
+});
+
+// Jobs baseline and subscription task
+db.addTask({
+    name: 'addJobsBaseline',
+    source: pandora,
+    event: 'jobsRecords',// Listen this event on source
+    action: 'jobs.add',// Run this action on event
+    initEvent: 'started',
+    isInitialized: 'initialized',
+    init: async () => {
+
+        try {
+
+            const isBaseline = await db.api.system.isBaseline('jobsBaseline');
+        
+            if (isBaseline) {
+
+                const blockNumber = await db.api.system.getBlockNumber();
+                pandora.emit('subscribeJobs', { blockNumber });
+
+                const jobs = await db.api.jobs.getAll({
+                    filterBy: 'jobStatus:notIn:7,4:number'
+                });
+
+                if (jobs && jobs.length > 0) {
+
+                    jobs.forEach(job => pandora.emit('subscribeJobAddress', {
+                        address: job.address,
+                        blockNumber
+                    }));
+                }
+
+                return;
+            }
+
+            pandora.emit('getJobs');
+        } catch (err) {
+
+            db.emit('error', err);
+        }        
+    },
 });
 
 db.initialize(config.database);

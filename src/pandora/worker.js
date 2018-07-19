@@ -4,6 +4,7 @@ const config = require('../../config');
 const { safeObject } = require('../utils/json');
 const kernelsApi = require('./api/kernels');
 const datasetsApi = require('./api/datasets');
+const jobsApi = require('./api/jobs');
 const pjs = require('./pjsConnector');
 const {
     PJS_STOPPED,
@@ -26,6 +27,10 @@ const PAN_KERNELS_SUBSCRIBED = 'PAN_KERNELS_SUBSCRIBED';
 const PAN_DATASETS_BASELINE = 'PAN_DATASETS_BASELINE';
 const PAN_DATASETS_SUBSCRIBED = 'PAN_DATASETS_SUBSCRIBED';
 
+// Jobs states
+const PAN_JOBS_BASELINE = 'PAN_JOBS_BASELINE';
+const PAN_JOBS_SUBSCRIBED = 'PAN_JOBS_SUBSCRIBED';
+
 // Worker state model
 const stateModel = {
     pjs: {
@@ -44,6 +49,10 @@ const stateModel = {
     datasets: {
         [PAN_DATASETS_BASELINE]: [PAN_DATASETS_SUBSCRIBED],
         [PAN_DATASETS_SUBSCRIBED]: [PAN_DATASETS_BASELINE]
+    },
+    jobs: {
+        [PAN_JOBS_BASELINE]: [PAN_JOBS_SUBSCRIBED],
+        [PAN_JOBS_SUBSCRIBED]: [PAN_JOBS_BASELINE]
     }
 };
 
@@ -60,6 +69,10 @@ const stateConditions = {
     [PAN_DATASETS_SUBSCRIBED]: {
         pan: [PAN_STARTED],
         pjs: [PJS_CONNECTED]
+    },
+    [PAN_JOBS_SUBSCRIBED]: {
+        pan: [PAN_STARTED],
+        pjs: [PJS_CONNECTED]
     }
 };
 
@@ -70,7 +83,8 @@ const state = new StateManager({
         pjs: PJS_STOPPED,
         pan: PAN_STOPPED,
         kernels: PAN_KERNELS_BASELINE,
-        datasets: PAN_DATASETS_BASELINE
+        datasets: PAN_DATASETS_BASELINE,
+        jobs: PAN_JOBS_BASELINE
     }
 });
 
@@ -153,10 +167,8 @@ const messageManager = async (message) => {
             // Subscribe to kernels updates
             case 'subscribeKernels':
                 
-                subscriptions.push(message.cmd);
-
-                await kernelsApi.subscribeKernelAdded(pjs, {
-                    blockNumber: message.blockNumber || undefined
+                const kernelAdded = await kernelsApi.subscribeKernelAdded(pjs, {
+                    blockNumber: message.blockNumber
                 }, result => process.send({
                     cmd: 'kernelsRecords',
                     records: result.records,
@@ -167,8 +179,8 @@ const messageManager = async (message) => {
                     error: safeObject(err)
                 }));
 
-                await kernelsApi.subscribeKernelRemoved(pjs, {
-                    blockNumber: message.blockNumber || undefined
+                const kernelRemoved = await kernelsApi.subscribeKernelRemoved(pjs, {
+                    blockNumber: message.blockNumber
                 }, result => process.send({
                     cmd: 'kernelsRecordsRemove',
                     records: result.records,
@@ -177,6 +189,11 @@ const messageManager = async (message) => {
                     cmd: 'error',
                     error: safeObject(err)
                 }));
+
+                subscriptions.push({
+                    ...message,
+                    events: [kernelAdded, kernelRemoved]
+                });
 
                 await state.set({
                     kernels: PAN_KERNELS_SUBSCRIBED
@@ -205,10 +222,8 @@ const messageManager = async (message) => {
             // Subscribe to datasets updates
             case 'subscribeDatasets':
                 
-                subscriptions.push(message.cmd);
-
-                await datasetsApi.subscribeDatasetAdded(pjs, {
-                    blockNumber: message.blockNumber || undefined
+                const datasetAdded = await datasetsApi.subscribeDatasetAdded(pjs, {
+                    blockNumber: message.blockNumber
                 }, result => process.send({
                     cmd: 'datasetsRecords',
                     records: result.records,
@@ -219,8 +234,8 @@ const messageManager = async (message) => {
                     error: safeObject(err)
                 }));
 
-                await datasetsApi.subscribeDatasetRemoved(pjs, {
-                    blockNumber: message.blockNumber || undefined
+                const datasetRemoved = await datasetsApi.subscribeDatasetRemoved(pjs, {
+                    blockNumber: message.blockNumber
                 }, result => process.send({
                     cmd: 'datasetsRecordsRemove',
                     records: result.records,
@@ -230,8 +245,99 @@ const messageManager = async (message) => {
                     error: safeObject(err)
                 }));
 
+                subscriptions.push({
+                    ...message,
+                    events: [datasetAdded, datasetRemoved]
+                });
+
                 await state.set({
                     datasets: PAN_DATASETS_SUBSCRIBED
+                });
+
+                break;
+
+            // Fetch jobs baseline
+            case 'getJobsRecords':
+                
+                const jobsRecordsResult = await jobsApi.getJobsRecords(pjs);
+
+                await state.set({
+                    jobs: PAN_JOBS_BASELINE
+                });
+
+                process.send({
+                    cmd: 'jobsRecords',
+                    records: jobsRecordsResult.records,
+                    blockNumber: jobsRecordsResult.blockNumber,
+                    baseline: true
+                });
+    
+                break;
+
+            // Subscribe to new job created event
+            case 'subscribeJobs':
+                
+                const cognitiveJobCreated = await jobsApi.subscribeCognitiveJobCreated(pjs, {
+                    blockNumber: message.blockNumber
+                }, result => process.send({
+                    cmd: 'jobsRecords',
+                    records: result.records,
+                    blockNumber: result.blockNumber,
+                    baseline: false
+                }), err => process.send({
+                    cmd: 'error',
+                    error: safeObject(err)
+                }));
+
+                subscriptions.push({
+                    ...message,
+                    events: [cognitiveJobCreated]
+                });
+
+                await state.set({
+                    jobs: PAN_JOBS_SUBSCRIBED
+                });
+
+                break;
+            
+            // Subscribe to specific job updates
+            case 'subscribeJobAddress':
+
+                const cognitiveJobStateChanged = await jobsApi.subscribeCognitiveJobStateChanged(pjs, message.address, {
+                    blockNumber: message.blockNumber
+                }, result => process.send({
+                    cmd: 'jobsRecords',
+                    records: result.records,
+                    blockNumber: result.blockNumber,
+                    baseline: false
+                }), err => process.send({
+                    cmd: 'error',
+                    error: safeObject(err)
+                }));
+
+                subscriptions.push({
+                    ...message,
+                    events: [cognitiveJobStateChanged]
+                });
+
+                break;
+
+            case 'unsubscribeJobAddress':
+
+                subscriptions = subscriptions.filter(msg => {
+
+                    if (msg.cmd !== 'subscribeJobAddress') {
+
+                        return true;
+                    }
+
+                    if (msg.address === message.address) {
+
+                        msg.events.map(evt => evt.unsubscribe());
+                        return false;
+                    }
+
+                    return true;
                 });
 
                 break;
@@ -252,23 +358,40 @@ const messageManager = async (message) => {
     }
 };
 
+// Listen for errors
 pjs.on('error', err => process.send({
     cmd: 'error',
     error: safeObject(err)
 }));
 
-pjs.on('reconnected', blockNumber => subscriptions.map(cmd => {
-    cmd,
-    blockNumber
-}));
+// Re-subscribe all active subscriptions on reconnect
+pjs.on('reconnected', blockNumber => {
+    const originSubscriptions = subscriptions;
+    subscriptions = [];
+    
+    originSubscriptions.forEach(message => {
+        message.events.forEach(evt => evt.unsubscribe());
+        message.events = [];
 
+        messageManager({
+            ...message,
+            ...{
+                blockNumber
+            }
+        });
+    });
+});
+
+// Emit last block event
 pjs.on('lastBlockNumber', blockNumber => process.send({
     cmd: 'blockNumber',
     blockNumber
 }));
 
+// Handle messages obtained from host
 process.on('message', messageManager);
 
+// Do not close the workker until processGuard becomes false
 setInterval(_ => {
 
     if (!processGuard) {

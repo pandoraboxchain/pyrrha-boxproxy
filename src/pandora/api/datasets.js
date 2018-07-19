@@ -34,7 +34,7 @@ module.exports.getDatasetsRecords = async (pjs) => {
  */
 module.exports.subscribeDatasetAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    pjs.api.datasets.eventDatasetAdded(options)
+    return pjs.api.datasets.eventDatasetAdded(options)
             .data(async (addedDataset) => {
 
                 try {
@@ -42,7 +42,7 @@ module.exports.subscribeDatasetAdded = async (pjs, options = {}, dataCallback = 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [addedDataset],
+                        records: [addedDataset.dataset],
                         blockNumber
                     });
                 } catch (err) {
@@ -63,7 +63,7 @@ module.exports.subscribeDatasetAdded = async (pjs, options = {}, dataCallback = 
  */
 module.exports.subscribeDatasetRemoved = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    pjs.api.datasets.eventDatasetRemoved(options)
+    return pjs.api.datasets.eventDatasetRemoved(options)
             .data(async (removedDataset) => {
 
                 try {

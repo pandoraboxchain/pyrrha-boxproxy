@@ -1,16 +1,15 @@
 'use strict';
-const store = require('../../store');
+const pack = require('../../../package.json');
+const config = require('../../../config');
 
 // @route /system/version
 module.exports.getVersion = (req, res, next) => {
 
-    const version = store.get('version');
-    res.status(200).json({ version });
+    res.status(200).json({ version: pack.version });
 };
 
 // @route /system/addresses
 module.exports.getAddresses = (req, res, next) => {
 
-    const addresses = store.get('config').addresses;
-    res.status(200).json(addresses);
+    res.status(200).json(config.addresses);
 };

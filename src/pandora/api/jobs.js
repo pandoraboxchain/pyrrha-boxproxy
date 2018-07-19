@@ -1,15 +1,15 @@
 'use strict';
 
 /**
- * Fetching kernels
+ * Fetching jobs
  *
  * @param {Object} pjs Pjs instance
  * @returns {Promise} {Array[{Object}]}
  */
-module.exports.getKernelsRecords = async (pjs) => {
+module.exports.getJobsRecords = async (pjs) => {
     
     const blockNumber = await pjs.web3.eth.getBlockNumber();
-    const { records, error } = await pjs.api.kernels.fetchAll();
+    const { records, error } = await pjs.api.jobs.fetchAll();
 
     if (Array.isArray(error) && error.length > 0) {
 
@@ -24,25 +24,25 @@ module.exports.getKernelsRecords = async (pjs) => {
 };
 
 /**
- * Subscribe to KernelAdded event
+ * Subscribe to CognitiveJobCreated event
  *
  * @param {Object} pjs Pjs instance
- * @param {Object} options eventKernelAdded, see pyrrha-js for details
+ * @param {Object} options eventCognitiveJobCreated, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
  * @returns {Promise}
  */
-module.exports.subscribeKernelAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeCognitiveJobCreated = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.kernels.eventKernelAdded(options)
-            .data(async (addedKernel) => {
+    return pjs.api.jobs.eventCognitiveJobCreated(options)
+            .data(async (addedJob) => {
 
                 try {
 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [addedKernel.kernel],
+                        records: [addedJob],
                         blockNumber
                     });
                 } catch (err) {
@@ -53,25 +53,26 @@ module.exports.subscribeKernelAdded = async (pjs, options = {}, dataCallback = (
 };
 
 /**
- * Subscribe to KernelRemoved event
+ * Subscribe to event StateChanged for CognitiveJob
  *
  * @param {Object} pjs Pjs instance
- * @param {Object} options eventKernelRemoved, see pyrrha-js for details
+ * @param {Object} address Job address
+ * @param {Object} options eventCognitiveJobStateChanged, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
  * @returns {Promise}
  */
-module.exports.subscribeKernelRemoved = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeCognitiveJobStateChanged = async (pjs, address, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.kernels.eventKernelRemoved(options)
-            .data(async (removedKernel) => {
+    return pjs.api.jobs.eventCognitiveJobStateChanged(address, options)
+            .data(async (changedJob) => {
 
                 try {
 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [removedKernel],
+                        records: [changedJob.job],
                         blockNumber
                     });
                 } catch (err) {

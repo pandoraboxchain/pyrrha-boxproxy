@@ -1,5 +1,4 @@
 'use strict';
-const store = require('../../store');
 const { getAll } = require('../../db/api/datasets');
 
 // @route /datasets
@@ -20,7 +19,7 @@ module.exports.getDatasets = async (req, res, next) => {
     }
 };
 
-// @route /datasets:address
+// @route /datasets/:address
 module.exports.getDatasetByAddress = async (req, res, next) => {
 
     try {

@@ -24,14 +24,14 @@
     "body-parser": "1.18.3",
     "express": "4.16.3",
     "helmet": "3.12.1",
-    "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.7.9",
+    "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.8.0-beta2",
     "websocket": "1.0.26",
     "winston": "3.0.0",
     "sequelize": "4.38.0",
     "sqlite3": "4.0.2"
   },
   "devDependencies": {
-    "eslint": "^5.0.1",
+    "eslint": "^5.1.0",
     "eslint-config-google": "^0.9.1"
   },
   "license": "MIT"

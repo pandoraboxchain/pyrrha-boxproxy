@@ -84,6 +84,22 @@ class PandoraSync extends EventEmitter {
                 });
                 break;
 
+            case 'jobsRecords':
+                this.emit('jobsRecords', {
+                    records: message.records || [],
+                    blockNumber: message.blockNumber,
+                    baseline: message.baseline || false
+                });
+                break;
+
+            case 'jobsRecordsUpdate':
+                this.emit('jobsRecordsUpdate', {
+                    records: message.records || [],
+                    blockNumber: message.blockNumber,
+                    baseline: message.baseline || false
+                });
+                break;
+
             case 'blockNumber':
                 this.emit('blockNumber', {
                     blockNumber: message.blockNumber
@@ -98,33 +114,64 @@ class PandoraSync extends EventEmitter {
     // Pandora synchronizer events handlers
     _setupOperationsHandlers() {
 
-        this.on('getKernels', (options = {}) => {
+        this.on('getKernels', () => {
 
             this.worker.send({
-                cmd: 'getKernelsRecords',
-                options
+                cmd: 'getKernelsRecords'
             });
         });
 
-        this.on('getDatasets', (options = {}) => {
-
-            this.worker.send({
-                cmd: 'getDatasetsRecords',
-                options
-            });
-        });
-
-        this.on('subscribeKernels', () => {
+        this.on('subscribeKernels', (options = {}) => {
             
             this.worker.send({
-                cmd: 'subscribeKernels'
+                cmd: 'subscribeKernels',
+                ...options
             });
         });
 
-        this.on('subscribeDatasets', () => {
+        this.on('getDatasets', () => {
+
+            this.worker.send({
+                cmd: 'getDatasetsRecords'
+            });
+        });
+
+        this.on('subscribeDatasets', (options = {}) => {
             
             this.worker.send({
-                cmd: 'subscribeDatasets'
+                cmd: 'subscribeDatasets',
+                ...options
+            });
+        });
+
+        this.on('getJobs', () => {
+
+            this.worker.send({
+                cmd: 'getJobsRecords'
+            });
+        });
+
+        this.on('subscribeJobs', (options = {}) => {
+            
+            this.worker.send({
+                cmd: 'subscribeJobs',
+                ...options
+            });
+        });
+
+        this.on('subscribeJobAddress', (options = {}) => {
+
+            this.worker.send({
+                cmd: 'subscribeJobs',
+                ...options
+            });
+        });
+
+        this.on('unsubscribeJobAddress', (options = {}) => {
+
+            this.worker.send({
+                cmd: 'unsubscribeJobAddress',
+                ...options
             });
         });
     }
