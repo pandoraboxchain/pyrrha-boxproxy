@@ -18,7 +18,7 @@ module.exports = (config) => {
     });
     app.use(helmet());
 
-    const server = app.listen(config.port, () => {
+    app.server = app.listen(config.port, () => {
         log.info(`Server running at ${config.port} port`);
     });
 
