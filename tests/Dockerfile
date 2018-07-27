@@ -8,13 +8,13 @@ COPY ./package.json /pyrrha-boxproxy/package.json
 # Installing of dependencies
 WORKDIR /pyrrha-boxproxy
 RUN npm i --save-dev --silent \
-        @babel/cli@7.0.0-beta.53 \
-        @babel/core@7.0.0-beta.53 \
-        @babel/plugin-proposal-object-rest-spread@7.0.0-beta.53 \
-        @babel/plugin-syntax-object-rest-spread@7.0.0-beta.53 \
-        @babel/polyfill@7.0.0-beta.53 \
-        @babel/preset-env@7.0.0-beta.53 \
-        @babel/register@7.0.0-beta.53 \
+        @babel/cli@7.0.0-beta.54 \
+        @babel/core@7.0.0-beta.54 \
+        @babel/plugin-proposal-object-rest-spread@7.0.0-beta.54 \
+        @babel/plugin-syntax-object-rest-spread@7.0.0-beta.54 \
+        @babel/polyfill@7.0.0-beta.54 \
+        @babel/preset-env@7.0.0-beta.54 \
+        @babel/register@7.0.0-beta.54 \
         ganache-sandbox@https://github.com/pandoraboxchain/ganache-sandbox.git#v0.3.0 \
         openzeppelin-solidity \
         mocha \

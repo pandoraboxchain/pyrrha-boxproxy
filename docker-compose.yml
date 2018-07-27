@@ -10,8 +10,8 @@ services:
       - WEB3_PROTOCOL=wss
       - WEB3_HOSTNAME=rinkeby.infura.io/ws
       - WEB3_PORT=8546
-      - PAN_ADDRESS=0x9ac5265030f55b594198443db41684e0f65ce1b3
-      - MARKET_ADDRESS=0x5fafdfed7ed553716e877961d41ca3fae6a40c35
+      - PAN_ADDRESS=0xf31b5318cfefcf8d661508b3e12f861aa160ca3b
+      - MARKET_ADDRESS=0x6b73053425d5ec272e44ced005dc5f7d80d346e2
     ports:
       - "1111:1111"
       - "1337:1337"

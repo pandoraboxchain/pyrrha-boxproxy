@@ -41,7 +41,7 @@ const hosts = {
     }
 };
 
-let defaultHost = process.env.USE_HOST || 'infura_rinkeby';
+let defaultHost = process.env.USE_HOST || 'rinkeby_infura';
 
 module.exports = {
     port: 1111,
