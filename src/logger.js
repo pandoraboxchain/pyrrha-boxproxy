@@ -16,13 +16,9 @@ if (process.env.LOG_LEVEL) {
     config.level = process.env.LOG_LEVEL;
 } else {
     
-    config.silent = true;
+    config.level = 'error';
 }
 
-if (process.env.DEBUG && process.env.DEBUG.split(',').includes('boxproxy')) {
-
-    config.transports.push(new winston.transports.Console());
-    // @todo Add file logger
-}
+config.transports.push(new winston.transports.Console());
 
 module.exports = winston.createLogger(config);

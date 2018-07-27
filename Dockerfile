@@ -1,4 +1,4 @@
-FROM node:9
+FROM node:10
 
 COPY ./package.json /package.json
 COPY ./src /src
@@ -14,6 +14,7 @@ RUN npm i --quiet
 RUN git submodule update --init --recursive --remote
 
 EXPOSE 1111
+ENV LOG_LEVEL=error
 
 VOLUME ["/logs"]
 

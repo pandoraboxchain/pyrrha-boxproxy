@@ -36,9 +36,9 @@
             "name": "Launch Infura Rinkeby",
             "cwd": "${workspaceFolder}/src",
             "program": "${workspaceFolder}/src/index.js",
-            "console": "integratedTerminal",
+            "outputCapture": "std",
             "env": {
-                "USE_HOST": "infura_rinkeby",
+                "USE_HOST": "rinkeby_infura",
                 "DEBUG": "boxproxy",
                 "LOG_LEVEL": "debug"
             }

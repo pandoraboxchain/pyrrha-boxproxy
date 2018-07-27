@@ -15,8 +15,8 @@ const hosts = {
         port: 8545,
         wstimeout: 5000,
         contracts: {
-            Pandora: '0x41ceb4bd1b8abeb1b036f7448a8a3a525fb5de56',
-            PandoraMarket: '0x019ccc2e2789eb3ddeed50caab32b408ac18969b'
+            Pandora: '0x9561c133dd8580860b6b7e504bc5aa500f0f06a7',
+            PandoraMarket: '0x2612af3a521c2df9eaf28422ca335b04adf3ac66'
         }
     },
     rinkeby: {
