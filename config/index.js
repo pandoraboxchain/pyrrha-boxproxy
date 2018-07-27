@@ -13,6 +13,7 @@ const hosts = {
         protocol: 'ws',
         host: 'localhost',
         port: 8545,
+        wstimeout: 5000,
         contracts: {
             Pandora: '0x41ceb4bd1b8abeb1b036f7448a8a3a525fb5de56',
             PandoraMarket: '0x019ccc2e2789eb3ddeed50caab32b408ac18969b'
@@ -22,6 +23,7 @@ const hosts = {
         protocol: 'ws', // 'http',
         host: 'rinkeby.pandora.network',
         port: 8546,
+        wstimeout: 5000,
         contracts: {
             Pandora: '0xf31b5318cfefcf8d661508b3e12f861aa160ca3b',
             PandoraMarket: '0x6b73053425d5ec272e44ced005dc5f7d80d346e2'
@@ -31,6 +33,7 @@ const hosts = {
         protocol: 'wss',
         host: 'rinkeby.infura.io/ws',
         port: 8546,
+        wstimeout: 5000,
         contracts: {
             Pandora: '0xf31b5318cfefcf8d661508b3e12f861aa160ca3b',
             PandoraMarket: '0x6b73053425d5ec272e44ced005dc5f7d80d346e2'
