@@ -130,7 +130,7 @@ class PjsConnector extends EventEmitter {
                             resolve();
                         } catch (err) {
         
-                            isReconnecting = false;
+                            this.isReconnecting = false;
                             this.emit('error', err);
                             reject(err);
                         }
