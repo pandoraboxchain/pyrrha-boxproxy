@@ -25,7 +25,7 @@ describe('Database module tests', () => {
         db.initialize(config).catch(done);
     });
 
-    after(async () => await db.stop());
+    // after(async () => await db.stop());
 
     it('db should prepopulate some system properties on setup', async () => {
         const system = await db.api.system.getAll();
@@ -70,7 +70,7 @@ describe('Database module tests', () => {
 
             done(new Error('watchBlockNumber task not been handled during timeout'));
             doneCalled = true;
-        }, 2000);
+        }, 4000);
 
         db.once('error', err => {
             clearTimeout(timeout);
@@ -91,7 +91,8 @@ describe('Database module tests', () => {
                 expect(data.event).to.be.equal('lastBlockNumber');
                 expect(data.data).to.be.an('object');
                 const bn = await db.api.system.getBlockNumber('lastBlock');
-                expect(bn).to.be.equal(12345);                
+                expect(bn).to.be.equal(12345);  
+
                 done();
                 doneCalled = true;
             } catch (err) {
@@ -132,11 +133,11 @@ describe('Database module tests', () => {
 
             if (doneCalled) {
                 return;
-            }
+            }            
             
             done(new Error('watchBlockNumber task not been handled during timeout useing custom action'));
             doneCalled = true;
-        }, 2000);
+        }, 7000);
     
         db.once('error', err => {
             clearTimeout(timeout);
@@ -149,24 +150,20 @@ describe('Database module tests', () => {
             doneCalled = true;
         });
         db.once('action', async (data) => {
-    
+
             try {
-    
+
                 clearTimeout(timeout);
                 expect(data.name).to.be.equal('watchBlockNumber');
                 expect(data.event).to.be.equal('lastBlockNumber');
                 expect(data.data).to.be.an('object');
                 const bn = await db.api.system.getBlockNumber('veryLastBlock');
                 expect(bn).to.be.equal(12345); 
-                
-                if (doneCalled) {
-                    return;
-                }
 
                 done();
                 doneCalled = true;
             } catch (err) {
-    
+
                 clearTimeout(timeout);
 
                 if (doneCalled) {
@@ -183,7 +180,7 @@ describe('Database module tests', () => {
             source: testProv,
             event: 'lastBlockNumber',
             action: async (data) => {            
-                await db.api.system.saveBlockNumber(data);            
+                await db.api.system.saveBlockNumber(data);
             },
             initEvent: 'started',
             isInitialized: 'initialized',
