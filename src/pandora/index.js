@@ -34,7 +34,7 @@ class PandoraSync extends EventEmitter {
         this._setupOperationsHandlers();
     }
 
-    // IPC messages manager (from worker)
+    // IPC messages manager (from the worker)
     _messageManager(message) {
 
         switch(message.cmd) {
@@ -44,12 +44,16 @@ class PandoraSync extends EventEmitter {
 
             case 'started':
                 this.initialized = true;
-                this.emit('started');
+                this.emit('started', {
+                    date: message.date
+                });
                 break;
 
             case 'stopped':
                 this.initialized = false;
-                this.emit('stopped');
+                this.emit('stopped', {
+                    date: message.date
+                });
                 break;
 
             case 'kernelsRecords':
@@ -100,8 +104,25 @@ class PandoraSync extends EventEmitter {
                 });
                 break;
 
-            case 'blockNumber':
-                this.emit('blockNumber', {
+            case 'workersRecords':
+                this.emit('workersRecords', {
+                    records: message.records || [],
+                    blockNumber: message.blockNumber,
+                    baseline: message.baseline || false
+                });
+                break;
+
+            case 'workersRecordsUpdate':
+                this.emit('workersRecordsUpdate', {
+                    records: message.records || [],
+                    blockNumber: message.blockNumber,
+                    baseline: message.baseline || false
+                });
+                break;
+
+            case 'lastBlockNumber':
+                this.emit('lastBlockNumber', {
+                    name: 'lastBlock',
                     blockNumber: message.blockNumber
                 });
                 break;
@@ -162,7 +183,7 @@ class PandoraSync extends EventEmitter {
         this.on('subscribeJobAddress', (options = {}) => {
 
             this.worker.send({
-                cmd: 'subscribeJobs',
+                cmd: 'subscribeJobAddress',
                 ...options
             });
         });
@@ -171,6 +192,37 @@ class PandoraSync extends EventEmitter {
 
             this.worker.send({
                 cmd: 'unsubscribeJobAddress',
+                ...options
+            });
+        });
+
+        this.on('getWorkers', () => {
+
+            this.worker.send({
+                cmd: 'getWorkersRecords'
+            });
+        });
+
+        this.on('subscribeWorkers', (options = {}) => {
+            
+            this.worker.send({
+                cmd: 'subscribeWorkers',
+                ...options
+            });
+        });
+
+        this.on('subscribeWorkerAddress', (options = {}) => {
+
+            this.worker.send({
+                cmd: 'subscribeWorkerAddress',
+                ...options
+            });
+        });
+
+        this.on('unsubscribeWorkerAddress', (options = {}) => {
+
+            this.worker.send({
+                cmd: 'unsubscribeWorkerAddress',
                 ...options
             });
         });

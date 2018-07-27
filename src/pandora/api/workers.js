@@ -1,15 +1,15 @@
 'use strict';
 
 /**
- * Fetching jobs
+ * Fetching workers
  *
  * @param {Object} pjs Pjs instance
  * @returns {Promise} {Array[{Object}]}
  */
-module.exports.getJobsRecords = async (pjs) => {
+module.exports.getWorkersRecords = async (pjs) => {
     
     const blockNumber = await pjs.web3.eth.getBlockNumber();
-    const { records, error } = await pjs.api.jobs.fetchAll();
+    const { records, error } = await pjs.api.workers.fetchAll();
 
     return {
         records,
@@ -19,55 +19,55 @@ module.exports.getJobsRecords = async (pjs) => {
 };
 
 /**
- * Subscribe to CognitiveJobCreated event
+ * Subscribe to WorkerNodeCreated event
  *
  * @param {Object} pjs Pjs instance
- * @param {Object} options eventCognitiveJobCreated, see pyrrha-js for details
+ * @param {Object} options eventWorkerNodeCreated, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
  * @returns {Promise}
  */
-module.exports.subscribeCognitiveJobCreated = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeWorkerAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.jobs.eventCognitiveJobCreated(options)
-            .data(async (evt) => {
+    return pjs.api.workers.eventWorkerNodeCreated(options)
+            .data(async (addedWorker) => {
 
                 try {
 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [...evt.records],
+                        records: [addedWorker.worker],
                         blockNumber
                     });
                 } catch (err) {
                     errorCallback(err);
                 }
             })
-            .error(errorCallback);
+            .error(errorCallback);    
 };
 
 /**
- * Subscribe to event JobStateChanged for CognitiveJob
+ * Subscribe to WorkerNodeStateChanged event
  *
  * @param {Object} pjs Pjs instance
- * @param {Object} address Job address
- * @param {Object} options eventCognitiveJobStateChanged, see pyrrha-js for details
+ * @param {Object} address Worker address
+ * @param {Object} options eventWorkerNodeStateChanged, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
  * @returns {Promise}
  */
-module.exports.subscribeJobStateChanged = async (pjs, address, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeWorkerNodeStateChanged = async (pjs, address, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.jobs.eventJobStateChanged(address, options)
-            .data(async (changedJob) => {
+    return pjs.api.workers.eventWorkerNodeStateChanged(address, options)
+            .data(async (changedWorker) => {
 
                 try {
 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [changedJob.job],
+                        records: [changedWorker.worker],
                         blockNumber
                     });
                 } catch (err) {

@@ -10,7 +10,7 @@
 
 const OPTIONS_REQUIRED = 'Options are required';
 const MODEL_REQUIRED = 'Model is required';
-const MODEL_TYPE_OPTIONS_REQUIRED = 'MODEL_TYPE_OPTIONS_REQUIRED';
+const MODEL_TYPE_OPTIONS_REQUIRED = 'Model type options required';
 const WRONG_TYPE = 'Wrong type of the property';
 const ADDRESS_REQUIRED = 'Address required';
 
@@ -99,12 +99,26 @@ module.exports.all = (options = {}, model = {}) => {
                 }
 
                 break;
+            
+            case 'functionOrMember':
+                
+                if (typeof value === 'function') {
 
+                    // It is OK
+                    break;
+                }
+                // If not then follow the next rule
+                
             case 'member':
                 
                 if (!model[key].provider || typeof model[key].provider !== 'object') {
 
                     throw new ExpectError(`Provider object must be defined as "provider" model option for "${key}"`);
+                }
+
+                if (typeof value !== 'string') {
+
+                    throw new ExpectError(`Property with "member" type must be a string but actually, it is a "${typeof value}"`);
                 }
 
                 let memberValue = value.split('.').reduce((acc, part) => {

@@ -9,7 +9,7 @@ module.exports = async (app) => {
     app.use('/jobs', require('./api/jobs'));
     app.use('/datasets', require('./api/datasets'));
     app.use('/kernels', require('./api/kernels'));    
-    // app.use('/workers', require('./api/workers'));
+    app.use('/workers', require('./api/workers'));
     
     
     app.get('/*', (req, res, next) => {

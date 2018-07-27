@@ -3,8 +3,8 @@
 // Contracts APIs
 const Pandora = require('../pyrrha-consensus/build/contracts/Pandora.json');
 const PandoraMarket = require('../pyrrha-consensus/build/contracts/PandoraMarket.json');
+const CognitiveJobController = require('../pyrrha-consensus/build/contracts/CognitiveJobController.json');
 const WorkerNode = require('../pyrrha-consensus/build/contracts/WorkerNode.json');
-const CognitiveJob = require('../pyrrha-consensus/build/contracts/CognitiveJob.json');
 const Kernel = require('../pyrrha-consensus/build/contracts/Kernel.json');
 const Dataset = require('../pyrrha-consensus/build/contracts/Dataset.json');
 
@@ -23,8 +23,8 @@ const hosts = {
         host: 'rinkeby.pandora.network',
         port: 8546,
         contracts: {
-            Pandora: '0x6f76ecc921da8c2a42a71681e5dd84186cd90402',
-            PandoraMarket: '0xde4207d9501c3cde90232082687e35eaf989c861'
+            Pandora: '0xf31b5318cfefcf8d661508b3e12f861aa160ca3b',
+            PandoraMarket: '0x6b73053425d5ec272e44ced005dc5f7d80d346e2'
         }
     },
     rinkeby_infura: {
@@ -32,8 +32,8 @@ const hosts = {
         host: 'rinkeby.infura.io/ws',
         port: 8546,
         contracts: {
-            Pandora: '0x6f76ecc921da8c2a42a71681e5dd84186cd90402',
-            PandoraMarket: '0xde4207d9501c3cde90232082687e35eaf989c861'
+            Pandora: '0xf31b5318cfefcf8d661508b3e12f861aa160ca3b',
+            PandoraMarket: '0x6b73053425d5ec272e44ced005dc5f7d80d346e2'
         }
     }
 };
@@ -50,8 +50,8 @@ module.exports = {
     contracts: {
         Pandora,
         PandoraMarket,
+        CognitiveJobController,
         WorkerNode,
-        CognitiveJob,
         Kernel,
         Dataset
     },
@@ -59,5 +59,9 @@ module.exports = {
         Pandora: process.env.PAN_ADDRESS || hosts[defaultHost].contracts.Pandora,
         PandoraMarket: process.env.MARKET_ADDRESS || hosts[defaultHost].contracts.PandoraMarket
     },
-    database: {}
+    database: {
+        pagination: {
+            limit: 5
+        }
+    }
 };

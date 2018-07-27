@@ -12,6 +12,7 @@ const pandora = require('../../pandora');
  *
  * @param {Object} data { records: Array[Object], baseline: Boolean }
  * @param {Object} options Options provided by task
+ * @returns {Promise}
  */
 module.exports.add = addRecordsFactory(Jobs, {
     baselineFlag: 'jobsBaseline', 
@@ -26,7 +27,6 @@ module.exports.add = addRecordsFactory(Jobs, {
         }
 
         return {
-            index: record.id,
             address: record.address, 
             activeWorkersCount: record.activeWorkersCount, 
             batches: record.batches, 

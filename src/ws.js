@@ -1,5 +1,6 @@
 'use strict';
 const log = require('./logger');
+const { safeObject } = require('./utils/json');
 const WebSocketServer = require('websocket').server;
 const http = require('http');
 const server = http.createServer();
@@ -20,7 +21,10 @@ module.exports = config => {
             
             if (message.type === 'utf8') {
 
-                log.info(message);
+                // Input API
+                // @todo Create input messages API handler
+                // @todo Create mapping of RESTful API to ws
+                log.debug('ws:data', message);
             }
         });
 
@@ -37,9 +41,7 @@ module.exports = config => {
 
         log.debug('ws:data', data);
 
-        connectionList.map(connection => connection.sendUTF(
-            JSON.stringify(data)
-        ));
+        connectionList.map(connection => connection.sendUTF(JSON.stringify(safeObject(data))));
     };
 
     wsServer.close = (callback = () => {}) => {

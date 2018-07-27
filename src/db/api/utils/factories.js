@@ -100,6 +100,16 @@ module.exports.addRecordsFactory = (model, factoryOptions) => {
     return async (data = {}, options = {}) => {
     
         const records = data.records.map(record => factoryOptions.formatRecord(record));
+
+        // We need this block number for restoring subscriptions 
+        // so we should listen for events from next block not the current
+        const nextBlockNumber = data.blockNumber + 1;
+
+        // Save blockNumber for current data entity
+        await system.saveBlockNumber({ 
+            name: model.name,
+            blockNumber: nextBlockNumber
+        });
     
         if (data.baseline) {
     
@@ -113,14 +123,14 @@ module.exports.addRecordsFactory = (model, factoryOptions) => {
     
             // Save system flag what kernels baseline has been saved
             await system.fixBaseline(factoryOptions.baselineFlag);
-    
+
             if (!options.source) {
     
                 throw new Error('Source object (event emitter) is required but not been provided by task');
             }
     
             options.source.emit(factoryOptions.subscribeEvent, { 
-                blockNumber: data.blockNumber 
+                blockNumber: nextBlockNumber 
             });
         } else {
     

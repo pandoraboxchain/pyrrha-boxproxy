@@ -1,6 +1,7 @@
 'use strict';
 const { EventEmitter } = require('events');
 const expect = require('../utils/expect');
+const { safeObject } = require('../utils/json');
 const db = require('./db');
 const migrator = require('./migrator');
 const migrations = require('./seeders');
@@ -12,12 +13,15 @@ const configModel = require('./models/config');
 const kernelsModel = require('./models/kernels');
 const datasetsModel = require('./models/datasets');
 const jobsModel = require('./models/jobs');
+const workersModel = require('./models/workers');
+
 const allModels = [
     systemModel,
     configModel,
     kernelsModel,
     datasetsModel,
-    jobsModel
+    jobsModel,
+    workersModel
 ];
 
 /**
@@ -26,6 +30,7 @@ const allModels = [
  * @class PandoraDb
  * @extends {EventEmitter}
  * @event initialized
+ * @event beforeAction
  * @event action
  * @event stopped
  * @event error
@@ -48,14 +53,26 @@ class PandoraDb extends EventEmitter {
         this.tasks = [];// tasks config
         this.options = {};
 
+        // Start all tasks after the Db initialization
         this.once('initialized', () => this.tasks.map(task => this._setupTask(task)));
     }
 
     // Setup a task by config
     _setupTask(task) {
-        const endpoint = task.action.split('.').reduce((acc, part) => {
-            return acc && acc[part] !== undefined ? acc[part] : null;
-        }, this.api);
+
+        let endpoint;
+
+        if (typeof task.action === 'function') {
+
+            // Custom action
+            endpoint = task.action;
+        } else {
+
+            // API-based action
+            endpoint = task.action.split('.').reduce((acc, part) => {
+                return acc && acc[part] !== undefined ? acc[part] : null;
+            }, this.api);
+        }
 
         if (task.source && task.event && endpoint) {
 
@@ -64,20 +81,27 @@ class PandoraDb extends EventEmitter {
 
                 try {
 
-                    this.emit('action', {
+                    this.emit('beforeAction', {
                         name: task.name,
                         event: task.event,
                         data
                     });
-                    
+
                     // Run task action
                     await endpoint(data, {
                         ...task.actionOptions,
                         source: task.source
                     });
+
+                    this.emit('action', {
+                        name: task.name,
+                        event: task.event,
+                        data
+                    });
+
                 } catch (err) {
 
-                    this.emit('error', err);
+                    this.emit('error', safeObject(err));
                 }
             });
         }
@@ -104,14 +128,14 @@ class PandoraDb extends EventEmitter {
     /**
      * Initialize the DB
      *
-     * @param {Object} options Manager config
+     * @param {Object} config Manager config
      * @returns {Promise}
      * @memberof PandoraDb
      */
-    async initialize(options = {}) {
+    async initialize(config = {}) {
 
         try {
-            Object.assign(this.options , options);
+            Object.assign(this.options , config.database || {});
 
             await Promise.all(allModels.map(model => model.sync()));
 
@@ -120,15 +144,28 @@ class PandoraDb extends EventEmitter {
 
             if (!alreadySeeded) {
 
-                // Seeed some initial data
+                // Seed some initial data
                 await migrator({ migrations }).up();
+            } else {
+
+                const { Pandora, PandoraMarket } = await api.system.getContactsAddresses();
+
+                // Check for used Pandora contract version
+                if (config.addresses.Pandora !== Pandora || config.addresses.PandoraMarket !== PandoraMarket) {
+
+                    // Wipe database
+                    await migrator({ migrations }).down();
+
+                    // And seed initial data
+                    await migrator({ migrations }).up();
+                }
             }
             
             this.initialized = true;
             this.emit('initialized');            
         } catch(err) {
             this.initialized = false;
-            this.emit('error', err);
+            this.emit('error', safeObject(err));
         }
 
         return this;
@@ -146,7 +183,7 @@ class PandoraDb extends EventEmitter {
             this.initialized = false;
             this.emit('stopped');
         } catch(err) {
-            this.emit('error', err);        
+            this.emit('error', safeObject(err));        
         }
     }
 
@@ -169,7 +206,7 @@ class PandoraDb extends EventEmitter {
                 required: false
             },
             action: {
-                type: 'member',
+                type: 'functionOrMember',
                 provider: this.api,
                 required: false
             },

@@ -8,9 +8,10 @@ process.on('uncaughtException', err => {
     process.exit(1);
 });
 
+const config = require('../config');
+const ws = require('./ws')(config);
 const express = require('./express');
 const routes = require('./routes');
-const config = require('../config');
 const db = require('./db');
 const pandora = require('./pandora');
 
@@ -19,24 +20,16 @@ pandora.on('started', () => log.info('Pandora synchronizer has been started'));
 pandora.on('stopped', () => log.info('Pandora synchronizer has been stopped'));
 
 db.on('error', err => log.error('A database error has occured', safeObject(err)));
-db.on('action', data => log.info('Action', safeObject(data)));
 db.once('initialized', () => {
     log.info(`Database initialized`);
     pandora.start(config);
 });
 db.once('stopped', () => log.info(`Database stopped`));
-
-// Last block number watching taks
-db.addTask({
-    name: 'watchBlockNumber',
-    source: pandora,
-    event: 'blockNumber',
-    action: 'system.saveBlockNumber'
-});
+db.on('action', data => ws.push(data));// publish actions data to websocket api
 
 // Kernels baseline and subscription task
 db.addTask({
-    name: 'addKernelsBaseline',
+    name: 'addKernels',
     source: pandora,
     event: 'kernelsRecords',// Listen this event on source
     action: 'kernels.add',// Run this action on event
@@ -50,7 +43,7 @@ db.addTask({
         
             if (isBaseline) {
 
-                const blockNumber = await db.api.system.getBlockNumber();
+                const blockNumber = await db.api.system.getBlockNumber('kernels');
                 return pandora.emit('subscribeKernels', { blockNumber });
             }
 
@@ -64,7 +57,7 @@ db.addTask({
 
 // Remove kernels from Db if they has been removed from the PandoraMarket
 db.addTask({
-    name: 'removeKernelsOnEvent',
+    name: 'removeKernels',
     source: pandora,
     event: 'kernelsRecordsRemove',
     action: 'kernels.remove'
@@ -72,7 +65,7 @@ db.addTask({
 
 // Datasets baseline and subscription task
 db.addTask({
-    name: 'addDatasetsBaseline',
+    name: 'addDatasets',
     source: pandora,
     event: 'datasetsRecords',// Listen this event on source
     action: 'datasets.add',// Run this action on event
@@ -86,7 +79,7 @@ db.addTask({
         
             if (isBaseline) {
 
-                const blockNumber = await db.api.system.getBlockNumber();
+                const blockNumber = await db.api.system.getBlockNumber('datasets');
                 return pandora.emit('subscribeDatasets', { blockNumber });
             }
 
@@ -100,7 +93,7 @@ db.addTask({
 
 // Remove datasets from Db if they has been removed from the PandoraMarket
 db.addTask({
-    name: 'removeDatasetsOnEvent',
+    name: 'removeDatasets',
     source: pandora,
     event: 'datasetsRecordsRemove',
     action: 'datasets.remove'
@@ -108,7 +101,7 @@ db.addTask({
 
 // Jobs baseline and subscription task
 db.addTask({
-    name: 'addJobsBaseline',
+    name: 'addJobs',
     source: pandora,
     event: 'jobsRecords',// Listen this event on source
     action: 'jobs.add',// Run this action on event
@@ -122,7 +115,7 @@ db.addTask({
         
             if (isBaseline) {
 
-                const blockNumber = await db.api.system.getBlockNumber();
+                const blockNumber = await db.api.system.getBlockNumber('jobs');
                 pandora.emit('subscribeJobs', { blockNumber });
 
                 const jobs = await db.api.jobs.getAll({
@@ -148,7 +141,35 @@ db.addTask({
     },
 });
 
-db.initialize(config.database);
+// Workers baseline and subscription task
+db.addTask({
+    name: 'addWorkers',
+    source: pandora,
+    event: 'workersRecords',
+    action: 'workers.add',
+    initEvent: 'started',
+    isInitialized: 'initialized',
+    init: async () => {
+
+        try {
+
+            const isBaseline = await db.api.system.isBaseline('workersBaseline');
+        
+            if (isBaseline) {
+
+                const blockNumber = await db.api.system.getBlockNumber('workers');
+                return pandora.emit('subscribeWorkers', { blockNumber });
+            }
+
+            pandora.emit('getWorkers');
+        } catch (err) {
+
+            db.emit('error', err);
+        }        
+    },
+});
+
+db.initialize(config);
 
 // Init RESTful and APIs
 const app = express(config);

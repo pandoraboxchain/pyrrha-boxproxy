@@ -1,5 +1,6 @@
 'use strict';
 const { Op } = require('sequelize');
+const config = require('../../../../config');
 
 /**
  * Bulk insertion helper for sequelize
@@ -10,14 +11,14 @@ const { Op } = require('sequelize');
  * @param {Array[Object]} values Array of objects to insert
  * @returns {Promise}
  */
-module.exports.bulkInsertOrUpdate = async (model, condition = [], values = []) => {
-    
-    if (typeof model !== 'object' || typeof model.findOne !== 'function') {
+module.exports.bulkInsertOrUpdate = (model, condition = [], values = []) => {
+
+    if (typeof model.findOne !== 'function') {
 
         throw new Error('"model" option should be a Sequelize model instance');
     }
-    
-    return await Promise.all(values.map(record => async () => {
+
+    return Promise.all(values.map(async (record) => {
         let existenRecord;
         
         if (Array.isArray(condition) && condition.length > 0) {
@@ -54,7 +55,7 @@ module.exports.bulkInsertOrUpdate = async (model, condition = [], values = []) =
 module.exports.extractPaginationQuery = (options = {}) => {
     const pagination = {};
 
-    pagination.limit = parseInt(options.limit, 10) || 5;
+    pagination.limit = parseInt(options.limit, 10) || config.database.pagination.limit || 5;
     pagination.offset = options.page && options.page > 0 ? (options.page - 1) * pagination.limit : 0;
 
     return pagination;

@@ -18,7 +18,19 @@ class Migrator {
                 return Promise.resolve();
             }
 
-            return mgr.up(this.queryInterface, this.sequelize);
+            return mgr.up ? mgr.up(this.queryInterface, this.sequelize) : Promise.resolve();
+        }));
+    }
+
+    async down(...names) {
+        return await Promise.all(this.options.migrations.map(mgr => {
+
+            if (names.length > 0 && !names.includes(mgr.name)) {
+
+                return Promise.resolve();
+            }
+
+            return mgr.down ? mgr.down(this.queryInterface, this.sequelize) : Promise.resolve();
         }));
     }
 }

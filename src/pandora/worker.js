@@ -5,6 +5,7 @@ const { safeObject } = require('../utils/json');
 const kernelsApi = require('./api/kernels');
 const datasetsApi = require('./api/datasets');
 const jobsApi = require('./api/jobs');
+const workersApi = require('./api/workers');
 const pjs = require('./pjsConnector');
 const {
     PJS_STOPPED,
@@ -31,6 +32,10 @@ const PAN_DATASETS_SUBSCRIBED = 'PAN_DATASETS_SUBSCRIBED';
 const PAN_JOBS_BASELINE = 'PAN_JOBS_BASELINE';
 const PAN_JOBS_SUBSCRIBED = 'PAN_JOBS_SUBSCRIBED';
 
+// Workers states
+const PAN_WORKERS_BASELINE = 'PAN_WORKERS_BASELINE';
+const PAN_WORKERS_SUBSCRIBED = 'PAN_WORKERS_SUBSCRIBED';
+
 // Worker state model
 const stateModel = {
     pjs: {
@@ -53,6 +58,10 @@ const stateModel = {
     jobs: {
         [PAN_JOBS_BASELINE]: [PAN_JOBS_SUBSCRIBED],
         [PAN_JOBS_SUBSCRIBED]: [PAN_JOBS_BASELINE]
+    },
+    workers: {
+        [PAN_WORKERS_BASELINE]: [PAN_WORKERS_SUBSCRIBED],
+        [PAN_WORKERS_SUBSCRIBED]: [PAN_WORKERS_BASELINE]
     }
 };
 
@@ -73,6 +82,10 @@ const stateConditions = {
     [PAN_JOBS_SUBSCRIBED]: {
         pan: [PAN_STARTED],
         pjs: [PJS_CONNECTED]
+    },
+    [PAN_WORKERS_SUBSCRIBED]: {
+        pan: [PAN_STARTED],
+        pjs: [PJS_CONNECTED]
     }
 };
 
@@ -84,12 +97,13 @@ const state = new StateManager({
         pan: PAN_STOPPED,
         kernels: PAN_KERNELS_BASELINE,
         datasets: PAN_DATASETS_BASELINE,
-        jobs: PAN_JOBS_BASELINE
+        jobs: PAN_JOBS_BASELINE,
+        workers: PAN_WORKERS_BASELINE
     }
 });
 
 // Dynamically handled subscriptions list
-const subscriptions = [];
+let subscriptions = [];
 
 // Worker IPC messages manager
 const messageManager = async (message) => {
@@ -142,7 +156,8 @@ const messageManager = async (message) => {
                 });
 
                 process.send({
-                    cmd: 'started'
+                    cmd: 'started',
+                    date: Date.now()
                 });
                 break;
             
@@ -168,7 +183,7 @@ const messageManager = async (message) => {
             case 'subscribeKernels':
                 
                 const kernelAdded = await kernelsApi.subscribeKernelAdded(pjs, {
-                    blockNumber: message.blockNumber
+                    fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'kernelsRecords',
                     records: result.records,
@@ -180,7 +195,7 @@ const messageManager = async (message) => {
                 }));
 
                 const kernelRemoved = await kernelsApi.subscribeKernelRemoved(pjs, {
-                    blockNumber: message.blockNumber
+                    fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'kernelsRecordsRemove',
                     records: result.records,
@@ -223,7 +238,7 @@ const messageManager = async (message) => {
             case 'subscribeDatasets':
                 
                 const datasetAdded = await datasetsApi.subscribeDatasetAdded(pjs, {
-                    blockNumber: message.blockNumber
+                    fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'datasetsRecords',
                     records: result.records,
@@ -235,7 +250,7 @@ const messageManager = async (message) => {
                 }));
 
                 const datasetRemoved = await datasetsApi.subscribeDatasetRemoved(pjs, {
-                    blockNumber: message.blockNumber
+                    fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'datasetsRecordsRemove',
                     records: result.records,
@@ -278,7 +293,7 @@ const messageManager = async (message) => {
             case 'subscribeJobs':
                 
                 const cognitiveJobCreated = await jobsApi.subscribeCognitiveJobCreated(pjs, {
-                    blockNumber: message.blockNumber
+                    fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'jobsRecords',
                     records: result.records,
@@ -303,8 +318,8 @@ const messageManager = async (message) => {
             // Subscribe to specific job updates
             case 'subscribeJobAddress':
 
-                const cognitiveJobStateChanged = await jobsApi.subscribeCognitiveJobStateChanged(pjs, message.address, {
-                    blockNumber: message.blockNumber
+                const cognitiveJobStateChanged = await jobsApi.subscribeJobStateChanged(pjs, message.address, {
+                    fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'jobsRecords',
                     records: result.records,
@@ -327,6 +342,92 @@ const messageManager = async (message) => {
                 subscriptions = subscriptions.filter(msg => {
 
                     if (msg.cmd !== 'subscribeJobAddress') {
+
+                        return true;
+                    }
+
+                    if (msg.address === message.address) {
+
+                        msg.events.map(evt => evt.unsubscribe());
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                break;
+
+            // Fetch workers baseline
+            case 'getWorkersRecords':
+                
+                const workersRecordsResult = await workersApi.getWorkersRecords(pjs);
+
+                await state.set({
+                    workers: PAN_WORKERS_BASELINE
+                });
+
+                process.send({
+                    cmd: 'workersRecords',
+                    records: workersRecordsResult.records,
+                    blockNumber: workersRecordsResult.blockNumber,
+                    baseline: true
+                });
+    
+                break;
+
+            // Subscribe to new worker node created event
+            case 'subscribeWorkers':
+                
+                const workerAdded = await workersApi.subscribeWorkerAdded(pjs, {
+                    fromBlock: message.blockNumber
+                }, result => process.send({
+                    cmd: 'workersRecords',
+                    records: result.records,
+                    blockNumber: result.blockNumber,
+                    baseline: false
+                }), err => process.send({
+                    cmd: 'error',
+                    error: safeObject(err)
+                }));
+
+                subscriptions.push({
+                    ...message,
+                    events: [workerAdded]
+                });
+
+                await state.set({
+                    workers: PAN_WORKERS_SUBSCRIBED
+                });
+
+                break;
+
+            // Subscribe to specific worker node updates
+            case 'subscribeWorkerAddress':
+
+                const workerChanged = await workersApi.subscribeWorkerNodeStateChanged(pjs, message.address, {
+                    fromBlock: message.blockNumber
+                }, result => process.send({
+                    cmd: 'workersRecords',
+                    records: result.records,
+                    blockNumber: result.blockNumber,
+                    baseline: false
+                }), err => process.send({
+                    cmd: 'error',
+                    error: safeObject(err)
+                }));
+
+                subscriptions.push({
+                    ...message,
+                    events: [workerChanged]
+                });
+
+                break;
+
+            case 'unsubscribeWorkerAddress':
+
+                subscriptions = subscriptions.filter(msg => {
+
+                    if (msg.cmd !== 'subscribeWorkerAddress') {
 
                         return true;
                     }
@@ -384,7 +485,7 @@ pjs.on('reconnected', blockNumber => {
 
 // Emit last block event
 pjs.on('lastBlockNumber', blockNumber => process.send({
-    cmd: 'blockNumber',
+    cmd: 'lastBlockNumber',
     blockNumber
 }));
 

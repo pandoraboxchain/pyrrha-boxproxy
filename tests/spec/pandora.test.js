@@ -13,6 +13,7 @@ describe('Pandora module tests', () => {
     let server;
 
     let pjs;
+    let accounts;
     let publisher;
     
     const kernelIpfsHash = 'QmVDqZiZspRJLb5d5UjBmGfVsXwxWB3Pga2n33eWovtjV7';
@@ -28,7 +29,7 @@ describe('Pandora module tests', () => {
     let kernelContractAddress3;
 
     const datasetIpfsHash = 'QmVDqZiZspRJLb5d5UjBmGfVsXwxWB3Pga2n33eWovtjV7';
-    const datasetBatchesCount = 10;
+    const datasetBatchesCount = 1;
     const datasetOptions = {
         dimension: 100, 
         price: 100,
@@ -38,6 +39,8 @@ describe('Pandora module tests', () => {
     let datasetContractAddress1;
     let datasetContractAddress2;
 
+    let workerNodeAddress1;
+
     before(async () => {
         const node = await ContractsNode;
 
@@ -45,6 +48,8 @@ describe('Pandora module tests', () => {
         config.provider = node.provider;
         config.contracts = node.contracts;
         config.addresses = node.addresses;
+
+        accounts = node.accounts;
         publisher = node.publisher;
 
         process.env.TESTING_PROVIDER_URL = node.provider.connection.url;
@@ -74,15 +79,19 @@ describe('Pandora module tests', () => {
         datasetContractAddress2 = await pjs.datasets.deploy(datasetIpfsHash, datasetBatchesCount, datasetOptions, publisher);
         await pjs.datasets.addToMarket(datasetContractAddress2, publisher);
 
+        await pjs.pandora.whitelistWorkerOwner(publisher, accounts[2]);
+        workerNodeAddress1 = await pjs.pandora.createWorkerNode(accounts[2]);
+        await pjs.workers.alive(workerNodeAddress1, accounts[2]);
+
         pandora.start(config);
     });
 
     after(done => pandora.stop(() => server.close(done)));
 
-    it('Pandora should emit lastBlock number every 3 sec', done => {
-        const timeout = setTimeout(() => done(new Error('last block not been obtained during timeout')), config.wstimeout * 1.2);
+    it('Pandora should emit lastBlockNumber number every 3 sec', done => {
+        const timeout = setTimeout(() => done(new Error('lastBlockNumber not been obtained during timeout')), config.wstimeout * 1.2);
         
-        pandora.once('blockNumber', data => {
+        pandora.once('lastBlockNumber', data => {
             expect(data.blockNumber).to.be.a('number');
             clearTimeout(timeout);
             done();
@@ -106,7 +115,10 @@ describe('Pandora module tests', () => {
     it('Pandora should emit kernelsRecords baseline on request', done => {
         const timeout = setTimeout(() => done(new Error('kernelsRecords not been obtained during timeout')), 3000);
 
-        pandora.once('error', done);
+        pandora.once('error', err => {
+            clearTimeout(timeout);
+            done(err);
+        });
         pandora.once('kernelsRecords', data => {
             expect(Array.isArray(data.records)).to.be.true;
             expect(data.records.length).to.be.equal(3);
@@ -122,7 +134,10 @@ describe('Pandora module tests', () => {
     it('Pandora should emit kernelsRecords if new kernel has been added during subscription', done => {
         const timeout = setTimeout(() => done(new Error('kernelsRecords (new kernel) not been obtained during timeout')), 3000);
 
-        pandora.once('error', done);
+        pandora.once('error', err => {
+            clearTimeout(timeout);
+            done(err);
+        });
         pandora.once('kernelsRecords', data => {
             expect(Array.isArray(data.records)).to.be.true;
             expect(data.blockNumber).to.be.a('number');
@@ -141,7 +156,10 @@ describe('Pandora module tests', () => {
     it('Pandora should emit kernelsRecordsRemove if new kernel has been removed from PandoraMarket during subscription', done => {
         const timeout = setTimeout(() => done(new Error('kernelsRecordsRemove (removed kernel) not been obtained during timeout')), 3000);
 
-        pandora.once('error', done);
+        pandora.once('error', err => {
+            clearTimeout(timeout);
+            done(err);
+        });
         pandora.once('kernelsRecordsRemove', data => {
             expect(Array.isArray(data.records)).to.be.true;
             expect(data.records.length).to.be.equal(1);
@@ -161,7 +179,10 @@ describe('Pandora module tests', () => {
     it('Pandora should emit datasetsRecords baseline on request', done => {
         const timeout = setTimeout(() => done(new Error('datasetsRecords not been obtained during timeout')), 3000);
 
-        pandora.once('error', done);
+        pandora.once('error', err => {
+            clearTimeout(timeout);
+            done(err);
+        });
         pandora.once('datasetsRecords', data => {
             expect(Array.isArray(data.records)).to.be.true;
             expect(data.records.length).to.be.equal(2);
@@ -177,7 +198,10 @@ describe('Pandora module tests', () => {
     it('Pandora should emit datasetsRecords if new dataset has been added during subscription', done => {
         const timeout = setTimeout(() => done(new Error('datasetsRecords (new dataset) not been obtained during timeout')), 3000);
 
-        pandora.once('error', done);
+        pandora.once('error', err => {
+            clearTimeout(timeout);
+            done(err);
+        });
         pandora.once('datasetsRecords', data => {
             expect(Array.isArray(data.records)).to.be.true;
             expect(data.blockNumber).to.be.a('number');
@@ -196,7 +220,10 @@ describe('Pandora module tests', () => {
     it('Pandora should emit datasetsRecordsRemove if new kernel has been removed from PandoraMarket during subscription', done => {
         const timeout = setTimeout(() => done(new Error('datasetsRecordsRemove (removed dataset) not been obtained during timeout')), 3000);
 
-        pandora.once('error', done);
+        pandora.once('error', err => {
+            clearTimeout(timeout);
+            done(err);
+        });
         pandora.once('datasetsRecordsRemove', data => {
             expect(Array.isArray(data.records)).to.be.true;
             expect(data.records.length).to.be.equal(1);
@@ -210,6 +237,38 @@ describe('Pandora module tests', () => {
 
         (async () => {
             await pjs.datasets.removeDataset(datasetContractAddress1, publisher);
+        })().catch(done);
+    });
+
+    it('Pandora should emit jobsRecords if new job created', done => {
+        const timeout = setTimeout(() => done(new Error('jobsRecords (create new job) not been obtained during timeout')), 3000);
+        let jobId;
+
+        pandora.once('error', err => {
+            clearTimeout(timeout);
+            done(err);
+        });
+        pandora.once('jobsRecords', data => {
+            expect(Array.isArray(data.records)).to.be.true;
+            expect(data.records[0].address).to.be.equal(jobId);
+            expect(data.blockNumber).to.be.a('number');
+            clearTimeout(timeout);
+            done();
+        });
+
+        pandora.emit('subscribeJobs', {
+            blockNumber: 0
+        });
+
+        (async () => {
+            jobId = await pjs.jobs.create({
+                kernel: kernelContractAddress2, 
+                dataset: datasetContractAddress2,
+                complexity: 1,
+                jobType: '0', 
+                description: 'test job',
+                deposit: 1
+            }, publisher);
         })().catch(done);
     });
 

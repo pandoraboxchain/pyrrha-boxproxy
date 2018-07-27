@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const config = require('../../../config');
 
 module.exports = {
     name: 'systems',
@@ -26,27 +27,18 @@ module.exports = {
                 value: 'no'
             },
             {
-                name: 'blockNumber',
-                value: '0'
+                name: 'contract.Pandora',
+                value: config.addresses.Pandora
+            },
+            {
+                name: 'contract.PandoraMarket',
+                value: config.addresses.PandoraMarket
             }
         ]);
     },
 
     down: (queryInterface, Sequelize) => {
 
-        return queryInterface.bulkDelete('systems', {
-            where: {
-                name: {
-                    [Op.or]: [
-                        'alreadySeeded',
-                        'kernelsBaseline',
-                        'datasetsBaseline',
-                        'workersBaseline',
-                        'jobsBaseline',
-                        'blockNumber'
-                    ]
-                }
-            }
-        });
+        return queryInterface.bulkDelete('systems', {});
     }
 };

@@ -34,8 +34,6 @@ describe('Database module tests', () => {
         expect(alreadySeeded.value).to.be.equal('yes');
         const kernelsBaseline = system.filter(rec => rec.name === 'kernelsBaseline')[0];
         expect(kernelsBaseline.value).to.be.equal('no');
-        const blockNumber = system.filter(rec => rec.name === 'blockNumber')[0];
-        expect(blockNumber.value).to.be.equal('0');
     });
 
     it('db should handle error event', done => {
@@ -63,36 +61,63 @@ describe('Database module tests', () => {
     });
 
     it('#addTask should create and handle a simple task', done => {
-        const timeout = setTimeout(() => done(new Error('Simple task not been handled during timeout')), 2000);
+        let doneCalled = false;
+        const timeout = setTimeout(() => {
 
+            if (doneCalled) {
+                return;
+            }
+
+            done(new Error('watchBlockNumber task not been handled during timeout'));
+            doneCalled = true;
+        }, 2000);
+
+        db.once('error', err => {
+            clearTimeout(timeout);
+
+            if (doneCalled) {
+                return;
+            }
+
+            done(new Error(err.message));
+            doneCalled = true;
+        });
         db.once('action', async (data) => {
 
             try {
 
-                expect(data.name).to.be.equal('watchBlockNumber');
-                expect(data.event).to.be.equal('blockNumber');
-                expect(data.data).to.be.an('object');
-                const bn = await db.api.system.getBlockNumber();
-                expect(bn).to.be.equal(12345);
                 clearTimeout(timeout);
+                expect(data.name).to.be.equal('watchBlockNumber');
+                expect(data.event).to.be.equal('lastBlockNumber');
+                expect(data.data).to.be.an('object');
+                const bn = await db.api.system.getBlockNumber('lastBlock');
+                expect(bn).to.be.equal(12345);                
                 done();
+                doneCalled = true;
             } catch (err) {
 
                 clearTimeout(timeout);
+
+                if (doneCalled) {
+                    return;
+                }
+
                 done(err);
+                doneCalled = true;
             }            
         });
 
         db.addTask({
             name: 'watchBlockNumber',
             source: testProv,
-            event: 'blockNumber',
+            event: 'lastBlockNumber',
             action: 'system.saveBlockNumber',
             initEvent: 'started',
             isInitialized: 'initialized',
             init: () => {
 
-                testProv.emit('blockNumber', {
+                testProv.emit('lastBlockNumber', {
+                    name: 'lastBlock',
                     blockNumber: 12345
                 });
             }
@@ -100,4 +125,78 @@ describe('Database module tests', () => {
 
         testProv.emit('started');
     });
+
+    it('#addTask should create and handle a task with custom action', done => {
+        let doneCalled = false;
+        const timeout = setTimeout(() => {
+
+            if (doneCalled) {
+                return;
+            }
+            
+            done(new Error('watchBlockNumber task not been handled during timeout useing custom action'));
+            doneCalled = true;
+        }, 2000);
+    
+        db.once('error', err => {
+            clearTimeout(timeout);
+
+            if (doneCalled) {
+                return;
+            }
+
+            done(new Error(err.message));
+            doneCalled = true;
+        });
+        db.once('action', async (data) => {
+    
+            try {
+    
+                clearTimeout(timeout);
+                expect(data.name).to.be.equal('watchBlockNumber');
+                expect(data.event).to.be.equal('lastBlockNumber');
+                expect(data.data).to.be.an('object');
+                const bn = await db.api.system.getBlockNumber('veryLastBlock');
+                expect(bn).to.be.equal(12345); 
+                
+                if (doneCalled) {
+                    return;
+                }
+
+                done();
+                doneCalled = true;
+            } catch (err) {
+    
+                clearTimeout(timeout);
+
+                if (doneCalled) {
+                    return;
+                }
+
+                done(err);
+                doneCalled = true;
+            }            
+        });
+    
+        db.addTask({
+            name: 'watchBlockNumber',
+            source: testProv,
+            event: 'lastBlockNumber',
+            action: async (data) => {            
+                await db.api.system.saveBlockNumber(data);            
+            },
+            initEvent: 'started',
+            isInitialized: 'initialized',
+            init: () => {
+    
+                testProv.emit('lastBlockNumber', {
+                    name: 'veryLastBlock',
+                    blockNumber: 12345
+                });
+            }
+        });
+    
+        testProv.emit('started');
+    });
+
 });

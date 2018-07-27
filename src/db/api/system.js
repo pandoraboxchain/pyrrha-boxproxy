@@ -6,7 +6,7 @@ const expect = require('../../utils/expect');
 /**
  * Fetch all system records
  *
- * @returns {Promise} {Array[{Object}]}
+ * @returns {Promise<[{Object}]>} 
  */
 module.exports.getAll = async () => {
     return await System.findAll();
@@ -15,7 +15,7 @@ module.exports.getAll = async () => {
 /**
  * Check is system has benn already seeded
  *
- * @returns {Promise} {Boolean}
+ * @returns {Promise<{Boolean}>} 
  */
 module.exports.isAlreadySeeded = async () => {
     const alreadySeeded = await System.findOne({
@@ -34,27 +34,46 @@ module.exports.isAlreadySeeded = async () => {
 
 /**
  * Save block number
- *
+ * 
  * @param {Object} data { records: Array[Object], baseline: Boolean }
  * @param {Object} options Options provided by task
+ * @returns {Promise} upsert result
  */
 module.exports.saveBlockNumber = async (data = {}, options = {}) => {
+
+    expect.all(data, {
+        'name': {
+            type: 'string'
+        },
+        'blockNumber': {
+            type: 'number'
+        }
+    });
+
     return await System.upsert({
-        name: 'blockNumber',
+        name: `${data.name}.blockNumber`,
         value: data.blockNumber
     });
 }
 
 /**
  * Fetch last saved block number
- *
- * @returns {Promise} {Number}
+ * 
+ * @param {String} name Model name
+ * @returns {Promise<{Number}>} 
  */
-module.exports.getBlockNumber = async () => {
+module.exports.getBlockNumber = async (name) => {
+
+    expect.all({ name }, {
+        'name': {
+            type: 'string'
+        }
+    });
+
     const blockNumber = await System.findOne({
         where: {
             name: {
-                [Op.eq]: 'blockNumber'
+                [Op.eq]: `${name}.blockNumber`
             }
         }
     });
@@ -65,13 +84,13 @@ module.exports.getBlockNumber = async () => {
 /**
  * Check the flag is baseline has been saved
  * 
- * @param {string} flag
- * @returns {Promise} {Boolean}
+ * @param {String} flag
+ * @returns {Promise<{Boolean}>}
  */
 module.exports.isBaseline = async (flag) => {
 
     expect.all({ flag }, {
-        flag: {
+        'flag': {
             type: 'enum',
             values: [
                 'kernelsBaseline',
@@ -94,15 +113,39 @@ module.exports.isBaseline = async (flag) => {
 };
 
 /**
+ * Get saved contracts addresses from database
+ * 
+ * @returns {Promise<Object>} {Pandora: {String}, PandoraMarket: {String}}
+ */
+module.exports.getContactsAddresses = async () => {
+
+    const [ pandoraRecord, marketRecord ] = await Promise.all([
+        'contract.Pandora', 
+        'contract.PandoraMarket'
+    ].map(key => System.findOne({
+        where: {
+            name: {
+                [Op.eq]: key
+            }
+        }
+    })));
+
+    return {
+        Pandora: pandoraRecord ? pandoraRecord.value : null,
+        PandoraMarket: marketRecord ? marketRecord.value : null
+    }
+};
+
+/**
  * Save flag about baseline has been saved
  * 
- * @param {string} flag
- * @returns {Promise}
+ * @param {String} flag
+ * @returns {Promise} upsert result
  */
 module.exports.fixBaseline = async (flag) => {
 
     expect.all({ flag }, {
-        flag: {
+        'flag': {
             type: 'enum',
             values: [
                 'kernelsBaseline',
@@ -122,13 +165,13 @@ module.exports.fixBaseline = async (flag) => {
 /**
  * Clear flag about baseline has been saved
  * 
- * @param {string} flag
- * @returns
+ * @param {String} flag
+ * @returns {Promise} upsert result
  */
 module.exports.clearBaseline = async (flag) => {
 
     expect.all({ flag }, {
-        flag: {
+        'flag': {
             type: 'enum',
             values: [
                 'kernelsBaseline',

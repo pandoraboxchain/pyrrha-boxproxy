@@ -8,9 +8,6 @@ module.exports = db.define('kernels', {
         primaryKey: true,
         autoIncrement: true
     },
-    index: {
-        type: Sequelize.INTEGER,
-    },
     address: {
         type: Sequelize.STRING,
         unique: true

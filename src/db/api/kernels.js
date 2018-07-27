@@ -11,12 +11,12 @@ const {
  *
  * @param {Object} data { records: Array[Object], baseline: Boolean }
  * @param {Object} options Options provided by task
+ * @returns {Promise}
  */
 module.exports.add = addRecordsFactory(Kernels, {
     baselineFlag: 'kernelsBaseline', 
     subscribeEvent: 'subscribeKernels',
     formatRecord: record => ({
-        index: record.id,
         address: record.address,
         ipfsAddress: record.ipfsAddress,
         dataDim: record.dataDim,

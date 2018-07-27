@@ -11,11 +11,6 @@ module.exports.getKernelsRecords = async (pjs) => {
     const blockNumber = await pjs.web3.eth.getBlockNumber();
     const { records, error } = await pjs.api.kernels.fetchAll();
 
-    if (Array.isArray(error) && error.length > 0) {
-
-        throw error;
-    }
-
     return {
         records,
         blockNumber,

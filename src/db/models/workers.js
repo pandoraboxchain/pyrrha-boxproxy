@@ -2,7 +2,7 @@
 const Sequelize = require('sequelize');
 const db = require('../db');
 
-module.exports = db.define('datasets', {
+module.exports = db.define('workers', {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -12,20 +12,15 @@ module.exports = db.define('datasets', {
         type: Sequelize.STRING,
         unique: true
     },
-    ipfsAddress: {
+    currentJob: {
         type: Sequelize.STRING,
+        unique: true
     },
-    dataDim: {
-        type: Sequelize.INTEGER,
+    currentJobStatus: {
+        type: Sequelize.INTEGER
     },
-    currentPrice: {
-        type: Sequelize.INTEGER,
-    },
-    metadata: {
-        type: Sequelize.STRING
-    },
-    description: {
-        type: Sequelize.STRING
+    currentState: {
+        type: Sequelize.INTEGER
     }
 }, {
     timestamps: false
