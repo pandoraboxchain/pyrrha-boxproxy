@@ -3,8 +3,8 @@
 // Contracts APIs
 const Pandora = require('../pyrrha-consensus/build/contracts/Pandora.json');
 const PandoraMarket = require('../pyrrha-consensus/build/contracts/PandoraMarket.json');
+const CognitiveJobController = require('../pyrrha-consensus/build/contracts/CognitiveJobController.json');
 const WorkerNode = require('../pyrrha-consensus/build/contracts/WorkerNode.json');
-const CognitiveJob = require('../pyrrha-consensus/build/contracts/CognitiveJob.json');
 const Kernel = require('../pyrrha-consensus/build/contracts/Kernel.json');
 const Dataset = require('../pyrrha-consensus/build/contracts/Dataset.json');
 
@@ -23,17 +23,17 @@ const hosts = {
         host: 'rinkeby.pandora.network',
         port: 8546,
         contracts: {
-            Pandora: '0x9ac5265030f55b594198443db41684e0f65ce1b3',
-            PandoraMarket: '0x5fafdfed7ed553716e877961d41ca3fae6a40c35'
+            Pandora: '0xf31b5318cfefcf8d661508b3e12f861aa160ca3b',
+            PandoraMarket: '0x6b73053425d5ec272e44ced005dc5f7d80d346e2'
         }
     },
-    infura_rinkeby: {
-        protocol: 'wss', // 'http',
-        host: `rinkeby.infura.io/ws`,
+    rinkeby_infura: {
+        protocol: 'wss',
+        host: 'rinkeby.infura.io/ws',
         port: 8546,
         contracts: {
-            Pandora: '0x9ac5265030f55b594198443db41684e0f65ce1b3',
-            PandoraMarket: '0x5fafdfed7ed553716e877961d41ca3fae6a40c35'
+            Pandora: '0xf31b5318cfefcf8d661508b3e12f861aa160ca3b',
+            PandoraMarket: '0x6b73053425d5ec272e44ced005dc5f7d80d346e2'
         }
     }
 };
@@ -43,20 +43,25 @@ let defaultHost = process.env.USE_HOST || 'infura_rinkeby';
 module.exports = {
     port: 1111,
     wsport: 1337,
-    wstimeout: 5000,
+    wstimeout: hosts[defaultHost].wstimeout || 5000,
     protocol: process.env.WEB3_PROTOCOL || hosts[defaultHost].protocol,
     nodePort: process.env.WEB3_PORT || hosts[defaultHost].port,
     nodeHost: process.env.WEB3_HOSTNAME || hosts[defaultHost].host,
     contracts: {
         Pandora,
         PandoraMarket,
+        CognitiveJobController,
         WorkerNode,
-        CognitiveJob,
         Kernel,
         Dataset
     },
     addresses: {
         Pandora: process.env.PAN_ADDRESS || hosts[defaultHost].contracts.Pandora,
         PandoraMarket: process.env.MARKET_ADDRESS || hosts[defaultHost].contracts.PandoraMarket
+    },
+    database: {
+        pagination: {
+            limit: 5
+        }
     }
 };

@@ -8,13 +8,13 @@ COPY ./package.json /pyrrha-boxproxy/package.json
 # Installing of dependencies
 WORKDIR /pyrrha-boxproxy
 RUN npm i --save-dev --silent \
-        @babel/cli@7.0.0-beta.51 \
-        @babel/core@7.0.0-beta.51 \
-        @babel/plugin-proposal-object-rest-spread@7.0.0-beta.51 \
-        @babel/plugin-syntax-object-rest-spread@7.0.0-beta.51 \
-        @babel/polyfill@7.0.0-beta.51 \
-        @babel/preset-env@7.0.0-beta.51 \
-        @babel/register@7.0.0-beta.51 \
+        @babel/cli@7.0.0-beta.53 \
+        @babel/core@7.0.0-beta.53 \
+        @babel/plugin-proposal-object-rest-spread@7.0.0-beta.53 \
+        @babel/plugin-syntax-object-rest-spread@7.0.0-beta.53 \
+        @babel/polyfill@7.0.0-beta.53 \
+        @babel/preset-env@7.0.0-beta.53 \
+        @babel/register@7.0.0-beta.53 \
         ganache-sandbox@https://github.com/pandoraboxchain/ganache-sandbox.git#v0.3.0 \
         openzeppelin-solidity \
         mocha \
@@ -28,6 +28,7 @@ RUN npm i --save-dev --silent \
 WORKDIR /
 COPY ./pyrrha-consensus/contracts /pyrrha-boxproxy/contracts 
 COPY ./pyrrha-consensus/migrations /pyrrha-boxproxy/migrations
+COPY ./pyrrha-consensus/build/contracts /pyrrha-boxproxy/pyrrha-consensus/build/contracts
 COPY ./src /pyrrha-boxproxy/src
 COPY ./config /pyrrha-boxproxy/config
 COPY ./tests /pyrrha-boxproxy/tests
@@ -42,6 +43,7 @@ ARG LOG_LEVEL=error
 ENV WITH_COVERAGE=$WITH_COVERAGE
 ENV LOG_LEVEL=$LOG_LEVEL
 ENV DEBUG=boxproxy
+ENV NODE_ENV=testing
 
 WORKDIR /pyrrha-boxproxy
 CMD [ "/pyrrha-boxproxy/tests-runner.sh" ]

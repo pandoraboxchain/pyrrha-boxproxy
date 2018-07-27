@@ -1,6 +1,6 @@
 {
   "name": "pyrrha-boxproxy",
-  "version": "1.5.19",
+  "version": "1.6.0",
   "private": true,
   "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
   "main": "./src/index.js",
@@ -13,23 +13,25 @@
     "build:docker": "docker-compose build --no-cache",
     "start:docker": "docker-compose up -d --remove-orphans",
     "stop:docker": "docker-compose down",
-    "start": "node ./src"
+    "start": "node ./src",
+    "start:dev": "NODE_ENV=development node ./src"
   },
   "author": "Kostiantyn Smyrnov <kostysh@gmail.com>",
   "contributors": [
     "Kostiantyn Smyrnov <kostysh@gmail.com>"
   ],
   "dependencies": {
-    "body-parser": "^1.18.3",
-    "express": "^4.16.3",
-    "helmet": "^3.12.1",
-    "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.7.9",
-    "websocket": "^1.0.26",
-    "winston": "^3.0.0"
+    "body-parser": "1.18.3",
+    "express": "4.16.3",
+    "helmet": "3.13.0",
+    "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.8.0-beta4",
+    "websocket": "1.0.26",
+    "winston": "3.0.0",
+    "sequelize": "4.38.0",
+    "sqlite3": "4.0.2"
   },
   "devDependencies": {
-    "eslint": "^5.0.0",
-    "eslint-config-google": "^0.9.1"
+    "eslint": "^5.2.0"
   },
   "license": "MIT"
 }

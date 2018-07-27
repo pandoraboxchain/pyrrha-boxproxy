@@ -8,26 +8,26 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Localhost",
-            "cwd": "${workspaceFolder}/src",
             "program": "${workspaceFolder}/src/index.js",
-            "console": "integratedTerminal",
+            "outputCapture": "std",
             "env": {
                 "USE_HOST": "default",
                 "DEBUG": "boxproxy",
-                "LOG_LEVEL": "debug"
+                "LOG_LEVEL": "debug",
+                "NODE_ENV": "development"
             }
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Launch Rinkeby",
-            "cwd": "${workspaceFolder}/src",
             "program": "${workspaceFolder}/src/index.js",
-            "console": "integratedTerminal",
+            "outputCapture": "std",
             "env": {
                 "USE_HOST": "rinkeby",
                 "DEBUG": "boxproxy",
-                "LOG_LEVEL": "debug"
+                "LOG_LEVEL": "debug",
+                "NODE_ENV": "development"
             }
         },
         {

@@ -1,21 +1,17 @@
 'use strict';
-const store = require('../../store');
-const { 
-    workers: {
-        fetchCount,
-        fetchAll,
-        fetchWorkerById,
-        fetchWorker
-    } 
-} = store.get('pjs');
+const { normalizePageLimit } = require('../../utils/pagination');
+const { getAll } = require('../../db/api/workers');
 
 // @route /workers/count
 module.exports.getWorkerNodesCount = async (req, res, next) => {
 
     try {
 
-        const count = await fetchCount();
-        res.status(200).json({ count });
+        const { count } = await getAll(req.query);        
+        
+        res.status(200).json({
+            count
+        });
     } catch(err) {
         next(err);
     }
@@ -26,14 +22,16 @@ module.exports.getWorkers = async (req, res, next) => {
 
     try {
 
-        const { records, error } = await fetchAll();
-
+        const { rows, count } = await getAll(req.query);
+        const { limit, page } = normalizePageLimit(req.query.page, req.query.limit, count);
+        
         res.status(200).json({
-            workers: records,
-            error,
-            workersTotal: records.length
+            records: rows,
+            count,
+            limit,
+            page
         });
-    } catch (err) {
+    } catch(err) {
         next(err);
     }
 };
@@ -43,10 +41,15 @@ module.exports.getWorkerById = async (req, res, next) => {
 
     try {
 
-        const worker = await fetchWorkerById(req.params.id);        
-
-        res.status(200).json(worker);
-    } catch (err) {
+        const { rows, count } = await getAll({
+            filterBy: `index:eq:${req.params.id}:number`
+        });
+        
+        res.status(200).json({
+            records: rows,
+            count
+        });
+    } catch(err) {
         next(err);
     }
 };
@@ -56,9 +59,14 @@ module.exports.getWorkerByAddress = async (req, res, next) => {
 
     try {
 
-        const worker = await fetchWorker(req.params.address);
+        const { rows, count } = await getAll({
+            filterBy: `address:eq:${req.params.address}`
+        });
         
-        res.status(200).json(worker);
+        res.status(200).json({
+            records: rows,
+            count
+        });
     } catch(err) {
         next(err);
     }

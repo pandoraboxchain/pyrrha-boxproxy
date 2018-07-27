@@ -1,17 +1,17 @@
 'use strict';
 
-module.exports = (app) => {
+module.exports = async (app) => {
 
     // System endpoints
     app.use('/system', require('./api/system'));
 
     // API routes
-    app.use('/workers', require('./api/workers'));
     app.use('/jobs', require('./api/jobs'));
     app.use('/datasets', require('./api/datasets'));
-    app.use('/kernels', require('./api/kernels'));
-    app.use('/store', require('./api/store'));
-
+    app.use('/kernels', require('./api/kernels'));    
+    app.use('/workers', require('./api/workers'));
+    
+    
     app.get('/*', (req, res, next) => {
         const err = new Error('Please use appropriate API route');
         err.code = 400;
