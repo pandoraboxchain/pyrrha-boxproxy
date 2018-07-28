@@ -16,6 +16,8 @@ const {
 module.exports.add = addRecordsFactory(Workers, {
     baselineFlag: 'workersBaseline', 
     subscribeEvent: 'subscribeWorkers',
+    subscribeUpdateEvent: 'subscribeWorkerAddress',
+    subscribeUpdateFilter: {},
     formatRecord: record => ({
         address: record.address, 
         currentJob: record.currentJob, 

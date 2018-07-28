@@ -1,4 +1,5 @@
 'use strict';
+const { Op } = require('sequelize');
 const Jobs = require('../models/jobs');
 const {
     addRecordsFactory,
@@ -17,28 +18,18 @@ const pandora = require('../../pandora');
 module.exports.add = addRecordsFactory(Jobs, {
     baselineFlag: 'jobsBaseline', 
     subscribeEvent: 'subscribeJobs',
-    formatRecord: record => {
-
-        if (record.jobStatus === 7) {
-
-            pandora.emit('unsubscribeJobAddress', {
-                address: record.address
-            });
-        }
-
-        return {
-            address: record.address, 
-            activeWorkersCount: record.activeWorkersCount, 
-            batches: record.batches, 
-            dataset: record.dataset, 
-            description: record.description, 
-            ipfsResults: record.ipfsResults.join(';'), 
-            jobStatus: record.jobStatus, 
-            jobType: record.jobType, 
-            kernel: record.kernel, 
-            progress: record.progress
-        };
-    }
+    formatRecord: record => ({
+        address: record.address, 
+        activeWorkers: record.activeWorkers, 
+        batches: record.batches, 
+        dataset: record.dataset, 
+        description: record.description, 
+        ipfsResults: record.ipfsResults.join(';'), 
+        state: record.state, 
+        jobType: record.jobType, 
+        kernel: record.kernel, 
+        progress: record.progress
+    })
 });
 
 /**

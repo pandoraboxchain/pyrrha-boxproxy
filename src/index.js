@@ -117,23 +117,12 @@ db.addTask({
 
                 const blockNumber = await db.api.system.getBlockNumber('jobs');
                 pandora.emit('subscribeJobs', { blockNumber });
-
-                const jobs = await db.api.jobs.getAll({
-                    filterBy: 'jobStatus:notIn:7,4:number'
-                });
-
-                if (jobs && jobs.length > 0) {
-
-                    jobs.forEach(job => pandora.emit('subscribeJobAddress', {
-                        address: job.address,
-                        blockNumber
-                    }));
-                }
-
+                pandora.emit('subscribeJobStateChanged', { blockNumber });
                 return;
             }
-
+            
             pandora.emit('getJobs');
+
         } catch (err) {
 
             db.emit('error', err);
@@ -159,6 +148,16 @@ db.addTask({
 
                 const blockNumber = await db.api.system.getBlockNumber('workers');
                 return pandora.emit('subscribeWorkers', { blockNumber });
+
+                const workers = await db.api.workers.getAll({});
+
+                if (workers && workers.length > 0) {
+
+                    workers.forEach(worker => pandora.emit('subscribeWorkerAddress', {
+                        address: worker.address,
+                        blockNumber
+                    }));
+                }
             }
 
             pandora.emit('getWorkers');

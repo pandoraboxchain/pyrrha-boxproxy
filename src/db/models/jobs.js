@@ -15,7 +15,7 @@ module.exports = db.define('jobs', {
     description: {
         type: Sequelize.STRING
     },
-    activeWorkersCount: {
+    activeWorkers: {
         type: Sequelize.INTEGER
     },
     progress: {
@@ -33,7 +33,7 @@ module.exports = db.define('jobs', {
     ipfsResults: {
         type: Sequelize.STRING,
     },
-    jobStatus: {
+    state: {
         type: Sequelize.INTEGER,
     },
     jobType: {

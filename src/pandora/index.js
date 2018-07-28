@@ -180,18 +180,10 @@ class PandoraSync extends EventEmitter {
             });
         });
 
-        this.on('subscribeJobAddress', (options = {}) => {
+        this.on('subscribeJobStateChanged', (options = {}) => {
 
             this.worker.send({
-                cmd: 'subscribeJobAddress',
-                ...options
-            });
-        });
-
-        this.on('unsubscribeJobAddress', (options = {}) => {
-
-            this.worker.send({
-                cmd: 'unsubscribeJobAddress',
+                cmd: 'subscribeJobStateChanged',
                 ...options
             });
         });

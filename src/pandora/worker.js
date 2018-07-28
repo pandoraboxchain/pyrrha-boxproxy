@@ -105,6 +105,16 @@ const state = new StateManager({
 // Dynamically handled subscriptions list
 let subscriptions = [];
 
+// Helper for sending errors
+const sendError = err => {
+    
+    process.send({
+        cmd: 'error',
+        error: safeObject(err),
+        date: Date.now()
+    })
+};
+
 // Worker IPC messages manager
 const messageManager = async (message) => {
 
@@ -118,7 +128,8 @@ const messageManager = async (message) => {
 
                 process.send({
                     cmd: 'state',
-                    state: currentState
+                    state: currentState,
+                    date: Date.now()
                 });
                 break;
             
@@ -174,7 +185,8 @@ const messageManager = async (message) => {
                     cmd: 'kernelsRecords',
                     records: kernelsRecordsResult.records,
                     blockNumber: kernelsRecordsResult.blockNumber,
-                    baseline: true
+                    baseline: true,
+                    date: Date.now()
                 });
     
                 break;
@@ -188,26 +200,22 @@ const messageManager = async (message) => {
                     cmd: 'kernelsRecords',
                     records: result.records,
                     blockNumber: result.blockNumber,
-                    baseline: false
-                }), err => process.send({
-                    cmd: 'error',
-                    error: safeObject(err)
-                }));
+                    baseline: false,
+                    date: Date.now()
+                }), err => sendError(err));
 
                 const kernelRemoved = await kernelsApi.subscribeKernelRemoved(pjs, {
                     fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'kernelsRecordsRemove',
                     records: result.records,
-                    blockNumber: result.blockNumber
-                }), err => process.send({
-                    cmd: 'error',
-                    error: safeObject(err)
-                }));
+                    blockNumber: result.blockNumber,
+                    date: Date.now()
+                }), err => sendError(err));
 
                 subscriptions.push({
                     ...message,
-                    events: [kernelAdded, kernelRemoved]
+                    events: [kernelAdded.event, kernelRemoved.event]
                 });
 
                 await state.set({
@@ -229,7 +237,8 @@ const messageManager = async (message) => {
                     cmd: 'datasetsRecords',
                     records: datasetsRecordsResult.records,
                     blockNumber: datasetsRecordsResult.blockNumber,
-                    baseline: true
+                    baseline: true,
+                    date: Date.now()
                 });
     
                 break;
@@ -243,26 +252,22 @@ const messageManager = async (message) => {
                     cmd: 'datasetsRecords',
                     records: result.records,
                     blockNumber: result.blockNumber,
-                    baseline: false
-                }), err => process.send({
-                    cmd: 'error',
-                    error: safeObject(err)
-                }));
+                    baseline: false,
+                    date: Date.now()
+                }), err => sendError(err));
 
                 const datasetRemoved = await datasetsApi.subscribeDatasetRemoved(pjs, {
                     fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'datasetsRecordsRemove',
                     records: result.records,
-                    blockNumber: result.blockNumber
-                }), err => process.send({
-                    cmd: 'error',
-                    error: safeObject(err)
-                }));
+                    blockNumber: result.blockNumber,
+                    date: Date.now()
+                }), err => sendError(err));
 
                 subscriptions.push({
                     ...message,
-                    events: [datasetAdded, datasetRemoved]
+                    events: [datasetAdded.event, datasetRemoved.event]
                 });
 
                 await state.set({
@@ -284,7 +289,8 @@ const messageManager = async (message) => {
                     cmd: 'jobsRecords',
                     records: jobsRecordsResult.records,
                     blockNumber: jobsRecordsResult.blockNumber,
-                    baseline: true
+                    baseline: true,
+                    date: Date.now()
                 });
     
                 break;
@@ -298,15 +304,13 @@ const messageManager = async (message) => {
                     cmd: 'jobsRecords',
                     records: result.records,
                     blockNumber: result.blockNumber,
-                    baseline: false
-                }), err => process.send({
-                    cmd: 'error',
-                    error: safeObject(err)
-                }));
+                    baseline: false,
+                    date: Date.now()
+                }), err => sendError(err));
 
                 subscriptions.push({
                     ...message,
-                    events: [cognitiveJobCreated]
+                    events: [cognitiveJobCreated.event]
                 });
 
                 await state.set({
@@ -315,44 +319,22 @@ const messageManager = async (message) => {
 
                 break;
             
-            // Subscribe to specific job updates
-            case 'subscribeJobAddress':
+            // Subscribe to jobs updates
+            case 'subscribeJobStateChanged':
 
-                const cognitiveJobStateChanged = await jobsApi.subscribeJobStateChanged(pjs, message.address, {
+                const cognitiveJobStateChanged = await jobsApi.subscribeJobStateChanged(pjs, {
                     fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'jobsRecords',
                     records: result.records,
                     blockNumber: result.blockNumber,
-                    baseline: false
-                }), err => process.send({
-                    cmd: 'error',
-                    error: safeObject(err)
-                }));
+                    baseline: false,
+                    date: Date.now()
+                }), err => sendError(err));
 
                 subscriptions.push({
                     ...message,
-                    events: [cognitiveJobStateChanged]
-                });
-
-                break;
-
-            case 'unsubscribeJobAddress':
-
-                subscriptions = subscriptions.filter(msg => {
-
-                    if (msg.cmd !== 'subscribeJobAddress') {
-
-                        return true;
-                    }
-
-                    if (msg.address === message.address) {
-
-                        msg.events.map(evt => evt.unsubscribe());
-                        return false;
-                    }
-
-                    return true;
+                    events: [cognitiveJobStateChanged.event]
                 });
 
                 break;
@@ -370,7 +352,8 @@ const messageManager = async (message) => {
                     cmd: 'workersRecords',
                     records: workersRecordsResult.records,
                     blockNumber: workersRecordsResult.blockNumber,
-                    baseline: true
+                    baseline: true,
+                    date: Date.now()
                 });
     
                 break;
@@ -384,15 +367,13 @@ const messageManager = async (message) => {
                     cmd: 'workersRecords',
                     records: result.records,
                     blockNumber: result.blockNumber,
-                    baseline: false
-                }), err => process.send({
-                    cmd: 'error',
-                    error: safeObject(err)
-                }));
+                    baseline: false,
+                    date: Date.now()
+                }), err => sendError(err));
 
                 subscriptions.push({
                     ...message,
-                    events: [workerAdded]
+                    events: [workerAdded.event]
                 });
 
                 await state.set({
@@ -410,15 +391,13 @@ const messageManager = async (message) => {
                     cmd: 'workersRecords',
                     records: result.records,
                     blockNumber: result.blockNumber,
-                    baseline: false
-                }), err => process.send({
-                    cmd: 'error',
-                    error: safeObject(err)
-                }));
+                    baseline: false,
+                    date: Date.now()
+                }), err => sendError(err));
 
                 subscriptions.push({
                     ...message,
-                    events: [workerChanged]
+                    events: [workerChanged.event]
                 });
 
                 break;
@@ -446,47 +425,54 @@ const messageManager = async (message) => {
             default: 
                 process.send({
                     cmd: 'error',
-                    error: safeObject(new Error('Unknown command'))
+                    error: safeObject(new Error('Unknown command')),
+                    date: Date.now()
                 });
         }
 
     } catch (err) {
 
-        process.send({
-            cmd: 'error',
-            error: safeObject(err)
-        });
+        sendError(err);
     }
 };
 
 // Listen for errors
 pjs.on('error', err => process.send({
     cmd: 'error',
-    error: safeObject(err)
+    error: safeObject(err),
+    date: Date.now()
 }));
 
 // Re-subscribe all active subscriptions on reconnect
 pjs.on('reconnected', blockNumber => {
-    const originSubscriptions = subscriptions;
-    subscriptions = [];
-    
-    originSubscriptions.forEach(message => {
-        message.events.forEach(evt => evt.unsubscribe());
-        message.events = [];
 
-        messageManager({
-            ...message,
-            ...{
-                blockNumber
-            }
+    try {
+
+        const originSubscriptions = subscriptions;
+        subscriptions = [];
+        
+        originSubscriptions.forEach(message => {
+            message.events.forEach(evt => evt.unsubscribe());
+            message.events = [];
+
+            messageManager({
+                ...message,
+                ...{
+                    blockNumber
+                }
+            });
         });
-    });
+    } catch (err) {
+
+        sendError(err);
+    }    
 });
 
 // Emit last block event
 pjs.on('lastBlockNumber', blockNumber => process.send({
     cmd: 'lastBlockNumber',
-    blockNumber
+    blockNumber,
+    date: Date.now()
 }));
 
 // Handle messages obtained from host
@@ -498,7 +484,8 @@ setInterval(_ => {
     if (!processGuard) {
 
         process.send({
-            cmd: 'stopped'
+            cmd: 'stopped',
+            date: Date.now()
         });
         process.exit(0);
     }

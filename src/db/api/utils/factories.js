@@ -136,5 +136,15 @@ module.exports.addRecordsFactory = (model, factoryOptions) => {
     
             await bulkInsertOrUpdate(model, ['address'], records);
         }
+
+        if (factoryOptions.subscribeUpdateEvent) {
+
+            const recordsForWatching = await model.findAll(factoryOptions.subscribeUpdateFilter || {});
+
+            recordsForWatching.forEach(record => options.source.emit(factoryOptions.subscribeUpdateEvent, {
+                address: record.address,
+                blockNumber: nextBlockNumber 
+            }));
+        }
     };
 };
