@@ -25,9 +25,9 @@ module.exports.getJobsRecords = async (pjs) => {
  * @param {Object} options eventCognitiveJobCreated, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Promise}
+ * @returns {Object}
  */
-module.exports.subscribeCognitiveJobCreated = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeCognitiveJobCreated = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.jobs.eventCognitiveJobCreated(options)
             .data(async (evt) => {
@@ -54,9 +54,9 @@ module.exports.subscribeCognitiveJobCreated = async (pjs, options = {}, dataCall
  * @param {Object} options eventCognitiveJobStateChanged, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Promise}
+ * @returns {Object}
  */
-module.exports.subscribeJobStateChanged = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeJobStateChanged = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.jobs.eventJobStateChanged(options)
             .data(async (changedJob) => {

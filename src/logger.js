@@ -11,13 +11,7 @@ const config = {
     transports: []
 };
 
-if (process.env.LOG_LEVEL) {
-
-    config.level = process.env.LOG_LEVEL;
-} else {
-    
-    config.level = 'error';
-}
+config.level = process.env.LOG_LEVEL || 'warn';
 
 config.transports.push(new winston.transports.Console());
 

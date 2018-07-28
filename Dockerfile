@@ -14,7 +14,7 @@ RUN npm i --quiet
 RUN git submodule update --init --recursive --remote
 
 EXPOSE 1111
-ENV LOG_LEVEL=error
+ENV LOG_LEVEL=warn
 
 VOLUME ["/logs"]
 

@@ -20,14 +20,15 @@ module.exports.add = addRecordsFactory(Jobs, {
     subscribeEvent: 'subscribeJobs',
     formatRecord: record => ({
         address: record.address, 
-        activeWorkers: record.activeWorkers, 
-        batches: record.batches, 
+        activeWorkers: record.activeWorkers.join(';'), 
         dataset: record.dataset, 
+        kernel: record.kernel,
+        kernelIpfs: record.kernelIpfs,
+        datasetIpfs: record.datasetIpfs,
         description: record.description, 
         ipfsResults: record.ipfsResults.join(';'), 
         state: record.state, 
         jobType: record.jobType, 
-        kernel: record.kernel, 
         progress: record.progress
     })
 });

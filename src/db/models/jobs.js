@@ -21,13 +21,16 @@ module.exports = db.define('jobs', {
     progress: {
         type: Sequelize.INTEGER
     },
-    batches: {
-        type: Sequelize.INTEGER,
-    },
     kernel: {
         type: Sequelize.STRING,
     },
+    kernelIpfs: {
+        type: Sequelize.STRING,
+    },
     dataset: {
+        type: Sequelize.STRING,
+    },
+    datasetIpfs: {
         type: Sequelize.STRING,
     },
     ipfsResults: {

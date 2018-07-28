@@ -25,9 +25,9 @@ module.exports.getDatasetsRecords = async (pjs) => {
  * @param {Object} options eventDatasetAdded, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Promise}
+ * @returns {Object}
  */
-module.exports.subscribeDatasetAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeDatasetAdded = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.datasets.eventDatasetAdded(options)
             .data(async (addedDataset) => {
@@ -54,9 +54,9 @@ module.exports.subscribeDatasetAdded = async (pjs, options = {}, dataCallback = 
  * @param {Object} options eventDatasetRemoved, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Promise}
+ * @returns {Object}
  */
-module.exports.subscribeDatasetRemoved = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeDatasetRemoved = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.datasets.eventDatasetRemoved(options)
             .data(async (removedDataset) => {

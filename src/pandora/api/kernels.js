@@ -25,9 +25,9 @@ module.exports.getKernelsRecords = async (pjs) => {
  * @param {Object} options eventKernelAdded, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Promise}
+ * @returns {Object}
  */
-module.exports.subscribeKernelAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeKernelAdded = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.kernels.eventKernelAdded(options)
             .data(async (addedKernel) => {
@@ -54,9 +54,9 @@ module.exports.subscribeKernelAdded = async (pjs, options = {}, dataCallback = (
  * @param {Object} options eventKernelRemoved, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Promise}
+ * @returns {Object}
  */
-module.exports.subscribeKernelRemoved = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeKernelRemoved = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.kernels.eventKernelRemoved(options)
             .data(async (removedKernel) => {

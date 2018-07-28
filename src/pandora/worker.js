@@ -215,7 +215,7 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
-                    events: [kernelAdded.event, kernelRemoved.event]
+                    events: [kernelAdded, kernelRemoved]
                 });
 
                 await state.set({
@@ -267,7 +267,7 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
-                    events: [datasetAdded.event, datasetRemoved.event]
+                    events: [datasetAdded, datasetRemoved]
                 });
 
                 await state.set({
@@ -298,7 +298,7 @@ const messageManager = async (message) => {
             // Subscribe to new job created event
             case 'subscribeJobs':
                 
-                const cognitiveJobCreated = await jobsApi.subscribeCognitiveJobCreated(pjs, {
+                const cognitiveJobCreated = jobsApi.subscribeCognitiveJobCreated(pjs, {
                     fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'jobsRecords',
@@ -310,7 +310,7 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
-                    events: [cognitiveJobCreated.event]
+                    events: [cognitiveJobCreated]
                 });
 
                 await state.set({
@@ -322,7 +322,7 @@ const messageManager = async (message) => {
             // Subscribe to jobs updates
             case 'subscribeJobStateChanged':
 
-                const cognitiveJobStateChanged = await jobsApi.subscribeJobStateChanged(pjs, {
+                const cognitiveJobStateChanged = jobsApi.subscribeJobStateChanged(pjs, {
                     fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'jobsRecords',
@@ -334,7 +334,7 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
-                    events: [cognitiveJobStateChanged.event]
+                    events: [cognitiveJobStateChanged]
                 });
 
                 break;
@@ -361,7 +361,7 @@ const messageManager = async (message) => {
             // Subscribe to new worker node created event
             case 'subscribeWorkers':
                 
-                const workerAdded = await workersApi.subscribeWorkerAdded(pjs, {
+                const workerAdded = workersApi.subscribeWorkerAdded(pjs, {
                     fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'workersRecords',
@@ -373,7 +373,7 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
-                    events: [workerAdded.event]
+                    events: [workerAdded]
                 });
 
                 await state.set({
@@ -385,7 +385,7 @@ const messageManager = async (message) => {
             // Subscribe to specific worker node updates
             case 'subscribeWorkerAddress':
 
-                const workerChanged = await workersApi.subscribeWorkerNodeStateChanged(pjs, message.address, {
+                const workerChanged = workersApi.subscribeWorkerNodeStateChanged(pjs, message.address, {
                     fromBlock: message.blockNumber
                 }, result => process.send({
                     cmd: 'workersRecords',
@@ -397,7 +397,7 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
-                    events: [workerChanged.event]
+                    events: [workerChanged]
                 });
 
                 break;
@@ -443,6 +443,11 @@ pjs.on('error', err => process.send({
     date: Date.now()
 }));
 
+pjs.on('reconnectStarted', date => process.send({
+    cmd: 'reconnectStarted',
+    date
+}));
+
 // Re-subscribe all active subscriptions on reconnect
 pjs.on('reconnected', blockNumber => {
 
@@ -452,7 +457,7 @@ pjs.on('reconnected', blockNumber => {
         subscriptions = [];
         
         originSubscriptions.forEach(message => {
-            message.events.forEach(evt => evt.unsubscribe());
+            message.events.forEach(item => item.event.unsubscribe());
             message.events = [];
 
             messageManager({
@@ -461,6 +466,11 @@ pjs.on('reconnected', blockNumber => {
                     blockNumber
                 }
             });
+        });
+
+        process.send({
+            cmd: 'reconnected',
+            date: Date.now()
         });
     } catch (err) {
 

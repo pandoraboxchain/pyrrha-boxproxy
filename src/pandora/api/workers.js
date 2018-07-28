@@ -25,9 +25,9 @@ module.exports.getWorkersRecords = async (pjs) => {
  * @param {Object} options eventWorkerNodeCreated, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Promise}
+ * @returns {Object}
  */
-module.exports.subscribeWorkerAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeWorkerAdded = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.workers.eventWorkerNodeCreated(options)
             .data(async (addedWorker) => {
@@ -55,9 +55,9 @@ module.exports.subscribeWorkerAdded = async (pjs, options = {}, dataCallback = (
  * @param {Object} options eventWorkerNodeStateChanged, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Promise}
+ * @returns {Object}
  */
-module.exports.subscribeWorkerNodeStateChanged = async (pjs, address, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeWorkerNodeStateChanged = (pjs, address, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.workers.eventWorkerNodeStateChanged(address, options)
             .data(async (changedWorker) => {

@@ -56,6 +56,18 @@ class PandoraSync extends EventEmitter {
                 });
                 break;
 
+            case 'reconnected':
+                this.emit('reconnected', {
+                    date: message.date
+                });
+                break;
+
+            case 'reconnectStarted':
+                this.emit('reconnectStarted', {
+                    date: message.date
+                });
+                break;
+
             case 'kernelsRecords':
                 this.emit('kernelsRecords', {
                     records: message.records || [],

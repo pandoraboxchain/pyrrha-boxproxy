@@ -98,7 +98,7 @@ class PjsConnector extends EventEmitter {
                 try {
 
                     const reconnectionTimeout = setTimeout(() => {
-                        this.emit('error', new Error(`Websocket reconnection timeout (${this.config.wstimeout}ms) exceeded`));            
+                        this.emit('error', new Error(`Websocket reconnection timeout (${this.config.wstimeout}ms) exceeded`));
                         this.isReconnecting = false;
                         this.reconnect(cb).then(cb).catch(err => {
                             this.emit('error', err);
@@ -111,6 +111,7 @@ class PjsConnector extends EventEmitter {
                     });
         
                     this.isReconnecting = true;
+                    this.emit('reconnectStarted', Date.now());
                     const newProvider = new Pjs.Web3.providers.WebsocketProvider(url);
     
                     newProvider.on('connect', async () => {
@@ -119,14 +120,14 @@ class PjsConnector extends EventEmitter {
                             clearTimeout(reconnectionTimeout);
         
                             web3.setProvider(newProvider);
-                            this._setProviderEvents();
-                            this.emit('reconnected', this.lastBlock);
+                            this._setProviderEvents();                            
         
                             await this.state.set({
                                 pjs: PJS_CONNECTED
                             });
         
                             this.isReconnecting = false;
+                            this.emit('reconnected', this.lastBlock);
                             resolve();
                         } catch (err) {
         
@@ -154,7 +155,6 @@ class PjsConnector extends EventEmitter {
 
                 this._getBlockNumber()
                     .catch(err => {
-                        console.log(err);
                         this.reconnect().catch(err => this.emit('error', err));
                     });
             }            
