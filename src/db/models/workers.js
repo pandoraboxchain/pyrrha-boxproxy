@@ -13,8 +13,7 @@ module.exports = db.define('workers', {
         unique: true
     },
     currentJob: {
-        type: Sequelize.STRING,
-        unique: true
+        type: Sequelize.STRING
     },
     currentJobStatus: {
         type: Sequelize.INTEGER
