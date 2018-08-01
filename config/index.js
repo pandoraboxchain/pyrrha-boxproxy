@@ -25,8 +25,8 @@ const hosts = {
         port: 8546,
         wstimeout: 5000,
         contracts: {
-            Pandora: '0xf31b5318cfefcf8d661508b3e12f861aa160ca3b',
-            PandoraMarket: '0x6b73053425d5ec272e44ced005dc5f7d80d346e2'
+            Pandora: '0x853be7e8af1686893648cf34117c618f9eae56ea',
+            PandoraMarket: '0x3da170350158dd0ad191ce5c193562d49a0203cd'
         }
     },
     rinkeby_infura: {
@@ -35,8 +35,8 @@ const hosts = {
         port: 8546,
         wstimeout: 5000,
         contracts: {
-            Pandora: '0xf31b5318cfefcf8d661508b3e12f861aa160ca3b',
-            PandoraMarket: '0x6b73053425d5ec272e44ced005dc5f7d80d346e2'
+            Pandora: '0x853be7e8af1686893648cf34117c618f9eae56ea',
+            PandoraMarket: '0x3da170350158dd0ad191ce5c193562d49a0203cd'
         }
     }
 };

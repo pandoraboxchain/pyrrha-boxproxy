@@ -1,6 +1,6 @@
 {
   "name": "pyrrha-boxproxy",
-  "version": "1.6.6",
+  "version": "1.6.8",
   "private": true,
   "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
   "main": "./src/index.js",
@@ -11,7 +11,7 @@
     "test": "docker run -e WITH_COVERAGE=0 -e LOG_LEVEL=debug -it pyrrha_boxproxy_tests",
     "test-with-coverage": "docker run -e WITH_COVERAGE=1 -it pyrrha_boxproxy_tests",
     "build:docker": "docker-compose build --no-cache",
-    "start:docker": "docker-compose up -d --remove-orphans",
+    "start:docker": "docker-compose up --remove-orphans",
     "stop:docker": "docker-compose down",
     "start": "node ./src",
     "start:dev": "NODE_ENV=development node ./src"
@@ -24,7 +24,7 @@
     "body-parser": "1.18.3",
     "express": "4.16.3",
     "helmet": "3.13.0",
-    "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.8.0-beta9",
+    "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.8.0-beta10",
     "websocket": "1.0.26",
     "winston": "3.0.0",
     "sequelize": "4.38.0",

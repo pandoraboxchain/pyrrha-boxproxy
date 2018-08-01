@@ -33,10 +33,8 @@ module.exports.getAllFactory = model => {
         const paginationQuery = extractPaginationQuery(options);
         
         return await model.findAndCountAll({
-            where: {
-                ...filterQuery
-            },
-            order: [...orderQuery],
+            where: filterQuery,
+            order: orderQuery,
             ...paginationQuery
         });
     };

@@ -10,7 +10,7 @@ Supported URL params are:
 ## `orderBy` query  
 Pattern:  
 ```
-http://<server_path>:<server_port>/<endpoint>?filterBy=<key>:<order>;<key>:<order>;<key>:<order>
+http://<server_path>:<server_port>/<endpoint>?orderBy=<key>:<order>;<key>:<order>;<key>:<order>
 ```
 Where:  
 - `endpoint`: entity endpoint. Can be 'kernels', 'datasets', 'jobs' or 'workers'

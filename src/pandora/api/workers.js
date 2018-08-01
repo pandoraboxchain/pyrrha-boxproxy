@@ -30,14 +30,14 @@ module.exports.getWorkersRecords = async (pjs) => {
 module.exports.subscribeWorkerAdded = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.workers.eventWorkerNodeCreated(options)
-            .data(async (addedWorker) => {
+            .data(async (result) => {
 
                 try {
 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [addedWorker.worker],
+                        records: result.records,
                         blockNumber
                     });
                 } catch (err) {
@@ -60,14 +60,14 @@ module.exports.subscribeWorkerAdded = (pjs, options = {}, dataCallback = () => {
 module.exports.subscribeWorkerNodeStateChanged = (pjs, address, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.workers.eventWorkerNodeStateChanged(address, options)
-            .data(async (changedWorker) => {
+            .data(async (result) => {
 
                 try {
 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [changedWorker.worker],
+                        records: result.records,
                         blockNumber
                     });
                 } catch (err) {

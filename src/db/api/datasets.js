@@ -20,6 +20,7 @@ module.exports.add = addRecordsFactory(Datasets, {
         address: record.address,
         ipfsAddress: record.ipfsAddress,
         dataDim: record.dataDim,
+        batchesCount: record.batchesCount,
         currentPrice: record.currentPrice,
         metadata: record.metadata,
         description: record.description
