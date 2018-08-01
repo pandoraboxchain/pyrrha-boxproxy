@@ -30,14 +30,15 @@ module.exports.getKernelsRecords = async (pjs) => {
 module.exports.subscribeKernelAdded = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.kernels.eventKernelAdded(options)
-            .data(async (addedKernel) => {
+            .data(async ({records, event}) => {
 
                 try {
 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [addedKernel.kernel],
+                        records,
+                        event,
                         blockNumber
                     });
                 } catch (err) {
@@ -59,14 +60,15 @@ module.exports.subscribeKernelAdded = (pjs, options = {}, dataCallback = () => {
 module.exports.subscribeKernelRemoved = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.kernels.eventKernelRemoved(options)
-            .data(async (removedKernel) => {
+            .data(async ({records, event}) => {
 
                 try {
 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [removedKernel],
+                        records,
+                        event,
                         blockNumber
                     });
                 } catch (err) {

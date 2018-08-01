@@ -30,14 +30,15 @@ module.exports.getJobsRecords = async (pjs) => {
 module.exports.subscribeCognitiveJobCreated = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.jobs.eventCognitiveJobCreated(options)
-            .data(async (evt) => {
+            .data(async ({records, event}) => {
 
                 try {
 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [...evt.records],
+                        records,
+                        event,
                         blockNumber
                     });
                 } catch (err) {
@@ -59,14 +60,15 @@ module.exports.subscribeCognitiveJobCreated = (pjs, options = {}, dataCallback =
 module.exports.subscribeJobStateChanged = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
     return pjs.api.jobs.eventJobStateChanged(options)
-            .data(async (changedJob) => {
+            .data(async ({records, event}) => {
 
                 try {
 
                     const blockNumber = await pjs.web3.eth.getBlockNumber();
 
                     dataCallback({
-                        records: [changedJob.job],
+                        records,
+                        event,
                         blockNumber
                     });
                 } catch (err) {

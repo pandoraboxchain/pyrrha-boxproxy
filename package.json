@@ -1,6 +1,6 @@
 {
   "name": "pyrrha-boxproxy",
-  "version": "1.6.9",
+  "version": "1.6.10",
   "private": true,
   "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
   "main": "./src/index.js",
@@ -24,7 +24,7 @@
     "body-parser": "1.18.3",
     "express": "4.16.3",
     "helmet": "3.13.0",
-    "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.8.0-beta10",
+    "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.8.0-beta11",
     "websocket": "1.0.26",
     "winston": "3.0.0",
     "sequelize": "4.38.0",
