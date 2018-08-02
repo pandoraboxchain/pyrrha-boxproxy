@@ -113,14 +113,14 @@ class PandoraDb extends EventEmitter {
 
                 if (task.source[task.isInitialized]) {
 
-                    task.init();
+                    task.init(task);
                 } else {
 
-                    task.source.once(task.initEvent, task.init);                    
+                    task.source.once(task.initEvent, () => task.init(task));
                 }                
             } else {
 
-                task.source.once(task.initEvent, task.init);                    
+                task.source.once(task.initEvent, () => task.init(task));                    
             }            
         }
     }

@@ -4,7 +4,7 @@ const log = require('./logger');
 
 // For better PM2 experience
 process.on('uncaughtException', err => {
-    log.error('An error has occured %o', safeObject(err));
+    log.error('An error has occured', safeObject(err));
     process.exit(1);
 });
 
@@ -27,6 +27,7 @@ db.once('initialized', () => {
     pandora.start(config);
 });
 db.once('stopped', () => log.info(`Database stopped`));
+db.on('beforeAction', task => log.debug(`Database manager going to start an action for task "${task.name}"`, task.data));
 db.on('action', data => ws.push(data));// publish actions data to websocket api
 
 // Kernels baseline and subscription task
@@ -37,11 +38,12 @@ db.addTask({
     action: 'kernels.add',// Run this action on event
     initEvent: 'started',
     isInitialized: 'initialized',
-    init: async () => {
+    init: async (config) => {
 
         try {
 
             const isBaseline = await db.api.system.isBaseline('kernelsBaseline');
+            log.debug(`"${config.name}" task has been initialized with baseline value: ${isBaseline}`);
         
             if (isBaseline) {
 
@@ -73,11 +75,12 @@ db.addTask({
     action: 'datasets.add',// Run this action on event
     initEvent: 'started',
     isInitialized: 'initialized',
-    init: async () => {
+    init: async (config) => {
 
         try {
 
             const isBaseline = await db.api.system.isBaseline('datasetsBaseline');
+            log.debug(`"${config.name}" task has been initialized with baseline value: ${isBaseline}`);
         
             if (isBaseline) {
 
@@ -109,11 +112,12 @@ db.addTask({
     action: 'jobs.add',// Run this action on event
     initEvent: 'started',
     isInitialized: 'initialized',
-    init: async () => {
+    init: async (config) => {
 
         try {
 
             const isBaseline = await db.api.system.isBaseline('jobsBaseline');
+            log.debug(`"${config.name}" task has been initialized with baseline value: ${isBaseline}`);
         
             if (isBaseline) {
 
@@ -140,11 +144,12 @@ db.addTask({
     action: 'workers.add',
     initEvent: 'started',
     isInitialized: 'initialized',
-    init: async () => {
+    init: async (config) => {
 
         try {
 
             const isBaseline = await db.api.system.isBaseline('workersBaseline');
+            log.debug(`"${config.name}" task has been initialized with baseline value: ${isBaseline}`);
         
             if (isBaseline) {
 

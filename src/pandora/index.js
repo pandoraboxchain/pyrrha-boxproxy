@@ -2,6 +2,7 @@
 const path = require('path');
 const { EventEmitter } = require('events');
 const { fork } = require('child_process');
+const log = require('../logger');
 
 /**
  * Pandora synchronizer
@@ -36,6 +37,7 @@ class PandoraSync extends EventEmitter {
 
     // IPC messages manager (from the worker)
     _messageManager(message) {
+        log.debug(`PandoraSync: A message has been obtained from the worker`, message);
 
         switch(message.cmd) {
             case 'error':
@@ -148,6 +150,7 @@ class PandoraSync extends EventEmitter {
     _setupOperationsHandlers() {
 
         this.on('getKernels', () => {
+            log.debug(`PandoraSync: "getKernels" event has been emitted`);
 
             this.worker.send({
                 cmd: 'getKernelsRecords'
@@ -155,6 +158,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeKernels', (options = {}) => {
+            log.debug(`PandoraSync: "subscribeKernels" event has been emitted`);
             
             this.worker.send({
                 cmd: 'subscribeKernels',
@@ -163,6 +167,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('getDatasets', () => {
+            log.debug(`PandoraSync: "getDatasets" event has been emitted`);
 
             this.worker.send({
                 cmd: 'getDatasetsRecords'
@@ -170,6 +175,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeDatasets', (options = {}) => {
+            log.debug(`PandoraSync: "subscribeDatasets" event has been emitted`);
             
             this.worker.send({
                 cmd: 'subscribeDatasets',
@@ -178,6 +184,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('getJobs', () => {
+            log.debug(`PandoraSync: "getJobs" event has been emitted`);
 
             this.worker.send({
                 cmd: 'getJobsRecords'
@@ -185,6 +192,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeJobs', (options = {}) => {
+            log.debug(`PandoraSync: "subscribeJobs" event has been emitted`);
             
             this.worker.send({
                 cmd: 'subscribeJobs',
@@ -193,6 +201,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeJobStateChanged', (options = {}) => {
+            log.debug(`PandoraSync: "subscribeJobStateChanged" event has been emitted`);
 
             this.worker.send({
                 cmd: 'subscribeJobStateChanged',
@@ -201,6 +210,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('getWorkers', () => {
+            log.debug(`PandoraSync: "getWorkers" event has been emitted`);
 
             this.worker.send({
                 cmd: 'getWorkersRecords'
@@ -208,6 +218,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeWorkers', (options = {}) => {
+            log.debug(`PandoraSync: "subscribeWorkers" event has been emitted`);
             
             this.worker.send({
                 cmd: 'subscribeWorkers',
@@ -216,6 +227,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeWorkerAddress', (options = {}) => {
+            log.debug(`PandoraSync: "subscribeWorkerAddress" event has been emitted`);
 
             this.worker.send({
                 cmd: 'subscribeWorkerAddress',
@@ -224,6 +236,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('unsubscribeWorkerAddress', (options = {}) => {
+            log.debug(`PandoraSync: "unsubscribeWorkerAddress" event has been emitted`);
 
             this.worker.send({
                 cmd: 'unsubscribeWorkerAddress',
