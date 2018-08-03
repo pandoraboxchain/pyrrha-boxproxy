@@ -133,7 +133,7 @@ const sendMessage = message => {
 
 // Worker IPC messages manager
 const messageManager = async (message) => {
-    log.debug(`WORKER: an message obtained from the PandoraSync`, message);
+    log.debug(`WORKER: an message received from the PandoraSync`, message);
 
     try {
 
@@ -222,7 +222,7 @@ const messageManager = async (message) => {
                 const kernelAdded = await kernelsApi.subscribeKernelAdded(pjs, {
                     fromBlock: message.blockNumber
                 }, result => {
-                    log.debug(`WORKER: going to send just added "kernelsRecords" obtained from event "subscribeKernelAdded"`, result);
+                    log.debug(`WORKER: going to send just added "kernelsRecords" received from event "subscribeKernelAdded"`, result);
 
                     sendMessage({
                         cmd: 'kernelsRecords',
@@ -240,7 +240,7 @@ const messageManager = async (message) => {
                 const kernelRemoved = await kernelsApi.subscribeKernelRemoved(pjs, {
                     fromBlock: message.blockNumber
                 }, result => {
-                    log.debug(`WORKER: going to send just removed kernels obtained from event "subscribeKernelRemoved"`, result);
+                    log.debug(`WORKER: going to send just removed kernels received from event "subscribeKernelRemoved"`, result);
 
                     sendMessage({
                         cmd: 'kernelsRecordsRemove',
@@ -296,7 +296,7 @@ const messageManager = async (message) => {
                 const datasetAdded = await datasetsApi.subscribeDatasetAdded(pjs, {
                     fromBlock: message.blockNumber
                 }, result => {
-                    log.debug(`WORKER: going to send just added "datasetsRecords" obtained from event "subscribeDatasetAdded"`, result);
+                    log.debug(`WORKER: going to send just added "datasetsRecords" received from event "subscribeDatasetAdded"`, result);
 
                     sendMessage({
                         cmd: 'datasetsRecords',
@@ -314,7 +314,7 @@ const messageManager = async (message) => {
                 const datasetRemoved = await datasetsApi.subscribeDatasetRemoved(pjs, {
                     fromBlock: message.blockNumber
                 }, result => {
-                    log.debug(`WORKER: going to send just removed datasets obtained from event "subscribeDatasetRemoved"`, result);
+                    log.debug(`WORKER: going to send just removed datasets received from event "subscribeDatasetRemoved"`, result);
 
                     sendMessage({
                         cmd: 'datasetsRecordsRemove',
@@ -370,7 +370,7 @@ const messageManager = async (message) => {
                 const cognitiveJobCreated = jobsApi.subscribeCognitiveJobCreated(pjs, {
                     fromBlock: message.blockNumber
                 }, result => {
-                    log.debug(`WORKER: going to send just added "jobsRecords" obtained from event "subscribeCognitiveJobCreated"`, result);
+                    log.debug(`WORKER: going to send just added "jobsRecords" received from event "subscribeCognitiveJobCreated"`, result);
 
                     sendMessage({
                         cmd: 'jobsRecords',
@@ -404,7 +404,7 @@ const messageManager = async (message) => {
                 const cognitiveJobStateChanged = jobsApi.subscribeJobStateChanged(pjs, {
                     fromBlock: message.blockNumber
                 }, result => {
-                    log.debug(`WORKER: going to send just changed "jobsRecords" obtained from event "subscribeJobStateChanged"`, result);
+                    log.debug(`WORKER: going to send just changed "jobsRecords" received from event "subscribeJobStateChanged"`, result);
 
                     sendMessage({
                         cmd: 'jobsRecords',
@@ -458,7 +458,7 @@ const messageManager = async (message) => {
                     fromBlock: message.blockNumber
                 }, result => {
 
-                    log.debug(`WORKER: going to send just added "workersRecords" obtained from event "subscribeWorkerAdded"`, result);
+                    log.debug(`WORKER: going to send just added "workersRecords" received from event "subscribeWorkerAdded"`, result);
 
                     sendMessage({
                         cmd: 'workersRecords',
@@ -493,7 +493,7 @@ const messageManager = async (message) => {
                 const workerChanged = workersApi.subscribeWorkerNodeStateChanged(pjs, message.address, {
                     fromBlock: message.blockNumber
                 }, result => {
-                    log.debug(`WORKER: going to send just changed "workersRecords" obtained from event "subscribeWorkerNodeStateChanged"`, result);
+                    log.debug(`WORKER: going to send just changed "workersRecords" received from event "subscribeWorkerNodeStateChanged"`, result);
 
                     sendMessage({
                         cmd: 'workersRecords',
@@ -588,7 +588,7 @@ pjs.on('lastBlockNumber', blockNumber => process.send({
     date: Date.now()
 }));
 
-// Handle messages obtained from host
+// Handle messages received from host
 process.on('message', messageManager);
 
 // Do not close the workker until processGuard becomes false

@@ -37,7 +37,7 @@ class PandoraSync extends EventEmitter {
 
     // IPC messages manager (from the worker)
     _messageManager(message) {
-        log.debug(`PandoraSync: A message has been obtained from the worker`, message);
+        log.debug(`PandoraSync: A message has been received from the worker`, message);
 
         switch(message.cmd) {
             case 'error':
