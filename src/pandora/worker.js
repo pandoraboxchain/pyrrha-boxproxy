@@ -107,13 +107,28 @@ const state = new StateManager({
 let subscriptions = [];
 
 // Helper for sending errors
-const sendError = err => {
-    
+const sendError = (err, ...extra) => {
+    const parsedExtra = extra.map(item => typeof item === 'object' ? safeObject(item) : item);
+    log.error(`WORKER: error`, safeObject(err));
+
     process.send({
         cmd: 'error',
         error: safeObject(err),
-        date: Date.now()
-    })
+        date: Date.now(),
+        ...(parsedExtra.length > 0 ? { data: parsedExtra } : {})
+    });
+};
+
+// Helper for messages sendig
+const sendMessage = message => {
+
+    const currentState = state.get('pjs');
+
+    if (currentState !== PJS_STOPPED) {
+
+        process.send(message);
+        log.debug(`WORKER: message sent`, message);
+    }
 };
 
 // Worker IPC messages manager
@@ -128,7 +143,7 @@ const messageManager = async (message) => {
             case 'state':
                 const currentState = state.get();
 
-                process.send({
+                sendMessage({
                     cmd: 'state',
                     state: currentState,
                     date: Date.now()
@@ -168,7 +183,7 @@ const messageManager = async (message) => {
                     pan: PAN_STARTED
                 });
 
-                process.send({
+                sendMessage({
                     cmd: 'started',
                     date: Date.now()
                 });
@@ -187,7 +202,7 @@ const messageManager = async (message) => {
 
                 log.debug(`WORKER: going to send "kernelsRecords" baseline`, kernelsRecordsResult);
 
-                process.send({
+                sendMessage({
                     cmd: 'kernelsRecords',
                     records: kernelsRecordsResult.records,
                     blockNumber: kernelsRecordsResult.blockNumber,
@@ -209,7 +224,7 @@ const messageManager = async (message) => {
                 }, result => {
                     log.debug(`WORKER: going to send just added "kernelsRecords" obtained from event "subscribeKernelAdded"`, result);
 
-                    process.send({
+                    sendMessage({
                         cmd: 'kernelsRecords',
                         records: result.records,
                         blockNumber: result.blockNumber,
@@ -227,12 +242,12 @@ const messageManager = async (message) => {
                 }, result => {
                     log.debug(`WORKER: going to send just removed kernels obtained from event "subscribeKernelRemoved"`, result);
 
-                    process.send({
+                    sendMessage({
                         cmd: 'kernelsRecordsRemove',
                         records: result.records,
                         blockNumber: result.blockNumber,
                         date: Date.now()
-                    })
+                    });
                 }, err => sendError(err));
 
                 subscriptions.push({
@@ -261,7 +276,7 @@ const messageManager = async (message) => {
 
                 log.debug(`WORKER: going to send "datasetsRecords" baseline`, datasetsRecordsResult);
 
-                process.send({
+                sendMessage({
                     cmd: 'datasetsRecords',
                     records: datasetsRecordsResult.records,
                     blockNumber: datasetsRecordsResult.blockNumber,
@@ -283,7 +298,7 @@ const messageManager = async (message) => {
                 }, result => {
                     log.debug(`WORKER: going to send just added "datasetsRecords" obtained from event "subscribeDatasetAdded"`, result);
 
-                    process.send({
+                    sendMessage({
                         cmd: 'datasetsRecords',
                         records: result.records,
                         blockNumber: result.blockNumber,
@@ -301,7 +316,7 @@ const messageManager = async (message) => {
                 }, result => {
                     log.debug(`WORKER: going to send just removed datasets obtained from event "subscribeDatasetRemoved"`, result);
 
-                    process.send({
+                    sendMessage({
                         cmd: 'datasetsRecordsRemove',
                         records: result.records,
                         blockNumber: result.blockNumber,
@@ -335,7 +350,7 @@ const messageManager = async (message) => {
 
                 log.debug(`WORKER: going to send "jobsRecords" baseline`, jobsRecordsResult);
 
-                process.send({
+                sendMessage({
                     cmd: 'jobsRecords',
                     records: jobsRecordsResult.records,
                     blockNumber: jobsRecordsResult.blockNumber,
@@ -357,7 +372,7 @@ const messageManager = async (message) => {
                 }, result => {
                     log.debug(`WORKER: going to send just added "jobsRecords" obtained from event "subscribeCognitiveJobCreated"`, result);
 
-                    process.send({
+                    sendMessage({
                         cmd: 'jobsRecords',
                         records: result.records,
                         blockNumber: result.blockNumber,
@@ -391,7 +406,7 @@ const messageManager = async (message) => {
                 }, result => {
                     log.debug(`WORKER: going to send just changed "jobsRecords" obtained from event "subscribeJobStateChanged"`, result);
 
-                    process.send({
+                    sendMessage({
                         cmd: 'jobsRecords',
                         records: result.records,
                         blockNumber: result.blockNumber,
@@ -422,7 +437,7 @@ const messageManager = async (message) => {
 
                 log.debug(`WORKER: going to send "jobsRecords" baseline`, workersRecordsResult);
 
-                process.send({
+                sendMessage({
                     cmd: 'workersRecords',
                     records: workersRecordsResult.records,
                     blockNumber: workersRecordsResult.blockNumber,
@@ -445,7 +460,7 @@ const messageManager = async (message) => {
 
                     log.debug(`WORKER: going to send just added "workersRecords" obtained from event "subscribeWorkerAdded"`, result);
 
-                    process.send({
+                    sendMessage({
                         cmd: 'workersRecords',
                         records: result.records,
                         blockNumber: result.blockNumber,
@@ -480,7 +495,7 @@ const messageManager = async (message) => {
                 }, result => {
                     log.debug(`WORKER: going to send just changed "workersRecords" obtained from event "subscribeWorkerNodeStateChanged"`, result);
 
-                    process.send({
+                    sendMessage({
                         cmd: 'workersRecords',
                         records: result.records,
                         blockNumber: result.blockNumber,
@@ -519,11 +534,7 @@ const messageManager = async (message) => {
                 break;
 
             default: 
-                process.send({
-                    cmd: 'error',
-                    error: safeObject(new Error('Unknown command')),
-                    date: Date.now()
-                });
+                sendError(new Error('Unknown command'), message);
         }
 
     } catch (err) {
@@ -533,11 +544,7 @@ const messageManager = async (message) => {
 };
 
 // Listen for errors
-pjs.on('error', err => process.send({
-    cmd: 'error',
-    error: safeObject(err),
-    date: Date.now()
-}));
+pjs.on('error', err => sendError(err));
 
 pjs.on('reconnectStarted', date => process.send({
     cmd: 'reconnectStarted',

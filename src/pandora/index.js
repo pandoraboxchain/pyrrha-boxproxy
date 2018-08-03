@@ -192,7 +192,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeJobs', (options = {}) => {
-            log.debug(`PandoraSync: "subscribeJobs" event has been emitted`);
+            log.debug(`PandoraSync: "subscribeJobs" event has been emitted`, options);
             
             this.worker.send({
                 cmd: 'subscribeJobs',
@@ -201,7 +201,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeJobStateChanged', (options = {}) => {
-            log.debug(`PandoraSync: "subscribeJobStateChanged" event has been emitted`);
+            log.debug(`PandoraSync: "subscribeJobStateChanged" event has been emitted`, options);
 
             this.worker.send({
                 cmd: 'subscribeJobStateChanged',
@@ -218,7 +218,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeWorkers', (options = {}) => {
-            log.debug(`PandoraSync: "subscribeWorkers" event has been emitted`);
+            log.debug(`PandoraSync: "subscribeWorkers" event has been emitted`, options);
             
             this.worker.send({
                 cmd: 'subscribeWorkers',
@@ -227,7 +227,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('subscribeWorkerAddress', (options = {}) => {
-            log.debug(`PandoraSync: "subscribeWorkerAddress" event has been emitted`);
+            log.debug(`PandoraSync: "subscribeWorkerAddress" event has been emitted`, options);
 
             this.worker.send({
                 cmd: 'subscribeWorkerAddress',
@@ -236,7 +236,7 @@ class PandoraSync extends EventEmitter {
         });
 
         this.on('unsubscribeWorkerAddress', (options = {}) => {
-            log.debug(`PandoraSync: "unsubscribeWorkerAddress" event has been emitted`);
+            log.debug(`PandoraSync: "unsubscribeWorkerAddress" event has been emitted`, options);
 
             this.worker.send({
                 cmd: 'unsubscribeWorkerAddress',
