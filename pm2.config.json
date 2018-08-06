@@ -7,8 +7,6 @@
             "name": "Pyrrha Boxproxy",            
             "max_restarts": 10,
             "log_file": "./logs/combined.outerr.log",
-            "out_file": "./logs/out.log",
-            "error_file": "./logs/err.log",
             "log_date_format": "YYYY-MM-DD HH:mm Z"
         }
     ]

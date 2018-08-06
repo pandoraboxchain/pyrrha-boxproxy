@@ -40,6 +40,13 @@ class PandoraSync extends EventEmitter {
         log.debug(`PandoraSync: A message has been received from the worker`, message);
 
         switch(message.cmd) {
+            case 'state':
+                this.emit('state', {
+                    state: message.state,
+                    date: message.date
+                });
+                break;
+
             case 'error':
                 this.emit('error', message.error);
                 break;
@@ -148,6 +155,14 @@ class PandoraSync extends EventEmitter {
 
     // Pandora synchronizer events handlers
     _setupOperationsHandlers() {
+
+        this.on('getState', () => {
+            log.debug(`PandoraSync: "getState" event has been emitted`);
+
+            this.worker.send({
+                cmd: 'state'
+            });
+        });
 
         this.on('getKernels', () => {
             log.debug(`PandoraSync: "getKernels" event has been emitted`);

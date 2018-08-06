@@ -2,15 +2,14 @@
 const { Op } = require('sequelize');
 const System = require('../models/system');
 const expect = require('../../utils/expect');
+const { getAllFactory } = require('./utils/factories');
 
 /**
  * Fetch all system records
  *
  * @returns {Promise<[{Object}]>} 
  */
-module.exports.getAll = async () => {
-    return await System.findAll();
-};
+module.exports.getAll = getAllFactory(System);
 
 /**
  * Check is system has benn already seeded

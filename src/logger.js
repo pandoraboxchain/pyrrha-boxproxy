@@ -1,18 +1,24 @@
 'use strict';
 const winston = require('winston');
 
-const config = {
-    format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.splat(),
-        winston.format.simple()
-    ),
-    exitOnError: false,
-    transports: []
+const createLogger = level => {
+
+    const config = {
+        level,
+        format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.splat(),
+            winston.format.simple()
+        ),
+        exitOnError: false,
+        transports: []
+    };
+    
+    // Setup transports
+    config.transports.push(new winston.transports.Console());
+
+    return winston.createLogger(config);
 };
 
-config.level = process.env.LOG_LEVEL || 'warn';
-
-config.transports.push(new winston.transports.Console());
-
-module.exports = winston.createLogger(config);
+module.exports = createLogger(process.env.LOG_LEVEL || 'warn');
+module.exports.createLogger = createLogger;
