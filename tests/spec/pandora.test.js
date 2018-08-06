@@ -241,7 +241,7 @@ describe('Pandora module tests', () => {
     });
 
     it('Pandora should emit jobsRecords if new job created', done => {
-        const timeout = setTimeout(() => done(new Error('jobsRecords (create new job) not been obtained during timeout')), 3000);
+        const timeout = setTimeout(() => done(new Error('jobsRecords (create new job) not been obtained during timeout')), 7000);
         let jobId;
 
         pandora.once('error', err => {

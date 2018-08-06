@@ -29,8 +29,6 @@ describe('Database module tests', () => {
 
     it('db should prepopulate some system properties on setup', async () => {
         const system = await db.api.system.getAll();
-
-        console.log('!!!', system)
         expect(Array.isArray(system.rows)).to.be.true;
         const alreadySeeded = system.rows.filter(rec => rec.name === 'alreadySeeded')[0];
         expect(alreadySeeded.value).to.be.equal('yes');
