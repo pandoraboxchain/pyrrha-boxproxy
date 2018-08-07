@@ -20,5 +20,5 @@ const createLogger = level => {
     return winston.createLogger(config);
 };
 
-module.exports = createLogger(process.env.LOG_LEVEL || 'warn');
+module.exports = createLogger(process.env.NODE_ENV === 'testing' ? 'error' : process.env.LOG_LEVEL || 'warn');
 module.exports.createLogger = createLogger;

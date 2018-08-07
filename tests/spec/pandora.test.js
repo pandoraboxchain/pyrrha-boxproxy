@@ -252,6 +252,7 @@ describe('Pandora module tests', () => {
             expect(Array.isArray(data.records)).to.be.true;
             expect(data.records[0].address).to.be.equal(jobId);
             expect(data.blockNumber).to.be.a('number');
+            expect(data.baseline).to.be.false;
             clearTimeout(timeout);
             done();
         });

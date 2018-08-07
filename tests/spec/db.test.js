@@ -17,7 +17,7 @@ describe('Database module tests', () => {
     let testProv = new TestEvetsProvider();
 
     before(done => {
-        const timeout = setTimeout(() => done(new Error('"initialized" event not emitted on start')), 1000);
+        const timeout = setTimeout(() => done(new Error('"initialized" event not emitted on start')), 5000);
         db.once('initialized', () => {
             clearTimeout(timeout);
             done();
@@ -70,7 +70,7 @@ describe('Database module tests', () => {
 
             done(new Error('watchBlockNumber task not been handled during timeout'));
             doneCalled = true;
-        }, 4000);
+        }, 7000);
 
         db.once('error', err => {
             clearTimeout(timeout);
@@ -174,13 +174,13 @@ describe('Database module tests', () => {
                 doneCalled = true;
             }            
         });
-    
+
         db.addTask({
             name: 'watchBlockNumber',
             source: testProv,
             event: 'lastBlockNumber',
-            action: async (data) => {            
-                await db.api.system.saveBlockNumber(data);
+            action: async (data) => {
+                await db.api.system.saveBlockNumber(data);                    
             },
             initEvent: 'started',
             isInitialized: 'initialized',
@@ -192,8 +192,8 @@ describe('Database module tests', () => {
                 });
             }
         });
-    
-        testProv.emit('started');
+
+        setTimeout(() => testProv.emit('started'), 500);        
     });
 
 });

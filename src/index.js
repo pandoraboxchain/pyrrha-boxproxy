@@ -28,7 +28,7 @@ db.once('initialized', () => {
 });
 db.once('stopped', () => log.info(`Database stopped`));
 db.on('beforeAction', task => log.debug(`Database manager going to start an action for task "${task.name}"`, task.data));
-db.on('action', data => ws.push(data));// publish actions data to websocket api
+db.on('action', data => ws.push(data));// publish action data to websocket api
 
 // Kernels baseline and subscription task
 db.addTask({
