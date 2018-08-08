@@ -18,8 +18,8 @@ const pandora = require('./pandora');
 pandora.on('error', err => log.error('A pandora error has occured', safeObject(err)));
 pandora.on('started', () => log.info('Pandora synchronizer has been started'));
 pandora.on('stopped', () => log.info('Pandora synchronizer has been stopped'));
-pandora.on('reconnectStarted', evt => log.warn('Connection lost and reconnection started',  evt.date));
-pandora.on('reconnected', evt => log.warn('Pandora synchronizer has been reconnected',  evt.date));
+pandora.on('disconnected', evt => log.warn('Connection lost and reconnection started',  evt.date));
+pandora.on('connected', evt => log.warn('Pandora synchronizer has been connected',  evt.date));
 
 db.on('error', err => log.error('A database error has occured', safeObject(err)));
 db.once('initialized', () => {

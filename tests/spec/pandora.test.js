@@ -64,6 +64,8 @@ describe('Pandora module tests', () => {
             addresses: node.addresses
         });
 
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         kernelContractAddress1 = await pjs.kernels.deploy(kernelIpfsHash, kernelOptions, publisher);
         await pjs.kernels.addToMarket(kernelContractAddress1, publisher);
 
@@ -89,6 +91,7 @@ describe('Pandora module tests', () => {
     after(done => pandora.stop(() => server.close(done)));
 
     it('Pandora should emit lastBlockNumber number every 3 sec', done => {
+
         const timeout = setTimeout(() => done(new Error('lastBlockNumber not been obtained during timeout')), config.wstimeout * 1.2);
         
         pandora.once('lastBlockNumber', data => {

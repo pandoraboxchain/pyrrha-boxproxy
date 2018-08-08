@@ -133,7 +133,21 @@ const sendMessage = message => {
 
 // Worker IPC messages manager
 const messageManager = async (message) => {
-    log.debug(`WORKER: an message received from the PandoraSync`, message);
+    log.debug(`WORKER: a message received from the PandoraSync`, message);
+
+    const connectionState = state.get('pjs');
+
+    if (connectionState === PJS_STOPPED && message.cmd !== 'start') {
+        
+        log.warn(`WORKER: message was ignored due to connection status "${connectionState}"`);
+        return sendError(new Error('Not connected yet. Message ignored'), message);
+    }
+
+    if (connectionState === PJS_CONNECTING) {
+
+        log.warn(`WORKER: message was delayed due to connection status "${connectionState}"`);
+        return pjs.once('connected', () => messageManager(message));
+    }
 
     try {
 
@@ -490,26 +504,40 @@ const messageManager = async (message) => {
                     fromBlock: message.blockNumber
                 });
 
-                const workerChanged = workersApi.subscribeWorkerNodeStateChanged(pjs, message.address, {
-                    fromBlock: message.blockNumber
-                }, result => {
-                    log.debug(`WORKER: going to send just changed "workersRecords" received from event "subscribeWorkerNodeStateChanged"`, result);
+                let alreadySubscribed = false;
 
-                    sendMessage({
-                        cmd: 'workersRecords',
-                        records: result.records,
-                        blockNumber: result.blockNumber,
-                        baseline: false,
-                        date: Date.now()
-                    });
-                }, err => sendError(err));
+                subscriptions.forEach(msg => {
 
-                subscriptions.push({
-                    ...message,
-                    events: [workerChanged]
+                    if (msg.cmd !== 'subscribeWorkerAddress' && 
+                        msg.address === message.address) {
+
+                        alreadySubscribed = true;
+                    }
                 });
 
-                log.debug(`WORKER: event "workerChanged" added to subscriptions list`);
+                if (!alreadySubscribed) {
+
+                    const workerChanged = workersApi.subscribeWorkerNodeStateChanged(pjs, message.address, {
+                        fromBlock: message.blockNumber
+                    }, result => {
+                        log.debug(`WORKER: going to send just changed "workersRecords" received from event "subscribeWorkerNodeStateChanged"`, result);
+    
+                        sendMessage({
+                            cmd: 'workersRecords',
+                            records: result.records,
+                            blockNumber: result.blockNumber,
+                            baseline: false,
+                            date: Date.now()
+                        });
+                    }, err => sendError(err));
+    
+                    subscriptions.push({
+                        ...message,
+                        events: [workerChanged]
+                    });
+    
+                    log.debug(`WORKER: event "workerChanged" added to subscriptions list`);
+                }
 
                 break;
 
@@ -546,33 +574,36 @@ const messageManager = async (message) => {
 // Listen for errors
 pjs.on('error', err => sendError(err));
 
-pjs.on('reconnectStarted', date => process.send({
-    cmd: 'reconnectStarted',
-    date
+pjs.on('disconnected', data => sendMessage({
+    cmd: 'disconnected',
+    date: data.date
 }));
 
 // Re-subscribe all active subscriptions on reconnect
-pjs.on('reconnected', blockNumber => {
+pjs.on('connected', data => {
 
     try {
 
-        const originSubscriptions = subscriptions;
-        subscriptions = [];
-        
-        originSubscriptions.forEach(message => {
-            message.events.forEach(item => item.event.unsubscribe());
-            message.events = [];
+        if (subscriptions.length > 0) {
 
-            messageManager({
-                ...message,
-                ...{
-                    blockNumber
-                }
+            const originSubscriptions = subscriptions;
+            subscriptions = [];
+            
+            originSubscriptions.forEach(message => {
+                message.events.forEach(item => item.event.unsubscribe());
+                message.events = [];
+
+                messageManager({
+                    ...message,
+                    ...{
+                        blockNumber: data.blockNumber
+                    }
+                });
             });
-        });
+        }
 
-        process.send({
-            cmd: 'reconnected',
+        sendMessage({
+            cmd: 'connected',
             date: Date.now()
         });
     } catch (err) {
@@ -582,7 +613,7 @@ pjs.on('reconnected', blockNumber => {
 });
 
 // Emit last block event
-pjs.on('lastBlockNumber', blockNumber => process.send({
+pjs.on('lastBlockNumber', blockNumber => sendMessage({
     cmd: 'lastBlockNumber',
     blockNumber,
     date: Date.now()
@@ -596,7 +627,7 @@ setInterval(_ => {
 
     if (!processGuard) {
 
-        process.send({
+        sendMessage({
             cmd: 'stopped',
             date: Date.now()
         });

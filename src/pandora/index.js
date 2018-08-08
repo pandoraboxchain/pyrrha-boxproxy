@@ -68,14 +68,14 @@ class PandoraSync extends EventEmitter {
                 });
                 break;
 
-            case 'reconnected':
+            case 'connected':
                 this.emit('reconnected', {
                     date: message.date
                 });
                 break;
 
-            case 'reconnectStarted':
-                this.emit('reconnectStarted', {
+            case 'disconnected':
+                this.emit('disconnected', {
                     date: message.date
                 });
                 break;
@@ -152,6 +152,7 @@ class PandoraSync extends EventEmitter {
                 break;
 
             default:
+                log.debug(`PandoraSync: Unknown worker command`, message);
                 this.emit('error', new Error('Unknown worker command'));
         }
     }

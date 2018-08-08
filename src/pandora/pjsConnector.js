@@ -38,7 +38,6 @@ class PjsConnector extends EventEmitter {
         };
         this.api = null;
         this.web3 = null;
-        this.isReconnecting = false;
         this.lastBlock = 0;
     }
 
@@ -91,27 +90,32 @@ class PjsConnector extends EventEmitter {
         const provider = web3.currentProvider;
         const url = provider.connection.url;
 
-        if (!this.isReconnecting && this.state.get('pjs') !== PJS_STOPPED) {
+        if (this.state.get('pjs') === PJS_CONNECTED) {
 
             await (() => new Promise(async (resolve, reject) => {
 
                 try {
 
+                    await this.state.set({
+                        pjs: PJS_CONNECTING
+                    });
+
+                    this.emit('connecting', {
+                        date: Date.now()
+                    });
+
                     const reconnectionTimeout = setTimeout(() => {
                         this.emit('error', new Error(`Websocket reconnection timeout (${this.config.wstimeout}ms) exceeded`));
-                        this.isReconnecting = false;
                         this.reconnect(cb).then(cb).catch(err => {
                             this.emit('error', err);
                             reject(err);
                         });
                     }, this.config.wstimeout);
         
-                    await this.state.set({
-                        pjs: PJS_CONNECTING
+                    this.emit('disconnected', {
+                        date: Date.now()
                     });
-        
-                    this.isReconnecting = true;
-                    this.emit('reconnectStarted', Date.now());
+                    
                     const newProvider = new Pjs.Web3.providers.WebsocketProvider(url);
     
                     newProvider.on('connect', async () => {
@@ -126,12 +130,13 @@ class PjsConnector extends EventEmitter {
                                 pjs: PJS_CONNECTED
                             });
         
-                            this.isReconnecting = false;
-                            this.emit('reconnected', this.lastBlock);
+                            this.emit('connected', {
+                                lastBlock: this.lastBlock,
+                                date: Date.now()
+                            });
                             resolve();
                         } catch (err) {
         
-                            this.isReconnecting = false;
                             this.emit('error', err);
                             reject(err);
                         }
@@ -196,8 +201,7 @@ class PjsConnector extends EventEmitter {
             };
         }
 
-        // provider option can be provided by external environment 
-        // (during tests, for example)
+        // during tests, provider option can be provided by external environment 
         if (!this.config.provider) {
 
             let url = `${this.config.protocol}://${this.config.host}${this.config.port ? ':' + this.config.port : ''}`;
@@ -226,6 +230,10 @@ class PjsConnector extends EventEmitter {
         await this.state.set({
             pjs: PJS_CONNECTING
         });
+
+        this.emit('connecting', {
+            date: Date.now()
+        });
     
         this.api = new Pjs({
             eth: {
@@ -246,7 +254,6 @@ class PjsConnector extends EventEmitter {
                     
                     const connectionTimeout = setTimeout(() => {
                         this.emit('error', new Error(`Websocket connection timeout (${this.config.wstimeout}ms) exceeded`));            
-                        this.isReconnecting = false;
                         this.reconnect(resolve).then(resolve).catch(err => this.emit('error', err));
                     }, this.config.wstimeout);
                     
@@ -263,6 +270,11 @@ class PjsConnector extends EventEmitter {
         
         await this.state.set({
             pjs: PJS_CONNECTED
+        });
+
+        this.emit('connected', {
+            lastBlock: this.lastBlock,
+            date: Date.now()
         });
 
         if (this.config.protocol === 'ws' || this.config.protocol === 'wss') {
