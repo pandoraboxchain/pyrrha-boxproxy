@@ -140,13 +140,21 @@ module.exports.addRecordsFactory = (model, factoryOptions) => {
                 throw new Error('Source object (event emitter) is required but not been provided by task');
             }
 
-            log.debug(`PandoraDbAPI:ADD going to emit "${factoryOptions.subscribeEvent}" event for model "${model.name}" with options`, { 
-                blockNumber: nextBlockNumber 
-            });
-    
-            options.source.emit(factoryOptions.subscribeEvent, { 
-                blockNumber: nextBlockNumber 
-            });
+            if (factoryOptions.subscribeEvent) {
+
+                factoryOptions.subscribeEvent = Array.isArray(factoryOptions.subscribeEvent) ? factoryOptions.subscribeEvent : [factoryOptions.subscribeEvent];
+
+                factoryOptions.subscribeEvent.forEach(eventName => {
+
+                    log.debug(`PandoraDbAPI:ADD going to emit "${eventName}" event for model "${model.name}" with options`, { 
+                        blockNumber: nextBlockNumber 
+                    });
+            
+                    options.source.emit(eventName, { 
+                        blockNumber: nextBlockNumber 
+                    });
+                });
+            }            
         } else {
 
             log.debug(`PandoraDbAPI:ADD going to "bulkInsertOrUpdate" for model "${model.name}" with records`, records);

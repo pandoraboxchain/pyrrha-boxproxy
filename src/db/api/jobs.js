@@ -17,7 +17,7 @@ const pandora = require('../../pandora');
  */
 module.exports.add = addRecordsFactory(Jobs, {
     baselineFlag: 'jobsBaseline', 
-    subscribeEvent: 'subscribeJobs',
+    subscribeEvent: ['subscribeJobs', 'subscribeJobStateChanged'],
     formatRecord: record => ({
         address: record.address, 
         activeWorkers: record.activeWorkers.join(';'), 
