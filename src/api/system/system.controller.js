@@ -41,11 +41,30 @@ module.exports.getRuntimeProperties = async (req, res, next) => {
     }
 };
 
+// @route /system/subscriptions
+module.exports.getSubscriptionsList = (req, res, next) => {
+    let timeout;
+    
+    const onResponseReceived = message => {
+
+        clearTimeout(timeout);
+        res.status(200).json(message);        
+    };
+
+    timeout = setTimeout(() => {
+        pandora.removeListener('subscriptionsList', onResponseReceived);
+        next(Error('Subscriptions list not received. Timeout exceeded'));
+    }, 1000);
+
+    pandora.once('subscriptionsList', onResponseReceived);
+    pandora.emit('getSubscriptionsList');
+};
+
 // @router /system/state
 module.exports.getState = (req, res, next) => {
     let timeout;
     
-    const onStateReceived = message => {
+    const onResponseReceived = message => {
 
         clearTimeout(timeout);
         res.status(200).json({
@@ -55,11 +74,11 @@ module.exports.getState = (req, res, next) => {
     };
 
     timeout = setTimeout(() => {
-        pandora.removeListener('state', onStateReceived);
-        next(Error('State not received during timeout'));
+        pandora.removeListener('state', onResponseReceived);
+        next(Error('State not received. Timeout exceeded'));
     }, 1000);
 
-    pandora.once('state', onStateReceived);
+    pandora.once('state', onResponseReceived);
     pandora.emit('getState');
 };
 

@@ -191,7 +191,7 @@ const messageManager = async (message) => {
                             provider: config.provider // Pre-defined provider, usually defined in testing environment 
                         }
                     });
-                }
+                } 
                 
                 await state.set({
                     pan: PAN_STARTED
@@ -266,7 +266,14 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
-                    events: [kernelAdded, kernelRemoved]
+                    name: 'KernelAdded',
+                    events: [kernelAdded]
+                });
+
+                subscriptions.push({
+                    ...message,
+                    name: 'KernelRemoved',
+                    events: [kernelRemoved]
                 });
 
                 log.debug(`WORKER: events "kernelAdded", "kernelRemoved" added to subscriptions list`);
@@ -340,7 +347,14 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
-                    events: [datasetAdded, datasetRemoved]
+                    name: 'DatasetAdded',
+                    events: [datasetAdded]
+                });
+
+                subscriptions.push({
+                    ...message,
+                    name: 'DatasetRemoved',
+                    events: [datasetRemoved]
                 });
 
                 log.debug(`WORKER: events "datasetAdded", "datasetRemoved" added to subscriptions list`);
@@ -397,6 +411,7 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
+                    name: 'CognitiveJobCreated',
                     events: [cognitiveJobCreated]
                 });
 
@@ -431,10 +446,11 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
+                    name: 'JobStateChanged',
                     events: [cognitiveJobStateChanged]
                 });
 
-                log.debug(`WORKER: event "cognitiveJobStateChanged" added to subscriptions list`);
+                log.debug(`WORKER: events "cognitiveJobStateChanged" (JobStateChanged, CognitionProgressed) are added to subscriptions list`);
 
                 break;
 
@@ -485,6 +501,7 @@ const messageManager = async (message) => {
 
                 subscriptions.push({
                     ...message,
+                    name: 'WorkerNodeCreated',
                     events: [workerAdded]
                 });
 
@@ -508,7 +525,7 @@ const messageManager = async (message) => {
 
                 subscriptions.forEach(msg => {
 
-                    if (msg.cmd !== 'subscribeWorkerAddress' && 
+                    if (msg.cmd === 'subscribeWorkerAddress' && 
                         msg.address === message.address) {
 
                         alreadySubscribed = true;
@@ -533,6 +550,7 @@ const messageManager = async (message) => {
     
                     subscriptions.push({
                         ...message,
+                        name: 'WorkerNodeStateChanged',
                         events: [workerChanged]
                     });
     
@@ -559,6 +577,40 @@ const messageManager = async (message) => {
                     return true;
                 });
 
+                break;
+
+            case 'getSubscriptionsList':
+
+                const subscriptionsList = [];
+
+                subscriptions.forEach(message => message.events.forEach(item => {
+                    
+                    if (Array.isArray(item.event)) {
+
+                        item.event.forEach(subItem => subscriptionsList.push({
+                            category: message.cmd,
+                            name: message.name,
+                            fromBlock: message.blockNumber,
+                            arguments: subItem.arguments
+                        }));
+                    } else {
+
+                        subscriptionsList.push({
+                            category: message.cmd,
+                            name: message.name,
+                            fromBlock: message.blockNumber,
+                            arguments: item.event.arguments
+                        })
+                    }
+                }));
+
+                sendMessage({
+                    cmd: 'subscriptionsList',
+                    records: subscriptionsList,
+                    count: subscriptionsList.length,
+                    date: Date.now()
+                });
+                
                 break;
 
             default: 
@@ -590,7 +642,17 @@ pjs.on('connected', data => {
             subscriptions = [];
             
             originSubscriptions.forEach(message => {
-                message.events.forEach(item => item.event.unsubscribe());
+                message.events.forEach(item => {
+
+                    if (Array.isArray(item.event)) {
+
+                        // Events can be complex (like "cognitiveJobStateChanged")
+                        item.event.forEach(subItem => subItem.unsubscribe());
+                    } else {
+
+                        item.event.unsubscribe();
+                    }
+                });
                 message.events = [];
 
                 messageManager({

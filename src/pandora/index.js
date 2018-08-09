@@ -144,6 +144,14 @@ class PandoraSync extends EventEmitter {
                 });
                 break;
 
+            case 'subscriptionsList':
+                this.emit('subscriptionsList', {
+                    records: message.records || [],
+                    count: message.count,
+                    date: message.date
+                });
+                break;
+
             case 'lastBlockNumber':
                 this.emit('lastBlockNumber', {
                     name: 'lastBlock',
@@ -260,6 +268,14 @@ class PandoraSync extends EventEmitter {
             this.worker.send({
                 cmd: 'unsubscribeWorkerAddress',
                 ...options
+            });
+        });
+
+        this.on('getSubscriptionsList', () => {
+            log.debug(`PandoraSync: "getSubscriptionsList" event has been emitted`);
+
+            this.worker.send({
+                cmd: 'getSubscriptionsList'
             });
         });
     }

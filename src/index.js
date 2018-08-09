@@ -48,7 +48,8 @@ db.addTask({
             if (isBaseline) {
 
                 const blockNumber = await db.api.system.getBlockNumber('kernels');
-                return pandora.emit('subscribeKernels', { blockNumber });
+                pandora.emit('subscribeKernels', { blockNumber });
+                return;
             }
 
             pandora.emit('getKernels');
@@ -85,7 +86,8 @@ db.addTask({
             if (isBaseline) {
 
                 const blockNumber = await db.api.system.getBlockNumber('datasets');
-                return pandora.emit('subscribeDatasets', { blockNumber });
+                pandora.emit('subscribeDatasets', { blockNumber });
+                return;
             }
 
             pandora.emit('getDatasets');
@@ -154,17 +156,19 @@ db.addTask({
             if (isBaseline) {
 
                 const blockNumber = await db.api.system.getBlockNumber('workers');
-                return pandora.emit('subscribeWorkers', { blockNumber });
+                pandora.emit('subscribeWorkers', { blockNumber });
 
                 const workers = await db.api.workers.getAll({});
 
-                if (workers && workers.length > 0) {
+                if (workers && workers.count > 0) {
 
-                    workers.forEach(worker => pandora.emit('subscribeWorkerAddress', {
+                    workers.rows.forEach(worker => pandora.emit('subscribeWorkerAddress', {
                         address: worker.address,
                         blockNumber
                     }));
                 }
+
+                return;
             }
 
             pandora.emit('getWorkers');
