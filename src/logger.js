@@ -16,6 +16,10 @@ const createLogger = level => {
     
     // Setup transports
     config.transports.push(new winston.transports.Console());
+    // config.transports.push(new winston.transports.File({
+    //     filename: 'boxproxy-log.log',
+    //     level: 'debug'
+    // }));
 
     return winston.createLogger(config);
 };

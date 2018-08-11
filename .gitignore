@@ -4,3 +4,5 @@ package-lock.json
 tmp
 app-compiled
 market.db
+*.log
+*.db

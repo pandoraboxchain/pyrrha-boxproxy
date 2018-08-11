@@ -1,6 +1,6 @@
 {
   "name": "pyrrha-boxproxy",
-  "version": "1.6.21",
+  "version": "1.6.22",
   "private": true,
   "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
   "main": "./src/index.js",
@@ -10,6 +10,7 @@
     "pretest-with-coverage": "npm run test:build",
     "test": "docker run -e WITH_COVERAGE=0 -e LOG_LEVEL=debug -it pyrrha_boxproxy_tests",
     "test-with-coverage": "docker run -e WITH_COVERAGE=1 -it pyrrha_boxproxy_tests",
+    "lint": "npx eslint ./src",
     "build:docker": "docker-compose build --no-cache",
     "start:docker": "docker-compose up --remove-orphans",
     "stop:docker": "docker-compose down",
@@ -31,7 +32,8 @@
     "sqlite3": "4.0.2"
   },
   "devDependencies": {
-    "eslint": "^5.3.0"
+    "eslint": "^5.3.0",
+    "eslint-plugin-security": "^1.4.0"
   },
   "license": "MIT"
 }

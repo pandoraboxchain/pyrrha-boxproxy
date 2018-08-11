@@ -1,7 +1,17 @@
 {
     "env": {
-        "es6": true
+        "es6": true,
+        "node": true
     },
+    "parserOptions": {
+        "ecmaVersion": 9
+    },
+    "plugins": [
+        "security"
+    ],
+    "extends": [
+        "plugin:security/recommended"
+    ],
     "rules": {
         "comma-dangle": 0,
         "arrow-parens": 0,
@@ -9,6 +19,7 @@
         "no-trailing-spaces": 0,
         "object-curly-spacing": 0,
         "new-cap": 0,
-        "max-len": 0
-    }    
+        "max-len": 0,
+        "security/detect-child-process": 0
+    }
 }

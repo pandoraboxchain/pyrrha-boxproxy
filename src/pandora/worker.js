@@ -127,7 +127,11 @@ const sendMessage = message => {
     if (currentState !== PJS_STOPPED) {
 
         process.send(message);
-        log.debug(`WORKER: message sent`, message);
+
+        if (message.cmd !== 'lastBlockNumber') {
+
+            log.debug(`WORKER: message sent`, message);
+        }        
     }
 };
 

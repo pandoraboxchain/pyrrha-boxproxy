@@ -25,8 +25,8 @@ const hosts = {
         port: 8546,
         wstimeout: 5000,
         contracts: {
-            Pandora: '0x5ad42cf68e8bbfe2c1961ed56b8cfd14a4abaa3e',
-            PandoraMarket: '0xb0aa414ea41bae214cc888b4cbb79a9146b9a10e'
+            Pandora: '0x09dc2389c786490c2fe03f121b6f597bac7773d9',
+            PandoraMarket: '0xd66f0550800ec823e7359e755f6c4f16e62e555b'
         }
     },
     rinkeby_infura: {
@@ -35,13 +35,13 @@ const hosts = {
         port: 8546,
         wstimeout: 5000,
         contracts: {
-            Pandora: '0x5ad42cf68e8bbfe2c1961ed56b8cfd14a4abaa3e',
-            PandoraMarket: '0xb0aa414ea41bae214cc888b4cbb79a9146b9a10e'
+            Pandora: '0x09dc2389c786490c2fe03f121b6f597bac7773d9',
+            PandoraMarket: '0xd66f0550800ec823e7359e755f6c4f16e62e555b'
         }
     }
 };
 
-let defaultHost = process.env.USE_HOST || 'rinkeby_infura';
+let defaultHost = process.env.USE_HOST || 'rinkeby';
 
 module.exports = {
     port: 1111,

@@ -130,7 +130,8 @@ module.exports.addRecordsFactory = (model, factoryOptions) => {
             });
     
             // Save baseline records
-            await model.bulkCreate(records);
+            log.debug(`PandoraDbAPI:ADD going to save baseline records for model "${model.name}"`, records);
+            await bulkInsertOrUpdate(model, ['address'], records);
     
             // Save system flag what kernels baseline has been saved
             await system.fixBaseline(factoryOptions.baselineFlag);
