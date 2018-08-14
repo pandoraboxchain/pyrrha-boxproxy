@@ -12,7 +12,7 @@ module.exports = async () => {
         gas: 0xfffffffffff,
         copy,
         extract,
-        timeout: 15000,
+        timeout: 40000,
         debug: true,
         maxServers: 5
     });

@@ -25,27 +25,28 @@ module.exports.getDatasetsRecords = async (pjs) => {
  * @param {Object} options eventDatasetAdded, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Object}
+ * @returns {Promise}
  */
-module.exports.subscribeDatasetAdded = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeDatasetAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.datasets.eventDatasetAdded(options)
-            .data(async ({records, event}) => {
+    const datasetAdded = await pjs.api.datasets.eventDatasetAdded(options);
+    return datasetAdded
+        .data(async ({records, event}) => {
 
-                try {
+            try {
 
-                    const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.web3.eth.getBlockNumber();
 
-                    dataCallback({
-                        records,
-                        event,
-                        blockNumber
-                    });
-                } catch (err) {
-                    errorCallback(err);
-                }
-            })
-            .error(errorCallback);    
+                dataCallback({
+                    records,
+                    event,
+                    blockNumber
+                });
+            } catch (err) {
+                errorCallback(err);
+            }
+        })
+        .error(errorCallback);    
 };
 
 /**
@@ -55,25 +56,26 @@ module.exports.subscribeDatasetAdded = (pjs, options = {}, dataCallback = () => 
  * @param {Object} options eventDatasetRemoved, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Object}
+ * @returns {Promise}
  */
-module.exports.subscribeDatasetRemoved = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeDatasetRemoved = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.datasets.eventDatasetRemoved(options)
-            .data(async ({records, event}) => {
+    const datasetRemoved = await pjs.api.datasets.eventDatasetRemoved(options);
+    return datasetRemoved
+        .data(async ({records, event}) => {
 
-                try {
+            try {
 
-                    const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.web3.eth.getBlockNumber();
 
-                    dataCallback({
-                        records,
-                        event,
-                        blockNumber
-                    });
-                } catch (err) {
-                    errorCallback(err);
-                }
-            })
-            .error(errorCallback);    
+                dataCallback({
+                    records,
+                    event,
+                    blockNumber
+                });
+            } catch (err) {
+                errorCallback(err);
+            }
+        })
+        .error(errorCallback);    
 };

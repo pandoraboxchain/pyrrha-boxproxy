@@ -25,27 +25,28 @@ module.exports.getKernelsRecords = async (pjs) => {
  * @param {Object} options eventKernelAdded, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Object}
+ * @returns {Promise}
  */
-module.exports.subscribeKernelAdded = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeKernelAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.kernels.eventKernelAdded(options)
-            .data(async ({records, event}) => {
+    const kernelAdded = await pjs.api.kernels.eventKernelAdded(options);
+    return kernelAdded
+        .data(async ({records, event}) => {
 
-                try {
+            try {
 
-                    const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.web3.eth.getBlockNumber();
 
-                    dataCallback({
-                        records,
-                        event,
-                        blockNumber
-                    });
-                } catch (err) {
-                    errorCallback(err);
-                }
-            })
-            .error(errorCallback);    
+                dataCallback({
+                    records,
+                    event,
+                    blockNumber
+                });
+            } catch (err) {
+                errorCallback(err);
+            }
+        })
+        .error(errorCallback);    
 };
 
 /**
@@ -55,25 +56,26 @@ module.exports.subscribeKernelAdded = (pjs, options = {}, dataCallback = () => {
  * @param {Object} options eventKernelRemoved, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Object}
+ * @returns {Promise}
  */
-module.exports.subscribeKernelRemoved = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeKernelRemoved = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.kernels.eventKernelRemoved(options)
-            .data(async ({records, event}) => {
+    const kernelRemoved = await pjs.api.kernels.eventKernelRemoved(options)
+    return kernelRemoved
+        .data(async ({records, event}) => {
 
-                try {
+            try {
 
-                    const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.web3.eth.getBlockNumber();
 
-                    dataCallback({
-                        records,
-                        event,
-                        blockNumber
-                    });
-                } catch (err) {
-                    errorCallback(err);
-                }
-            })
-            .error(errorCallback);    
+                dataCallback({
+                    records,
+                    event,
+                    blockNumber
+                });
+            } catch (err) {
+                errorCallback(err);
+            }
+        })
+        .error(errorCallback);
 };

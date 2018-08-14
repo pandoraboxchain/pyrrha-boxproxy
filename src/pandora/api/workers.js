@@ -25,27 +25,28 @@ module.exports.getWorkersRecords = async (pjs) => {
  * @param {Object} options eventWorkerNodeCreated, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Object}
+ * @returns {Promise}
  */
-module.exports.subscribeWorkerAdded = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeWorkerAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.workers.eventWorkerNodeCreated(options)
-            .data(async ({records, event}) => {
+    const workerNodeCreated = await pjs.api.workers.eventWorkerNodeCreated(options);
+    return workerNodeCreated
+        .data(async ({records, event}) => {
 
-                try {
+            try {
 
-                    const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.web3.eth.getBlockNumber();
 
-                    dataCallback({
-                        records,
-                        event,
-                        blockNumber
-                    });
-                } catch (err) {
-                    errorCallback(err);
-                }
-            })
-            .error(errorCallback);    
+                dataCallback({
+                    records,
+                    event,
+                    blockNumber
+                });
+            } catch (err) {
+                errorCallback(err);
+            }
+        })
+        .error(errorCallback);    
 };
 
 /**
@@ -56,25 +57,26 @@ module.exports.subscribeWorkerAdded = (pjs, options = {}, dataCallback = () => {
  * @param {Object} options eventWorkerNodeStateChanged, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Object}
+ * @returns {Promise}
  */
-module.exports.subscribeWorkerNodeStateChanged = (pjs, address, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeWorkerNodeStateChanged = async (pjs, address, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.workers.eventWorkerNodeStateChanged(address, options)
-            .data(async ({records, event}) => {
+    const workerNodeStateChanged = await pjs.api.workers.eventWorkerNodeStateChanged(address, options);
+    return workerNodeStateChanged
+        .data(async ({records, event}) => {
 
-                try {
+            try {
 
-                    const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.web3.eth.getBlockNumber();
 
-                    dataCallback({
-                        records,
-                        event,
-                        blockNumber
-                    });
-                } catch (err) {
-                    errorCallback(err);
-                }
-            })
-            .error(errorCallback);    
+                dataCallback({
+                    records,
+                    event,
+                    blockNumber
+                });
+            } catch (err) {
+                errorCallback(err);
+            }
+        })
+        .error(errorCallback);    
 };

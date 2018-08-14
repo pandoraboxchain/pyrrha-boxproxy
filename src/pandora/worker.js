@@ -1,6 +1,7 @@
 'use strict';
-const StateManager = require('./stateManager');
 const config = require('../../config');
+const StateManager = require('./stateManager');
+const SubscriptionsManager = require('./subscriptionsManager');
 const log = require('../logger');
 const { safeObject } = require('../utils/json');
 const kernelsApi = require('./api/kernels');
@@ -90,6 +91,7 @@ const stateConditions = {
     }
 };
 
+// Worker`s state
 const state = new StateManager({
     model: stateModel,
     conditions: stateConditions,
@@ -103,8 +105,13 @@ const state = new StateManager({
     }
 });
 
+// Show state changes in debug mode
+state.on('state_change', data => {
+    log.debug(`WORKER: state changed`, data);
+});
+
 // Dynamically handled subscriptions list
-let subscriptions = [];
+const subscriptions = new SubscriptionsManager();
 
 // Helper for sending errors
 const sendError = (err, ...extra) => {
@@ -135,22 +142,27 @@ const sendMessage = message => {
     }
 };
 
-// Worker IPC messages manager
+/**
+ * Worker IPC messages manager
+ *
+ * @param {Object} message Process message
+ * @returns {Promise} 
+ */
 const messageManager = async (message) => {
     log.debug(`WORKER: a message received from the PandoraSync`, message);
 
     const connectionState = state.get('pjs');
 
-    if (connectionState === PJS_STOPPED && message.cmd !== 'start') {
-        
-        log.warn(`WORKER: message was ignored due to connection status "${connectionState}"`);
-        return sendError(new Error('Not connected yet. Message ignored'), message);
-    }
-
     if (connectionState === PJS_CONNECTING) {
 
         log.warn(`WORKER: message was delayed due to connection status "${connectionState}"`);
         return pjs.once('connected', () => messageManager(message));
+    }
+
+    if (connectionState === PJS_STOPPED && message.cmd !== 'start') {
+        
+        log.warn(`WORKER: message was ignored due to connection status "${connectionState}"`);
+        return sendError(new Error('Not connected. Message ignored'), message);
     }
 
     try {
@@ -233,6 +245,13 @@ const messageManager = async (message) => {
             // Subscribe to kernels updates
             case 'subscribeKernels':
 
+                if (subscriptions.isSubscribed('KernelAdded') && 
+                    subscriptions.isSubscribed('KernelRemoved')) {
+                    
+                    log.debug(`WORKER: command "subscribeKernelAdded" was ignored due to worker is already subscribed to events KernelAdded and KernelRemoved`);
+                    break;
+                }
+
                 log.debug(`WORKER: going to run "subscribeKernelAdded"`, {
                     fromBlock: message.blockNumber
                 });
@@ -251,6 +270,8 @@ const messageManager = async (message) => {
                     });
                 }, err => sendError(err));
 
+                subscriptions.register(message, kernelAdded);
+
                 log.debug(`WORKER: going to run "subscribeKernelRemoved"`, {
                     fromBlock: message.blockNumber
                 });
@@ -268,17 +289,7 @@ const messageManager = async (message) => {
                     });
                 }, err => sendError(err));
 
-                subscriptions.push({
-                    ...message,
-                    name: 'KernelAdded',
-                    events: [kernelAdded]
-                });
-
-                subscriptions.push({
-                    ...message,
-                    name: 'KernelRemoved',
-                    events: [kernelRemoved]
-                });
+                subscriptions.register(message, kernelRemoved);
 
                 log.debug(`WORKER: events "kernelAdded", "kernelRemoved" added to subscriptions list`);
 
@@ -314,6 +325,13 @@ const messageManager = async (message) => {
             // Subscribe to datasets updates
             case 'subscribeDatasets':
 
+                if (subscriptions.isSubscribed('DatasetAdded') && 
+                    subscriptions.isSubscribed('DatasetRemoved')) {
+                    
+                    log.debug(`WORKER: command "subscribeDatasetAdded" was ignored due to worker is already subscribed to events DatasetAdded and DatasetRemoved`);
+                    break;
+                }
+
                 log.debug(`WORKER: going to run "subscribeDatasetAdded"`, {
                     fromBlock: message.blockNumber
                 });
@@ -332,6 +350,8 @@ const messageManager = async (message) => {
                     });
                 }, err => sendError(err));
 
+                subscriptions.register(message, datasetAdded);
+
                 log.debug(`WORKER: going to run "subscribeDatasetRemoved"`, {
                     fromBlock: message.blockNumber
                 });
@@ -349,19 +369,7 @@ const messageManager = async (message) => {
                     });
                 }, err => sendError(err));
 
-                subscriptions.push({
-                    ...message,
-                    name: 'DatasetAdded',
-                    events: [datasetAdded]
-                });
-
-                subscriptions.push({
-                    ...message,
-                    name: 'DatasetRemoved',
-                    events: [datasetRemoved]
-                });
-
-                log.debug(`WORKER: events "datasetAdded", "datasetRemoved" added to subscriptions list`);
+                subscriptions.register(message, datasetRemoved);
 
                 await state.set({
                     datasets: PAN_DATASETS_SUBSCRIBED
@@ -395,11 +403,17 @@ const messageManager = async (message) => {
             // Subscribe to new job created event
             case 'subscribeJobs':
 
+                if (subscriptions.isSubscribed('CognitiveJobCreated')) {
+                    
+                    log.debug(`WORKER: command "subscribeCognitiveJobCreated" was ignored due to worker is already subscribed to event CognitiveJobCreated`);
+                    break;
+                }
+
                 log.debug(`WORKER: going to run "subscribeCognitiveJobCreated"`, {
                     fromBlock: message.blockNumber
                 });
                 
-                const cognitiveJobCreated = jobsApi.subscribeCognitiveJobCreated(pjs, {
+                const cognitiveJobCreated = await jobsApi.subscribeCognitiveJobCreated(pjs, {
                     fromBlock: message.blockNumber
                 }, result => {
                     log.debug(`WORKER: going to send just added "jobsRecords" received from event "subscribeCognitiveJobCreated"`, result);
@@ -413,13 +427,7 @@ const messageManager = async (message) => {
                     });
                 }, err => sendError(err));
 
-                subscriptions.push({
-                    ...message,
-                    name: 'CognitiveJobCreated',
-                    events: [cognitiveJobCreated]
-                });
-
-                log.debug(`WORKER: event "cognitiveJobCreated" added to subscriptions list`);
+                subscriptions.register(message, cognitiveJobCreated);
 
                 await state.set({
                     jobs: PAN_JOBS_SUBSCRIBED
@@ -430,11 +438,18 @@ const messageManager = async (message) => {
             // Subscribe to jobs updates
             case 'subscribeJobStateChanged':
 
+                if (subscriptions.isSubscribed('JobStateChanged') && 
+                    subscriptions.isSubscribed('CognitionProgressed')) {
+                    
+                    log.debug(`WORKER: command "subscribeJobStateChanged" was ignored due to worker is already subscribed to events JobStateChanged and CognitionProgressed`);
+                    break;
+                }
+
                 log.debug(`WORKER: going to run "subscribeJobStateChanged"`, {
                     fromBlock: message.blockNumber
                 });
 
-                const cognitiveJobStateChanged = jobsApi.subscribeJobStateChanged(pjs, {
+                const cognitiveJobStateChanged = await jobsApi.subscribeJobStateChanged(pjs, {
                     fromBlock: message.blockNumber
                 }, result => {
                     log.debug(`WORKER: going to send just changed "jobsRecords" received from event "subscribeJobStateChanged"`, result);
@@ -448,13 +463,7 @@ const messageManager = async (message) => {
                     });
                 }, err => sendError(err));
 
-                subscriptions.push({
-                    ...message,
-                    name: 'JobStateChanged',
-                    events: [cognitiveJobStateChanged]
-                });
-
-                log.debug(`WORKER: events "cognitiveJobStateChanged" (JobStateChanged, CognitionProgressed) are added to subscriptions list`);
+                subscriptions.register(message, cognitiveJobStateChanged);
 
                 break;
 
@@ -484,11 +493,17 @@ const messageManager = async (message) => {
             // Subscribe to new worker node created event
             case 'subscribeWorkers':
 
+                if (subscriptions.isSubscribed('WorkerNodeCreated')) {
+                        
+                    log.debug(`WORKER: command "subscribeWorkerAdded" was ignored due to worker is already subscribed to event WorkerNodeCreated`);
+                    break;
+                }
+
                 log.debug(`WORKER: going to run "subscribeWorkerAdded"`, {
                     fromBlock: message.blockNumber
                 });
                 
-                const workerAdded = workersApi.subscribeWorkerAdded(pjs, {
+                const workerAdded = await workersApi.subscribeWorkerAdded(pjs, {
                     fromBlock: message.blockNumber
                 }, result => {
 
@@ -503,13 +518,7 @@ const messageManager = async (message) => {
                     });
                 }, err => sendError(err));
 
-                subscriptions.push({
-                    ...message,
-                    name: 'WorkerNodeCreated',
-                    events: [workerAdded]
-                });
-
-                log.debug(`WORKER: event "workerAdded" added to subscriptions list`);
+                subscriptions.register(message, workerAdded);
 
                 await state.set({
                     workers: PAN_WORKERS_SUBSCRIBED
@@ -525,20 +534,9 @@ const messageManager = async (message) => {
                     fromBlock: message.blockNumber
                 });
 
-                let alreadySubscribed = false;
+                if (!subscriptions.isSubscribed('WorkerNodeStateChanged', message, 'address')) {
 
-                subscriptions.forEach(msg => {
-
-                    if (msg.cmd === 'subscribeWorkerAddress' && 
-                        msg.address === message.address) {
-
-                        alreadySubscribed = true;
-                    }
-                });
-
-                if (!alreadySubscribed) {
-
-                    const workerChanged = workersApi.subscribeWorkerNodeStateChanged(pjs, message.address, {
+                    const workerChanged = await workersApi.subscribeWorkerNodeStateChanged(pjs, message.address, {
                         fromBlock: message.blockNumber
                     }, result => {
                         log.debug(`WORKER: going to send just changed "workersRecords" received from event "subscribeWorkerNodeStateChanged"`, result);
@@ -552,61 +550,20 @@ const messageManager = async (message) => {
                         });
                     }, err => sendError(err));
     
-                    subscriptions.push({
-                        ...message,
-                        name: 'WorkerNodeStateChanged',
-                        events: [workerChanged]
-                    });
-    
-                    log.debug(`WORKER: event "workerChanged" added to subscriptions list`);
+                    subscriptions.register(message, workerChanged);
                 }
 
                 break;
 
             case 'unsubscribeWorkerAddress':
 
-                subscriptions = subscriptions.filter(msg => {
-
-                    if (msg.cmd !== 'subscribeWorkerAddress') {
-
-                        return true;
-                    }
-
-                    if (msg.address === message.address) {
-
-                        msg.events.map(evt => evt.unsubscribe());
-                        return false;
-                    }
-
-                    return true;
-                });
+                subscriptions.remove('WorkerNodeStateChanged', message, 'address');
 
                 break;
 
             case 'getSubscriptionsList':
 
-                const subscriptionsList = [];
-
-                subscriptions.forEach(message => message.events.forEach(item => {
-                    
-                    if (Array.isArray(item.event)) {
-
-                        item.event.forEach(subItem => subscriptionsList.push({
-                            category: message.cmd,
-                            name: message.name,
-                            fromBlock: message.blockNumber,
-                            arguments: subItem.arguments
-                        }));
-                    } else {
-
-                        subscriptionsList.push({
-                            category: message.cmd,
-                            name: message.name,
-                            fromBlock: message.blockNumber,
-                            arguments: item.event.arguments
-                        })
-                    }
-                }));
+                const subscriptionsList = subscriptions.getList();
 
                 sendMessage({
                     cmd: 'subscriptionsList',
@@ -636,37 +593,11 @@ pjs.on('disconnected', data => sendMessage({
 }));
 
 // Re-subscribe all active subscriptions on reconnect
-pjs.on('connected', data => {
+pjs.on('connected', async (data) => {
 
     try {
 
-        if (subscriptions.length > 0) {
-
-            const originSubscriptions = subscriptions;
-            subscriptions = [];
-            
-            originSubscriptions.forEach(message => {
-                message.events.forEach(item => {
-
-                    if (Array.isArray(item.event)) {
-
-                        // Events can be complex (like "cognitiveJobStateChanged")
-                        item.event.forEach(subItem => subItem.unsubscribe());
-                    } else {
-
-                        item.event.unsubscribe();
-                    }
-                });
-                message.events = [];
-
-                messageManager({
-                    ...message,
-                    ...{
-                        blockNumber: data.blockNumber
-                    }
-                });
-            });
-        }
+        await subscriptions.refresh(data.blockNumber, messageManager);
 
         sendMessage({
             cmd: 'connected',

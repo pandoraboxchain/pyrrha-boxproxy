@@ -17,7 +17,7 @@ describe('Database module tests', () => {
     let testProv = new TestEvetsProvider();
 
     before(done => {
-        const timeout = setTimeout(() => done(new Error('"initialized" event not emitted on start')), 5000);
+        const timeout = setTimeout(() => done(new Error('"initialized" event not emitted on start')), 7000);
         db.once('initialized', () => {
             clearTimeout(timeout);
             done();

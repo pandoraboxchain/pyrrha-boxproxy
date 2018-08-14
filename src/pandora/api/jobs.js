@@ -25,27 +25,28 @@ module.exports.getJobsRecords = async (pjs) => {
  * @param {Object} options eventCognitiveJobCreated, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Object}
+ * @returns {Promise}
  */
-module.exports.subscribeCognitiveJobCreated = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeCognitiveJobCreated = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.jobs.eventCognitiveJobCreated(options)
-            .data(async ({records, event}) => {
+    const cognitiveJobCreated = await pjs.api.jobs.eventCognitiveJobCreated(options);
+    return cognitiveJobCreated
+        .data(async ({records, event}) => {
 
-                try {
+            try {
 
-                    const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.web3.eth.getBlockNumber();
 
-                    dataCallback({
-                        records,
-                        event,
-                        blockNumber
-                    });
-                } catch (err) {
-                    errorCallback(err);
-                }
-            })
-            .error(errorCallback);
+                dataCallback({
+                    records,
+                    event,
+                    blockNumber
+                });
+            } catch (err) {
+                errorCallback(err);
+            }
+        })
+        .error(errorCallback);
 };
 
 /**
@@ -55,25 +56,26 @@ module.exports.subscribeCognitiveJobCreated = (pjs, options = {}, dataCallback =
  * @param {Object} options eventCognitiveJobStateChanged, see pyrrha-js for details
  * @param {Function} dataCallback Return { records: Array[Object], blockNumber: Number }
  * @param {Function} errorCallback
- * @returns {Object}
+ * @returns {Promise}
  */
-module.exports.subscribeJobStateChanged = (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
+module.exports.subscribeJobStateChanged = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    return pjs.api.jobs.eventJobStateChanged(options)
-            .data(async ({records, event}) => {
+    const jobStateChanged = await pjs.api.jobs.eventJobStateChanged(options);
+    return jobStateChanged
+        .data(async ({records, event}) => {
 
-                try {
+            try {
 
-                    const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.web3.eth.getBlockNumber();
 
-                    dataCallback({
-                        records,
-                        event,
-                        blockNumber
-                    });
-                } catch (err) {
-                    errorCallback(err);
-                }
-            })
-            .error(errorCallback);    
+                dataCallback({
+                    records,
+                    event,
+                    blockNumber
+                });
+            } catch (err) {
+                errorCallback(err);
+            }
+        })
+        .error(errorCallback);    
 };
