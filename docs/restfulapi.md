@@ -1,0 +1,427 @@
+# Pyrrha Boxproxy RESTful API
+All endpoints are available under the URL: http://[boxproxy-host-name]/*
+
+## /kernels
+- `/kernels` List of kernels (with [query parameters](./dbquery.md))  
+```json
+/kernels?page=1&limit=1
+{
+   "records":[
+      {
+         "id":1,
+         "address":"0x2fDB604C17533b3A434dc8968E8552488E33B87A",
+         "ipfsAddress":"QmckxuPyBzmaTJDpf32RCpkkTsAYMynAk3eCh5B7EbFA9p",
+         "dataDim":784,
+         "currentPrice":48,
+         "complexity":669706,
+         "metadata":"CIFAR_10,HANDWRITTEN,DIGITS",
+         "description":"CIFAR10,digits,for_train_48"
+      }
+   ],
+   "count":3,
+   "limit":1,
+   "page":1
+}
+```
+- `/kernels/address/:address` Search kernels list by contract address 
+```json
+/kernels/address/0x2fDB604C17533b3A434dc8968E8552488E33B87A
+{
+   "records":[
+      {
+         "id":1,
+         "address":"0x2fDB604C17533b3A434dc8968E8552488E33B87A",
+         "ipfsAddress":"QmckxuPyBzmaTJDpf32RCpkkTsAYMynAk3eCh5B7EbFA9p",
+         "dataDim":784,
+         "currentPrice":48,
+         "complexity":669706,
+         "metadata":"CIFAR_10,HANDWRITTEN,DIGITS",
+         "description":"CIFAR10,digits,for_train_48"
+      }
+   ]
+}
+```
+
+## /datasets
+- `/datasets` List of datasets (with [query parameters](./dbquery.md))
+```json
+/datasets?page=1&limit=1
+{
+   "records":[
+      {
+         "id":1,
+         "address":"0x5aAB5046C20e83Eb5e101F9d143eaBc00c3F55EF",
+         "ipfsAddress":"QmeZ5Ra4NsSVqTv5T6jiDKM7yDVKPmwDH94Sfuyy3Knd1d",
+         "dataDim":784,
+         "batchesCount":1,
+         "currentPrice":48,
+         "metadata":"CIFAR_10,HANDWRITTEN,DIGITS",
+         "description":"CIFAR10,digits,train_48"
+      }
+   ],
+   "count":9,
+   "limit":1,
+   "page":1
+}
+```
+- `/datasets/address/:address` Search datasets by contract address  
+```json
+/datasets/address/0x5aAB5046C20e83Eb5e101F9d143eaBc00c3F55EF
+{
+   "records":[
+      {
+         "id":1,
+         "address":"0x5aAB5046C20e83Eb5e101F9d143eaBc00c3F55EF",
+         "ipfsAddress":"QmeZ5Ra4NsSVqTv5T6jiDKM7yDVKPmwDH94Sfuyy3Knd1d",
+         "dataDim":784,
+         "batchesCount":1,
+         "currentPrice":48,
+         "metadata":"CIFAR_10,HANDWRITTEN,DIGITS",
+         "description":"CIFAR10,digits,train_48"
+      }
+   ]
+}
+```
+## /workers
+- `/workers` List of workers (with [query parameters](./dbquery.md))  
+```json
+/workers?page=1&limit=5
+{
+   "records":[
+      {
+         "id":1,
+         "address":"0x3547B66F24e35690aCFF80C76c6aE5Dc31FA6480",
+         "currentJob":"0x989c0156d6c5f9c3cca841bc6e6826ff6fef36eb6b7e775f9516cd4174763f23",
+         "currentJobStatus":7,
+         "currentState":2
+      }
+   ],
+   "count":3,
+   "limit":1,
+   "page":1
+}
+```
+- `/workers/address/:address` Search workers by contract address    
+```json
+/workers/address/0x3547B66F24e35690aCFF80C76c6aE5Dc31FA6480  
+{
+   "records":[
+      {
+         "id":1,
+         "address":"0x3547B66F24e35690aCFF80C76c6aE5Dc31FA6480",
+         "currentJob":"0x989c0156d6c5f9c3cca841bc6e6826ff6fef36eb6b7e775f9516cd4174763f23",
+         "currentJobStatus":7,
+         "currentState":2
+      }
+   ]
+}
+```
+
+## /jobs
+- `/jobs`  List of jobs (with [query parameters](./dbquery.md))    
+```json
+/jobs?page=1&limit=1  
+{
+   "records":[
+      {
+         "id":1,
+         "address":"0x18eab4230adc0d527789faa413daf3b59601c068086e66956d83ba2a85b632f6",
+         "description":"test_train_100/1",
+         "activeWorkers":"0x3547B66F24e35690aCFF80C76c6aE5Dc31FA6480",
+         "progress":100,
+         "kernel":"0x867999D172b9a71F3CF4e79Ca6eEFE53a6E8e481",
+         "kernelIpfs":"QmckxuPyBzmaTJDpf32RCpkkTsAYMynAk3eCh5B7EbFA9p",
+         "dataset":"0x893D0f9A4E0C4eF38A5e25a249A4397D1Cf95023",
+         "datasetIpfs":"QmaxqW5DEySxWe4L9SGFwmG7F81swHFVik1xFdnUWsUtPB",
+         "ipfsResults":"QmW14Rmy4Gdn2z5Abvy1CmUvJcCyNDyikwytFghxw9MXzj",
+         "state":7,
+         "jobType":"0"
+      }
+   ],
+   "count":31,
+   "limit":1,
+   "page":1
+}
+```
+- `/jobs/address/:address` Search jobs by jobId    
+```json
+/jobs/address/0x18eab4230adc0d527789faa413daf3b59601c068086e66956d83ba2a85b632f6 
+{
+   "records":[
+      {
+         "id":1,
+         "address":"0x18eab4230adc0d527789faa413daf3b59601c068086e66956d83ba2a85b632f6",
+         "description":"test_train_100/1",
+         "activeWorkers":"0x3547B66F24e35690aCFF80C76c6aE5Dc31FA6480",
+         "progress":100,
+         "kernel":"0x867999D172b9a71F3CF4e79Ca6eEFE53a6E8e481",
+         "kernelIpfs":"QmckxuPyBzmaTJDpf32RCpkkTsAYMynAk3eCh5B7EbFA9p",
+         "dataset":"0x893D0f9A4E0C4eF38A5e25a249A4397D1Cf95023",
+         "datasetIpfs":"QmaxqW5DEySxWe4L9SGFwmG7F81swHFVik1xFdnUWsUtPB",
+         "ipfsResults":"QmW14Rmy4Gdn2z5Abvy1CmUvJcCyNDyikwytFghxw9MXzj",
+         "state":7,
+         "jobType":"0"
+      }
+   ]
+}
+```
+
+## /system
+ - `/system/version` Actual server version  
+```json
+{
+    "version": "1.6.24"
+}
+```
+ - `/system/addresses` Root pyrrha-consesnsus contracts addresses  
+```json
+{
+   "Pandora":"0x09dc2389c786490c2fe03f121b6f597bac7773d9",
+   "PandoraMarket":"0xd66f0550800ec823e7359e755f6c4f16e62e555b"
+}
+```
+ - `/system/runtime?limit=20` Runtime configuration (with [pagination](./dbquery.md), because of this list can be long)
+```json
+{
+   "records":[
+      {
+         "id":1,
+         "name":"alreadySeeded",
+         "value":"yes"
+      },
+      {
+         "id":2,
+         "name":"kernelsBaseline",
+         "value":"yes"
+      },
+      {
+         "id":3,
+         "name":"datasetsBaseline",
+         "value":"yes"
+      },
+      {
+         "id":4,
+         "name":"workersBaseline",
+         "value":"yes"
+      },
+      {
+         "id":5,
+         "name":"jobsBaseline",
+         "value":"yes"
+      },
+      {
+         "id":6,
+         "name":"contract.Pandora",
+         "value":"0x09dc2389c786490c2fe03f121b6f597bac7773d9"
+      },
+      {
+         "id":7,
+         "name":"contract.PandoraMarket",
+         "value":"0xd66f0550800ec823e7359e755f6c4f16e62e555b"
+      },
+      {
+         "id":8,
+         "name":"kernels.blockNumber",
+         "value":"2820969"
+      },
+      {
+         "id":10,
+         "name":"jobs.blockNumber",
+         "value":"2823554"
+      },
+      {
+         "id":12,
+         "name":"datasets.blockNumber",
+         "value":"2820969"
+      },
+      {
+         "id":14,
+         "name":"workers.blockNumber",
+         "value":"2823554"
+      }
+   ],
+   "count":11,
+   "limit":20,
+   "page":1
+}
+ ```
+ - `/system/state` Pandora synchronizer state  
+```json
+{
+   "state":{
+      "pjs":"PJS_CONNECTED",
+      "pan":"PAN_STARTED",
+      "kernels":"PAN_KERNELS_SUBSCRIBED",
+      "datasets":"PAN_DATASETS_SUBSCRIBED",
+      "jobs":"PAN_JOBS_SUBSCRIBED",
+      "workers":"PAN_WORKERS_SUBSCRIBED"
+   },
+   "date":1534438754857
+}
+```
+ - `/system/loglevel` Current log level configuration  
+```json
+{
+   "level":"debug",
+   "date":1534438993869
+}
+```
+ - `/system/subscriptions` Currntly subscribel event listeners list  
+```json
+{
+   "records":[
+      {
+         "name":"KernelAdded",
+         "cmd":"subscribeKernels",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0xcf31165d5ed409961af0e533d1df52e392ca2a050a9e73c406bb1ccb683cc5ba"
+               ],
+               "address":"0xd66f0550800ec823e7359e755f6c4f16e62e555b"
+            }
+         ]
+      },
+      {
+         "name":"KernelRemoved",
+         "cmd":"subscribeKernels",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0x71574028d614ed221ccaf33bd6f2c3f152ab7832b2f3f755f744bbc96da75f5a"
+               ],
+               "address":"0xd66f0550800ec823e7359e755f6c4f16e62e555b"
+            }
+         ]
+      },
+      {
+         "name":"CognitiveJobCreated",
+         "cmd":"subscribeJobs",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0x11a21264ecb93e14000906dc00b4753fd6eec24f9f0f1b4305a1a04740b3023e"
+               ],
+               "address":"0x09dc2389c786490c2fe03f121b6f597bac7773d9"
+            }
+         ]
+      },
+      {
+         "name":"JobStateChanged",
+         "cmd":"subscribeJobStateChanged",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0x9cb99c834b5e878ca7005d163b0fd70203dbc223d5845abe517de64a74dc5816",
+                  null
+               ],
+               "address":"0xe84e8ceb13ccd58db64801e1ad7470614d73ce80"
+            }
+         ]
+      },
+      {
+         "name":"CognitionProgressed",
+         "cmd":"subscribeJobStateChanged",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0x84d08018633e0a8a0ba434acc29166246cfe913279e254647ca8c2f24f136607",
+                  null
+               ],
+               "address":"0xe84e8ceb13ccd58db64801e1ad7470614d73ce80"
+            }
+         ]
+      },
+      {
+         "name":"DatasetAdded",
+         "cmd":"subscribeDatasets",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0x0c4c9279435b64167addbdd51e76b8ef0cb6dd29fd131c486b1a276b4c6ad2b2"
+               ],
+               "address":"0xd66f0550800ec823e7359e755f6c4f16e62e555b"
+            }
+         ]
+      },
+      {
+         "name":"DatasetRemoved",
+         "cmd":"subscribeDatasets",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0x8c915c9fd390f8f4da90f661dd26612aeafd3908a283036d02540aa4053d1f6a"
+               ],
+               "address":"0xd66f0550800ec823e7359e755f6c4f16e62e555b"
+            }
+         ]
+      },
+      {
+         "name":"StateChanged",
+         "cmd":"subscribeWorkerAddress",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0xe8a97ea87e4388fa22d496b95a8ed5ced6717f49790318de2b928aaf37a021d8"
+               ],
+               "address":"0x3547b66f24e35690acff80c76c6ae5dc31fa6480"
+            }
+         ]
+      },
+      {
+         "name":"StateChanged",
+         "cmd":"subscribeWorkerAddress",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0xe8a97ea87e4388fa22d496b95a8ed5ced6717f49790318de2b928aaf37a021d8"
+               ],
+               "address":"0x44d8cc1591147c8dfb3f6644b40262b2baaa142d"
+            }
+         ]
+      },
+      {
+         "name":"StateChanged",
+         "cmd":"subscribeWorkerAddress",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0xe8a97ea87e4388fa22d496b95a8ed5ced6717f49790318de2b928aaf37a021d8"
+               ],
+               "address":"0x12d78f71ebcbc8d53db278c1d1c9a1c8d7af78ef"
+            }
+         ]
+      },
+      {
+         "name":"WorkerNodeCreated",
+         "cmd":"subscribeWorkers",
+         "fromBlock":2820969,
+         "arguments":[
+            {
+               "topics":[
+                  "0x093794466f44429afc8d8ec2c4c7f42c98d5db9b3db965ce46a31e7d4f7c29c8"
+               ],
+               "address":"0x09dc2389c786490c2fe03f121b6f597bac7773d9"
+            }
+         ]
+      }
+   ],
+   "count":11,
+   "date":1534439041685
+}
+```
+
+
+
+
+

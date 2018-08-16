@@ -2,7 +2,12 @@
 
 # pyrrha-boxproxy
 
-Server-side Proxy for Pyrrha Boxchain Explorer
+Server-side proxy for Pandora Pyrrha Boxchain explorer
+
+## Documentation
+- [Architecture notes](./docs/architecture.md)
+- [RESTful API endpoints](./docs/restfulapi.md)
+- [Database queries syntax](./docs/dbquery.md) 
 
 ## Initial setup
 Requires node.js version 9 and up
@@ -11,17 +16,14 @@ npm i
 git submodule update --init --recursive --remote
 ```
 
-## Config
-Local configuration file is placed in folder ./config  
+## Configuration
+Local configuration file is placed in folder [./config](./config)  
 Also, can be used following environment vars:
 - WEB3_PROTOCOL
 - WEB3_HOSTNAME
 - WEB3_PORT
 - PAN_ADDRESS
 - MARKET_ADDRESS
-
-Currently deployed instances of contracts can be found by this link:
-https://github.com/pandoraboxchain/pyrrha-consensus/wiki
 
 ## Using with Docker
 Environment configuration is in the ./docker-compose.yml
