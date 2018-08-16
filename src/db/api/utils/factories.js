@@ -122,6 +122,20 @@ module.exports.addRecordsFactory = (model, factoryOptions) => {
         
         log.debug(`PandoraDbAPI:ADD, current baseline mode for model "${model.name}": ${data.baseline}`);
 
+        // After-insertion callback
+        const onAfterInsert = record => {
+
+            if (factoryOptions.subscribeUpdateEvent) {
+
+                options.source.emit(factoryOptions.subscribeUpdateEvent, {
+                    address: record.address,
+                    blockNumber: nextBlockNumber 
+                })
+
+                log.debug(`PandoraDbAPI:ADD going to emit "${factoryOptions.subscribeUpdateEvent}" event for model "${model.name}"`, record.toJSON());
+            }
+        };
+
         if (data.baseline) {
     
             await model.destroy({
@@ -131,7 +145,7 @@ module.exports.addRecordsFactory = (model, factoryOptions) => {
     
             // Save baseline records
             log.debug(`PandoraDbAPI:ADD going to save baseline records for model "${model.name}"`, records);
-            await bulkInsertOrUpdate(model, ['address'], records);
+            await bulkInsertOrUpdate(model, ['address'], records, onAfterInsert);
     
             // Save system flag what kernels baseline has been saved
             await system.fixBaseline(factoryOptions.baselineFlag);
@@ -159,18 +173,7 @@ module.exports.addRecordsFactory = (model, factoryOptions) => {
         } else {
 
             log.debug(`PandoraDbAPI:ADD going to "bulkInsertOrUpdate" for model "${model.name}" with records`, records);
-            await bulkInsertOrUpdate(model, ['address'], records);
-        }
-
-        if (factoryOptions.subscribeUpdateEvent) {
-
-            const recordsForWatching = await model.findAll(factoryOptions.subscribeUpdateFilter || {});
-            log.debug(`PandoraDbAPI:ADD going to emit "${factoryOptions.subscribeUpdateEvent}" event for model "${model.name}" records`, recordsForWatching);
-
-            recordsForWatching.forEach(record => options.source.emit(factoryOptions.subscribeUpdateEvent, {
-                address: record.address,
-                blockNumber: nextBlockNumber 
-            }));
+            await bulkInsertOrUpdate(model, ['address'], records, onAfterInsert);
         }
     };
 };

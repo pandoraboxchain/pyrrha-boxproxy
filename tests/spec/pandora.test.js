@@ -42,6 +42,8 @@ describe('Pandora module tests', () => {
     let workerNodeAddress1;
 
     before(async () => {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         const node = await ContractsNode;
 
         server = node.node;
@@ -63,8 +65,6 @@ describe('Pandora module tests', () => {
             contracts: node.contracts,
             addresses: node.addresses
         });
-
-        await new Promise(resolve => setTimeout(resolve, 500));
 
         kernelContractAddress1 = await pjs.kernels.deploy(kernelIpfsHash, kernelOptions, publisher);
         await pjs.kernels.addToMarket(kernelContractAddress1, publisher);

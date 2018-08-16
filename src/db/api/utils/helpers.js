@@ -9,9 +9,10 @@ const config = require('../../../../config');
  * @param {Object} model Sequelize model
  * @param {Array[String]} condition Array of key to find by
  * @param {Array[Object]} values Array of objects to insert
+ * @param {Function} onAfterInsert Callback that should be called after insertion of the new record
  * @returns {Promise}
  */
-module.exports.bulkInsertOrUpdate = (model, condition = [], values = []) => {
+module.exports.bulkInsertOrUpdate = (model, condition = [], values = [], onAfterInsert = () => {}) => {
 
     if (typeof model.findOne !== 'function') {
 
@@ -41,7 +42,8 @@ module.exports.bulkInsertOrUpdate = (model, condition = [], values = []) => {
             await existenRecord.update(record);
         } else {
 
-            await model.create(record);
+            const savedNewRecord = await model.create(record);
+            onAfterInsert(savedNewRecord);
         }
     }));
 };

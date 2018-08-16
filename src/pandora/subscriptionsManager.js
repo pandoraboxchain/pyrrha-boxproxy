@@ -1,177 +1,65 @@
 'use strict';
 const log = require('../logger');
+const { EventEmitter } = require('events');
+const Queue = require('../utils/queue');
 
 /**
  * Subscriptions manager 
  *
  * @class SubscriptionsManager
  */
-class SubscriptionsManager {
+class SubscriptionsManager extends EventEmitter  {
 
     constructor() {
-        this.subscriptions = [];
-    }
+        super();
 
-    /**
-     * Generate unique id for subscriptions
-     *
-     * @returns {[<{String}>]} Array of affected events names
-     * @memberof SubscriptionsManager
-     * @private 
-     */
-    _guId() {
-
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-            let r = Math.random() * 16|0; 
-            let v = c == 'x' ? r : (r&0x3|0x8);
-            return v.toString(16);
-        });
+        this.subscriptions = new Queue();
     }
 
     /**
      * Unsubscribe event(s)
      *
-     * @param {Object} subscriptionItem Subscription item object
-     * @returns {[<{String}>]} Array of affected events names
+     * @param {Object} message Subscription item object (message object with "events" property)
      * @memberof SubscriptionsManager
      * @private 
      */
-    _unsubscribeEvent(subscriptionItem) {
+    _unsubscribeEvents(message) {
+        let unsubscribedEvents = [];
 
-        if (Array.isArray(subscriptionItem.subscription)) {
-
-            // Events can be complex (like "cognitiveJobStateChanged")
-            subscriptionItem.subscription.forEach(subItem => subItem.unsubscribe());
-        } else {
-
-            subscriptionItem.subscription.unsubscribe();
-        }
-
-        log.debug(`WORKER: event "${subscriptionItem.name}" has been unsubscribed at ${Date.now()}`);
-    }
-
-    /**
-    * Check is event already subscribed
-    *
-    * @param {String} eventName Condition property (event name name)
-    * @param {Object} message Process message
-    * @param {String} addProp Additional condition property (optional)
-    * @returns {Boolean} 
-    * @memberof SubscriptionsManager
-    */
-    isSubscribed(eventName, message, addProp = null) {
-        let subscribed = false;
-
-        const validateSubscription = (subscription, item) => {
-
-            if (subscription.name === eventName) {
-    
-                if (addProp && item[addProp] !== message[addProp]) {
-                    
-                    subscribed = false;
-                    return;
-                }
-                
-                subscribed = true;
-            }
-        };
-    
-        this.subscriptions.forEach(item => {
-
-            if (Array.isArray(item.subscription)) {
-
-                item.subscription.forEach(subItem => validateSubscription(subItem, item));
-            } else {
-
-                validateSubscription(item.subscription, item);
-            }            
+        message.events.forEach(event => {
+            unsubscribedEvents.push(event.name);
+            event.unsubscribe();
         });
-    
-        return subscribed;
+
+        delete message.events;
+
+        log.debug(`WORKER: events [${unsubscribedEvents.join(',')}"] has been unsubscribed at ${Date.now()}`);
     }
 
     /**
-     * Register event in subscriptions list
-     * 
-     * Template for subscription object:
-     * {
-     *      id: <String>,          // Unique Id
-     *      cmd: {String},         // Process message cmd (part of message object)
-     *      blockNumber: {Number}, // Block number from which the event is listen to (part of message object)
-     *      name: {String},        // Event name (see pyrrha-js)
-     *      event: {Object}        // Web3 event object
-     * }
+     * Create new subscription
      *
      * @param {Object} message Process message
-     * @param {[<{Object}>]} events Events objects to be registered (kind of sourceEventName)
+     * @param {[<{String}>]} conditions Additional condition (message property name)
+     * @param {Function} subscriptionCallback
      * @memberof SubscriptionsManager
      */
-    register(message, ...events) {
-
-        events.forEach(item => {            
-            const isComplexEvent = Array.isArray(item.event);
-
-            const subscriptionObject = {
-                id: this._guId(),
-                name: isComplexEvent ? item.event.map(subEvent => subEvent.name).join('&') : item.event.name,
-                subscription: item.event,
-                ...message
-            };
-
-            this.subscriptions.push(subscriptionObject);
-
-            log.debug(`WORKER: subscription on event "${subscriptionObject.name}" has been registered at ${Date.now()}`);
-        });
+    create(message, conditions = [], subscriptionCallback = async () => {}) {
+        
+        this.subscriptions.add(message, conditions, subscriptionCallback);
     }
 
     /**
      * Remove event subscription
      *
-     * @param {String} eventName Event name
-     * @param {Object} message Process message
-     * @param {String} cmdProp Additional removal condition (message property name)
+     * @param {Object} conditions Removal condition rules
      * @memberof SubscriptionsManager
      */
-    remove(eventName, message, cmdProp = null) {
+    remove(conditions = {}) {
 
-        log.debug(`WORKER: going to remove subscription for "${eventName}"`);
+        log.debug(`WORKER: going to remove subscription by conditions`, conditions);
 
-        const validateSubscription = (subscription, item) => {
-
-            if (subscription.name === eventName) {
-    
-                if (cmdProp && item[cmdProp] !== message[cmdProp]) {
-                    
-                    return false;
-                }
-                
-                this._unsubscribeEvent(item);
-                log.debug(`WORKER: subscription on "${item.name}" has been removed`);
-                return true;
-            }
-        };
-
-        this.subscriptions = this.subscriptions.filter(item => {
-            let isKept = true;
-
-            if (Array.isArray(item.subscription)) {
-                
-
-                item.subscription.forEach(subItem => {
-                    
-                    if (validateSubscription(subItem, item)) {
-
-                        isKept = false;
-                        return;
-                    }
-                });
-            } else if (validateSubscription(item.subscription, item)) {
-
-                isKept = false;
-            }
-                            
-            return isKept;
-        });
+        this.subscriptions.remove(conditions);
     }
 
     /**
@@ -182,61 +70,67 @@ class SubscriptionsManager {
      * @returns {Promise} 
      * @memberof SubscriptionsManager
      */
-    async refresh(blockNumber, subscriptionCallback = async () => {}) {
+    refresh(blockNumber, subscriptionCallback = async () => {}) {
 
         if (this.subscriptions.length === 0) {
 
             return Promise.resolve();
         }
 
-        let originSubscriptions = this.subscriptions;
-        this.subscriptions = [];
+        return new Promise(async (resolve, reject) => {
+            let originSubscriptions = this.subscriptions.data;
 
-        await Promise.all(originSubscriptions.map(message => {
-            this._unsubscribeEvent(message);
+            this.subscriptions.once('reset', async () => {
+
+                try {
+
+                    this.subscriptions.delay(50).then(() => {
+
+                        log.debug(`WORKER: all subscriptions have been refreshed at ${Date.now()}`);
+                        resolve(this.subscriptions.data);
+                    });
+        
+                    await Promise.all(originSubscriptions.map(message => {
+        
+                        this._unsubscribeEvents(message);
+                                    
+                        return subscriptionCallback({
+                            ...message,
+                            blockNumber
+                        });
+                    }));
             
-            return subscriptionCallback({
-                ...message,
-                blockNumber
+                    originSubscriptions = undefined;
+                } catch (err) {
+        
+                    this.emit('error', err);
+                    reject(err);
+                }
             });
-        }));
 
-        originSubscriptions = undefined;
-
-        log.debug(`WORKER: all subscriptions have been refreshed at ${Date.now()}`);
+            this.subscriptions.reset();            
+        });        
     }
 
     /**
      * Get subscriptions list
      *  
-     * @returns {[<{Object}>]} Array of subscriptions
+     * @returns {Object[]} Array of subscriptions
      * @memberof SubscriptionsManager
      */
     getList() {
 
         const subscriptionsList = [];
+        const subscriptions = this.subscriptions.data;
 
-        this.subscriptions.forEach(item => {
+        subscriptions.forEach(message => {
 
-            if (Array.isArray(item.subscription)) {
-
-                item.subscription.forEach(subItem => subscriptionsList.push({
-                    id: item.id,
-                    name: subItem.name,
-                    cmd: item.cmd,
-                    fromBlock: item.blockNumber,
-                    arguments: subItem.arguments
-                }));
-            } else {
-
-                subscriptionsList.push({
-                    id: item.id,
-                    name: item.name,
-                    cmd: item.cmd,
-                    fromBlock: item.blockNumber,
-                    arguments: item.subscription.arguments
-                })
-            }
+            message.events.forEach(event => subscriptionsList.push({
+                name: event.name,
+                cmd: message.cmd,
+                fromBlock: message.blockNumber,
+                arguments: event.arguments
+            }));
         });
 
         return subscriptionsList;

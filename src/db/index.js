@@ -2,6 +2,7 @@
 const { EventEmitter } = require('events');
 const expect = require('../utils/expect');
 const { safeObject } = require('../utils/json');
+const Queue = require('../utils/queue');
 const db = require('./db');
 const migrator = require('./migrator');
 const migrations = require('./seeders');
@@ -52,6 +53,8 @@ class PandoraDb extends EventEmitter {
         this.initialized = false;
         this.tasks = [];// tasks config
         this.options = {};
+        this.queue = new Queue();
+        this.queue.on('error', err => this.emit('error', safeObject(err)));
 
         // Start all tasks after the Db initialization
         this.once('initialized', () => this.tasks.map(task => this._setupTask(task)));
@@ -87,17 +90,27 @@ class PandoraDb extends EventEmitter {
                         data
                     });
 
-                    // Run task action
-                    await endpoint(data, {
-                        ...task.actionOptions,
-                        source: task.source
-                    });
+                    this.queue.add(task, [], async (task) => {
 
-                    this.emit('action', {
-                        name: task.name,
-                        event: task.event,
-                        data
-                    });
+                        try {
+
+                            // Run task action
+                            await endpoint(data, {
+                                ...task.actionOptions,
+                                source: task.source
+                            });
+
+                            this.emit('action', {
+                                name: task.name,
+                                event: task.event,
+                                data
+                            });
+                        } catch (err) {
+
+                            this.emit('error', safeObject(err));
+                        }                        
+
+                    }, false);
 
                 } catch (err) {
 
@@ -162,13 +175,16 @@ class PandoraDb extends EventEmitter {
             }
             
             this.initialized = true;
-            this.emit('initialized');            
+            this.emit('initialized');
+            
+            return this;
+
         } catch(err) {
+
             this.initialized = false;
             this.emit('error', safeObject(err));
+            return Promise.reject(err);
         }
-
-        return this;
     }
 
     /**
@@ -183,7 +199,8 @@ class PandoraDb extends EventEmitter {
             this.initialized = false;
             this.emit('stopped');
         } catch(err) {
-            this.emit('error', safeObject(err));        
+            this.emit('error', safeObject(err));
+            return Promise.reject(err);
         }
     }
 

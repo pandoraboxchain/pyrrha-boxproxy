@@ -41,6 +41,7 @@ class PjsConnector extends EventEmitter {
         this.lastBlock = 0;
     }
 
+    // Get the last block number from the network
     _getBlockNumber() {
         const provider = this.web3.currentProvider;
 
