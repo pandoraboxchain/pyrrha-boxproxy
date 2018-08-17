@@ -243,28 +243,24 @@ describe('Pandora module tests', () => {
         })().catch(done);
     });
 
-    it('Pandora should emit jobsRecords if new job created', done => {
-        const timeout = setTimeout(() => done(new Error('jobsRecords (create new job) not been obtained during timeout')), 15000);
+    it('Pandora should emit jobsRecords if new job created', async () => {
         let jobId;
 
-        pandora.once('error', err => {
-            clearTimeout(timeout);
-            done(err);
-        });
-        pandora.once('jobsRecords', data => {
-            expect(Array.isArray(data.records)).to.be.true;
-            expect(data.records[0].address).to.be.equal(jobId);
-            expect(data.blockNumber).to.be.a('number');
-            expect(data.baseline).to.be.false;
-            clearTimeout(timeout);
-            done();
-        });
+        await new Promise(async (resolve, reject) => {
 
-        pandora.emit('subscribeJobs', {
-            blockNumber: 0
-        });
-
-        (async () => {
+            pandora.once('error', reject)
+            pandora.once('jobsRecords', data => {
+                expect(Array.isArray(data.records)).to.be.true;
+                expect(data.records[0].address).to.be.equal(jobId);
+                expect(data.blockNumber).to.be.a('number');
+                expect(data.baseline).to.be.false;
+                resolve();
+            });
+    
+            pandora.emit('subscribeJobs', {
+                blockNumber: 0
+            });
+    
             jobId = await pjs.jobs.create({
                 kernel: kernelContractAddress2, 
                 dataset: datasetContractAddress2,
@@ -273,7 +269,6 @@ describe('Pandora module tests', () => {
                 description: 'test job',
                 deposit: 1
             }, publisher);
-        })().catch(done);
+        });        
     });
-
 });
