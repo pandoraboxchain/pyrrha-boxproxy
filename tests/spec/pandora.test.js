@@ -241,6 +241,8 @@ describe('Pandora module tests', () => {
                 expect(data.baseline).to.be.false;
                 resolve();
             });
+            pandora.once('subscriptionsList', console.log);
+            pandora.emit('getSubscriptionsList');
     
             jobId = await pjs.jobs.create({
                 kernel: kernelContractAddress2, 

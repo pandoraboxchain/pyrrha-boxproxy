@@ -15,7 +15,7 @@ RUN npm i --save-dev --silent \
         @babel/polyfill@7.0.0-rc.1 \
         @babel/preset-env@7.0.0-rc.1 \
         @babel/register@7.0.0-rc.1 \
-        ganache-sandbox@https://github.com/pandoraboxchain/ganache-sandbox.git#v0.3.8 \
+        ganache-sandbox@https://github.com/pandoraboxchain/ganache-sandbox.git#v0.3.9 \
         openzeppelin-solidity \
         mocha \
         mocha-lcov-reporter \
