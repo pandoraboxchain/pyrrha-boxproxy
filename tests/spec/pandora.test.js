@@ -227,9 +227,7 @@ describe('Pandora module tests', () => {
     it('Pandora should emit jobsRecords if new job created', async () => {
         let jobId;
 
-        pandora.emit('subscribeJobs', {
-            blockNumber: 0
-        });
+        pandora.emit('subscribeJobs');
 
         await new Promise(async (resolve, reject) => {
 
@@ -244,14 +242,17 @@ describe('Pandora module tests', () => {
             pandora.once('subscriptionsList', console.log);
             pandora.emit('getSubscriptionsList');
     
-            jobId = await pjs.jobs.create({
-                kernel: kernelContractAddress2, 
-                dataset: datasetContractAddress2,
-                complexity: 1,
-                jobType: '0', 
-                description: 'test job',
-                deposit: 1
-            }, publisher);
+            setTimeout(async () => {
+
+                jobId = await pjs.jobs.create({
+                    kernel: kernelContractAddress2, 
+                    dataset: datasetContractAddress2,
+                    complexity: 1,
+                    jobType: '0', 
+                    description: 'test job',
+                    deposit: 1
+                }, publisher);
+            }, 1000);
         });        
     });
 });
