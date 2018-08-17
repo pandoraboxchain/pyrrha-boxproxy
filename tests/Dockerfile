@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:9
 
 LABEL maintainer="kostysh@gmail.com"
 
@@ -8,14 +8,14 @@ COPY ./package.json /pyrrha-boxproxy/package.json
 # Installing of dependencies
 WORKDIR /pyrrha-boxproxy
 RUN npm i --save-dev --silent \
-        @babel/cli@7.0.0-beta.56 \
-        @babel/core@7.0.0-beta.56 \
-        @babel/plugin-proposal-object-rest-spread@7.0.0-beta.56 \
-        @babel/plugin-syntax-object-rest-spread@7.0.0-beta.56 \
-        @babel/polyfill@7.0.0-beta.56 \
-        @babel/preset-env@7.0.0-beta.56 \
-        @babel/register@7.0.0-beta.56 \
-        ganache-sandbox@https://github.com/pandoraboxchain/ganache-sandbox.git#v0.3.5 \
+        @babel/cli@7.0.0-rc.1 \
+        @babel/core@7.0.0-rc.1 \
+        @babel/plugin-proposal-object-rest-spread@7.0.0-rc.1 \
+        @babel/plugin-syntax-object-rest-spread@7.0.0-rc.1 \
+        @babel/polyfill@7.0.0-rc.1 \
+        @babel/preset-env@7.0.0-rc.1 \
+        @babel/register@7.0.0-rc.1 \
+        ganache-sandbox@https://github.com/pandoraboxchain/ganache-sandbox.git#v0.3.8 \
         openzeppelin-solidity \
         mocha \
         mocha-lcov-reporter \
@@ -42,7 +42,7 @@ ARG WITH_COVERAGE=0
 ARG LOG_LEVEL=error
 ENV WITH_COVERAGE=$WITH_COVERAGE
 ENV LOG_LEVEL=$LOG_LEVEL
-ENV DEBUG=boxproxy
+ENV DEBUG=boxproxy,ganache
 ENV NODE_ENV=testing
 
 WORKDIR /pyrrha-boxproxy
