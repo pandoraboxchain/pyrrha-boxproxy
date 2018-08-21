@@ -11,6 +11,7 @@ describe('Queue tests', () => {
             event: {},
             blockNumber: 1234567
         };
+        const addedRecords = [];
 
         let isSomethingQueued = false;
         queue.once('queued', () => { isSomethingQueued = true; });
@@ -25,12 +26,18 @@ describe('Queue tests', () => {
             queue.add({
                 ...message,
                 index
+            }, [], undefined, (err, data) => {
+                
+                if (!err) {
+                    addedRecords.push(data);
+                }
             });
         }, Math.floor(Math.random() * 50)));
 
         await queue.delay(55);
 
         expect(queue.size).to.be.equal(100);
+        expect(addedRecords.length).to.be.equal(100);
         expect(isSomethingQueued).to.be.true;
         expect(isUpdated).to.be.true;
         expect(isStopped).to.be.true;
@@ -88,21 +95,28 @@ describe('Queue tests', () => {
                 blockNumber: 1234567
             }
         ];
+        const addedRecords = [];
 
         let isSomethingIgnored = false;
         queue.once('ignored', () => { isSomethingIgnored = true; });
 
         messages.map(message => setTimeout(() => {
-            queue.add(message, ['address', 'name']);
+            queue.add(message, ['address', 'name'], undefined, (err, data) => {
+                
+                if (!err) {
+                    addedRecords.push(data);
+                }
+            });
         }, Math.floor(Math.random() * 110)));
 
         await queue.delay(120);
 
         expect(queue.size).to.be.equal(4);
+        expect(addedRecords.length).to.be.equal(4);
         expect(isSomethingIgnored).to.be.true;
     });
 
-    it('#add should add messages with async transforming', async () => {
+    it('#add should add messages with async transforming before adding', async () => {
         const queue = new Queue();        
         const message = {
             blockNumber: 1234567
@@ -112,7 +126,7 @@ describe('Queue tests', () => {
             queue.add({
                 ...message,
                 index
-            }, 'index', message => new Promise(resolve => setTimeout(() => resolve({
+            }, ['index'], message => new Promise(resolve => setTimeout(() => resolve({
                 ...message,
                 event: {
                     id: guid()
@@ -135,13 +149,13 @@ describe('Queue tests', () => {
             queue.add({
                     ...message,
                     index
-                }, 'index',
+                }, ['index'],
                 message => new Promise(resolve => setTimeout(() => resolve({
                     ...message,
                     event: {
                         id: guid()
                     }
-                }), 5)), false);
+                }), 5)), undefined, false);
             }, Math.floor(Math.random() * 50)));
 
         await queue.delay(55);
@@ -159,7 +173,7 @@ describe('Queue tests', () => {
             queue.add({
                 ...message,
                 index
-            }, 'index', message => new Promise(resolve => setTimeout(() => resolve({
+            }, ['index'], message => new Promise(resolve => setTimeout(() => resolve({
                 ...message,
                 event: {
                     id: guid()
@@ -185,7 +199,7 @@ describe('Queue tests', () => {
             queue.add({
                 ...message,
                 index
-            }, 'index', message => new Promise(resolve => setTimeout(() => resolve({
+            }, ['index'], message => new Promise(resolve => setTimeout(() => resolve({
                 ...message,
                 event: {
                     id: guid()

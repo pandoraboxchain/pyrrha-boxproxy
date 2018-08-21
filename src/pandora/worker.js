@@ -246,62 +246,72 @@ const messageManager = async (message) => {
             // Subscribe to kernels updates
             case 'subscribeKernels':
 
-                subscriptions.create({
-                    ...message,
-                    name: 'KernelAdded'
-                }, ['cmd', 'name'], async message => {
+                const kernelsSubscriptionsProms = [];
 
-                    log.debug(`WORKER: going to run "subscribeKernelAdded"`, {
-                        fromBlock: message.blockNumber
-                    });
-                    
-                    const kernelAdded = await kernelsApi.subscribeKernelAdded(pjs, {
-                        fromBlock: message.blockNumber
-                    }, result => {
-                        log.debug(`WORKER: going to send just added "kernelsRecords" received from event "subscribeKernelAdded"`, result);
-    
-                        sendMessage({
-                            cmd: 'kernelsRecords',
-                            records: result.records,
-                            blockNumber: result.blockNumber,
-                            baseline: false,
-                            date: Date.now()
-                        });
-                    }, err => sendError(err));
+                kernelsSubscriptionsProms.push(new Promise((resolve, reject) => {
 
-                    return {
+                    subscriptions.create({
                         ...message,
-                        events: kernelAdded.event
-                    };
-                });
-
-                subscriptions.create({
-                    ...message,
-                    name: 'KernelRemoved'
-                }, ['cmd', 'name'], async message => {
-
-                    log.debug(`WORKER: going to run "subscribeKernelRemoved"`, {
-                        fromBlock: message.blockNumber
-                    });
+                        name: 'KernelAdded'
+                    }, ['cmd', 'name'], async message => {
     
-                    const kernelRemoved = await kernelsApi.subscribeKernelRemoved(pjs, {
-                        fromBlock: message.blockNumber
-                    }, result => {
-                        log.debug(`WORKER: going to send just removed kernels received from event "subscribeKernelRemoved"`, result);
-    
-                        sendMessage({
-                            cmd: 'kernelsRecordsRemove',
-                            records: result.records,
-                            blockNumber: result.blockNumber,
-                            date: Date.now()
+                        log.debug(`WORKER: going to run "subscribeKernelAdded"`, {
+                            fromBlock: message.blockNumber
                         });
-                    }, err => sendError(err));                    
+                        
+                        const kernelAdded = await kernelsApi.subscribeKernelAdded(pjs, {
+                            fromBlock: message.blockNumber
+                        }, result => {
+                            log.debug(`WORKER: going to send just added "kernelsRecords" received from event "subscribeKernelAdded"`, result);
+        
+                            sendMessage({
+                                cmd: 'kernelsRecords',
+                                records: result.records,
+                                blockNumber: result.blockNumber,
+                                baseline: false,
+                                date: Date.now()
+                            });
+                        }, reject);
+    
+                        return {
+                            ...message,
+                            events: kernelAdded.event
+                        };
+                    }, resolve);
+                }));
 
-                    return {
+                kernelsSubscriptionsProms.push(new Promise((resolve, reject) => {
+
+                    subscriptions.create({
                         ...message,
-                        events: kernelRemoved.event
-                    };
-                });
+                        name: 'KernelRemoved'
+                    }, ['cmd', 'name'], async message => {
+    
+                        log.debug(`WORKER: going to run "subscribeKernelRemoved"`, {
+                            fromBlock: message.blockNumber
+                        });
+        
+                        const kernelRemoved = await kernelsApi.subscribeKernelRemoved(pjs, {
+                            fromBlock: message.blockNumber
+                        }, result => {
+                            log.debug(`WORKER: going to send just removed kernels received from event "subscribeKernelRemoved"`, result);
+        
+                            sendMessage({
+                                cmd: 'kernelsRecordsRemove',
+                                records: result.records,
+                                blockNumber: result.blockNumber,
+                                date: Date.now()
+                            });
+                        }, reject);                    
+    
+                        return {
+                            ...message,
+                            events: kernelRemoved.event
+                        };
+                    }, resolve);
+                }));
+
+                await Promise.all(kernelsSubscriptionsProms);
 
                 await state.set({
                     kernels: PAN_KERNELS_SUBSCRIBED
@@ -335,63 +345,73 @@ const messageManager = async (message) => {
             // Subscribe to datasets updates
             case 'subscribeDatasets':
 
-                subscriptions.create({
-                    ...message,
-                    name: 'DatasetAdded'
-                }, ['cmd', 'name'], async message => {
+                const datasetsSubscriptionsProms = [];
 
-                    log.debug(`WORKER: going to run "subscribeDatasetAdded"`, {
-                        fromBlock: message.blockNumber
-                    });
-                    
-                    const datasetAdded = await datasetsApi.subscribeDatasetAdded(pjs, {
-                        fromBlock: message.blockNumber
-                    }, result => {
-                        log.debug(`WORKER: going to send just added "datasetsRecords" received from event "subscribeDatasetAdded"`, result);
-    
-                        sendMessage({
-                            cmd: 'datasetsRecords',
-                            records: result.records,
-                            blockNumber: result.blockNumber,
-                            baseline: false,
-                            date: Date.now()
-                        });
-                    }, err => sendError(err));
+                datasetsSubscriptionsProms.push(new Promise((resolve, reject) => {
 
-                    return {
+                    subscriptions.create({
                         ...message,
-                        events: datasetAdded.event
-                    };
-                });
-
-                subscriptions.create({
-                    ...message,
-                    name: 'DatasetRemoved'
-                }, ['cmd', 'name'], async message => {
-
-                    log.debug(`WORKER: going to run "subscribeDatasetRemoved"`, {
-                        fromBlock: message.blockNumber
-                    });
+                        name: 'DatasetAdded'
+                    }, ['cmd', 'name'], async message => {
     
-                    const datasetRemoved = await datasetsApi.subscribeDatasetRemoved(pjs, {
-                        fromBlock: message.blockNumber
-                    }, result => {
-                        log.debug(`WORKER: going to send just removed datasets received from event "subscribeDatasetRemoved"`, result);
-    
-                        sendMessage({
-                            cmd: 'datasetsRecordsRemove',
-                            records: result.records,
-                            blockNumber: result.blockNumber,
-                            date: Date.now()
+                        log.debug(`WORKER: going to run "subscribeDatasetAdded"`, {
+                            fromBlock: message.blockNumber
                         });
-                    }, err => sendError(err));
+                        
+                        const datasetAdded = await datasetsApi.subscribeDatasetAdded(pjs, {
+                            fromBlock: message.blockNumber
+                        }, result => {
+                            log.debug(`WORKER: going to send just added "datasetsRecords" received from event "subscribeDatasetAdded"`, result);
+        
+                            sendMessage({
+                                cmd: 'datasetsRecords',
+                                records: result.records,
+                                blockNumber: result.blockNumber,
+                                baseline: false,
+                                date: Date.now()
+                            });
+                        }, reject);
+    
+                        return {
+                            ...message,
+                            events: datasetAdded.event
+                        };
+                    }, resolve);
+                }));
+                
+                datasetsSubscriptionsProms.push(new Promise((resolve, reject) => {
 
-                    return {
+                    subscriptions.create({
                         ...message,
-                        events: datasetRemoved.event
-                    };
-                });
+                        name: 'DatasetRemoved'
+                    }, ['cmd', 'name'], async message => {
+    
+                        log.debug(`WORKER: going to run "subscribeDatasetRemoved"`, {
+                            fromBlock: message.blockNumber
+                        });
+        
+                        const datasetRemoved = await datasetsApi.subscribeDatasetRemoved(pjs, {
+                            fromBlock: message.blockNumber
+                        }, result => {
+                            log.debug(`WORKER: going to send just removed datasets received from event "subscribeDatasetRemoved"`, result);
+        
+                            sendMessage({
+                                cmd: 'datasetsRecordsRemove',
+                                records: result.records,
+                                blockNumber: result.blockNumber,
+                                date: Date.now()
+                            });
+                        }, reject);
+    
+                        return {
+                            ...message,
+                            events: datasetRemoved.event
+                        };
+                    }, resolve);
+                }));
 
+                await Promise.all(datasetsSubscriptionsProms);
+                
                 await state.set({
                     datasets: PAN_DATASETS_SUBSCRIBED
                 });
@@ -424,30 +444,33 @@ const messageManager = async (message) => {
             // Subscribe to new job created event
             case 'subscribeJobs':
 
-                subscriptions.create(message, ['cmd'], async message => {
+                await new Promise((resolve, reject) => {
 
-                    log.debug(`WORKER: going to run "subscribeCognitiveJobCreated"`, {
-                        fromBlock: message.blockNumber
-                    });
-                    
-                    const cognitiveJobCreated = await jobsApi.subscribeCognitiveJobCreated(pjs, {
-                        fromBlock: message.blockNumber
-                    }, result => {
-                        log.debug(`WORKER: going to send just added "jobsRecords" received from event "subscribeCognitiveJobCreated"`, result);
-    
-                        sendMessage({
-                            cmd: 'jobsRecords',
-                            records: result.records,
-                            blockNumber: result.blockNumber,
-                            baseline: false,
-                            date: Date.now()
+                    subscriptions.create(message, ['cmd'], async message => {
+
+                        log.debug(`WORKER: going to run "subscribeCognitiveJobCreated"`, {
+                            fromBlock: message.blockNumber
                         });
-                    }, err => sendError(err));
-
-                    return {
-                        ...message,
-                        events: cognitiveJobCreated.event
-                    };
+                        
+                        const cognitiveJobCreated = await jobsApi.subscribeCognitiveJobCreated(pjs, {
+                            fromBlock: message.blockNumber
+                        }, result => {
+                            log.debug(`WORKER: going to send just added "jobsRecords" received from event "subscribeCognitiveJobCreated"`, result);
+        
+                            sendMessage({
+                                cmd: 'jobsRecords',
+                                records: result.records,
+                                blockNumber: result.blockNumber,
+                                baseline: false,
+                                date: Date.now()
+                            });
+                        }, reject);
+    
+                        return {
+                            ...message,
+                            events: cognitiveJobCreated.event
+                        };
+                    }, resolve);
                 });
 
                 await state.set({
@@ -458,33 +481,36 @@ const messageManager = async (message) => {
             
             // Subscribe to jobs updates
             case 'subscribeJobStateChanged':
-                
-                subscriptions.create(message, ['cmd'], async message => {
 
-                    log.debug(`WORKER: going to run "subscribeJobStateChanged"`, {
-                        fromBlock: message.blockNumber
-                    });
-    
-                    const cognitiveJobStateChanged = await jobsApi.subscribeJobStateChanged(pjs, {
-                        fromBlock: message.blockNumber
-                    }, result => {
-                        log.debug(`WORKER: going to send just changed "jobsRecords" received from event "subscribeJobStateChanged"`, result);
-    
-                        sendMessage({
-                            cmd: 'jobsRecords',
-                            records: result.records,
-                            blockNumber: result.blockNumber,
-                            baseline: false,
-                            date: Date.now()
+                await new Promise((resolve, reject) => {
+
+                    subscriptions.create(message, ['cmd'], async message => {
+
+                        log.debug(`WORKER: going to run "subscribeJobStateChanged"`, {
+                            fromBlock: message.blockNumber
                         });
-                    }, err => sendError(err));
-
-                    return {
-                        ...message,
-                        events: cognitiveJobStateChanged.event
-                    };
+        
+                        const cognitiveJobStateChanged = await jobsApi.subscribeJobStateChanged(pjs, {
+                            fromBlock: message.blockNumber
+                        }, result => {
+                            log.debug(`WORKER: going to send just changed "jobsRecords" received from event "subscribeJobStateChanged"`, result);
+        
+                            sendMessage({
+                                cmd: 'jobsRecords',
+                                records: result.records,
+                                blockNumber: result.blockNumber,
+                                baseline: false,
+                                date: Date.now()
+                            });
+                        }, reject);
+    
+                        return {
+                            ...message,
+                            events: cognitiveJobStateChanged.event
+                        };
+                    }, resolve);
                 });
-
+                
                 break;
 
             // Fetch workers baseline
@@ -513,31 +539,34 @@ const messageManager = async (message) => {
             // Subscribe to new worker node created event
             case 'subscribeWorkers':
 
-                subscriptions.create(message, ['cmd'], async message => {
+                await new Promise((resolve, reject) => {
 
-                    log.debug(`WORKER: going to run "subscribeWorkerAdded"`, {
-                        fromBlock: message.blockNumber
-                    });
-                    
-                    const workerAdded = await workersApi.subscribeWorkerAdded(pjs, {
-                        fromBlock: message.blockNumber
-                    }, result => {
-    
-                        log.debug(`WORKER: going to send just added "workersRecords" received from event "subscribeWorkerAdded"`, result);
-    
-                        sendMessage({
-                            cmd: 'workersRecords',
-                            records: result.records,
-                            blockNumber: result.blockNumber,
-                            baseline: false,
-                            date: Date.now()
+                    subscriptions.create(message, ['cmd'], async message => {
+
+                        log.debug(`WORKER: going to run "subscribeWorkerAdded"`, {
+                            fromBlock: message.blockNumber
                         });
-                    }, err => sendError(err));
-
-                    return {
-                        ...message,
-                        events: workerAdded.event
-                    };
+                        
+                        const workerAdded = await workersApi.subscribeWorkerAdded(pjs, {
+                            fromBlock: message.blockNumber
+                        }, result => {
+        
+                            log.debug(`WORKER: going to send just added "workersRecords" received from event "subscribeWorkerAdded"`, result);
+        
+                            sendMessage({
+                                cmd: 'workersRecords',
+                                records: result.records,
+                                blockNumber: result.blockNumber,
+                                baseline: false,
+                                date: Date.now()
+                            });
+                        }, reject);
+    
+                        return {
+                            ...message,
+                            events: workerAdded.event
+                        };
+                    }, resolve);
                 });
 
                 await state.set({
@@ -568,7 +597,7 @@ const messageManager = async (message) => {
                             baseline: false,
                             date: Date.now()
                         });
-                    }, err => sendError(err));
+                    }, sendError);
 
                     return {
                         ...message,
@@ -611,7 +640,7 @@ const messageManager = async (message) => {
 };
 
 // Listen for errors
-pjs.on('error', err => sendError(err));
+pjs.on('error', sendError);
 
 pjs.on('disconnected', data => sendMessage({
     cmd: 'disconnected',

@@ -40,13 +40,14 @@ class SubscriptionsManager extends EventEmitter  {
      * Create new subscription
      *
      * @param {Object} message Process message
-     * @param {[<{String}>]} conditions Additional condition (message property name)
+     * @param {String[]} conditions Additional condition (message property name)
      * @param {Function} subscriptionCallback
+     * @param {Function} onAfter
      * @memberof SubscriptionsManager
      */
-    create(message, conditions = [], subscriptionCallback = async () => {}) {
+    create(message, conditions = [], subscriptionCallback = data => data, onAfter = () => {}) {
         
-        this.subscriptions.add(message, conditions, subscriptionCallback);
+        this.subscriptions.add(message, conditions, subscriptionCallback, onAfter);
     }
 
     /**

@@ -119,10 +119,11 @@ class Queue extends EventEmitter {
 
             if (occurrences.length === 0) {
 
-                if (item.transform) {
+                if (item.onBefore) {
 
                     // Run async transformation for the record
-                    item.data = await item.transform(item.data);
+                    // before this record will be added to the storage
+                    item.data = await item.onBefore(item.data);
                 }
 
                 if (item.storage) {
@@ -131,8 +132,20 @@ class Queue extends EventEmitter {
                     this._data.push(item.data);
                 }
 
+                if (item.onAfter) {
+
+                    await item.onAfter(null, item.data);
+                }
+
                 this.emit('updated', item.data);                
             } else {
+
+                if (item.onAfter) {
+
+                    const ignoredErr = new Error('Record has been ignored due it is not match to conditions');
+                    ignoredErr.code = 'IGNORED';
+                    await item.onAfter(ignoredErr, item.data);
+                }
 
                 // All records what not meet conditions just ignored
                 this.emit('ignored', item);
@@ -163,17 +176,19 @@ class Queue extends EventEmitter {
      * Add record to the queue
      *
      * @param {Object} data Data to be added to the queue
-     * @param {[<{String}>]} conditions Array of properties  which are should be unique in the queue storage
-     * @param {Function} transform Transformation function what will be called before adding a record to the storage (can be async)
+     * @param {String[]} conditions Array of properties  which are should be unique in the queue storage
+     * @param {Function} onBefore Transformation function what will be called before adding a record to the storage (can be async)
+     * @param {Function} onAfter Callback which will be called after data record added to the storage
      * @param {boolean} storage Enable or disable queue storage (enabled by default)
      * @memberof Queue
      */
-    add(data, conditions, transform = data => data, storage = true) {
+    add(data, conditions = [], onBefore = data => data, onAfter = () => {}, storage = true) {
         this._resetTimers();
         const record = {
             data,
-            conditions,
-            transform,
+            conditions: Array.isArray(conditions) ? conditions : [conditions],
+            onBefore,
+            onAfter,
             storage
         };
         this._queue.unshift(record);

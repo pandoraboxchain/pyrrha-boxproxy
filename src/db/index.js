@@ -110,7 +110,7 @@ class PandoraDb extends EventEmitter {
                             this.emit('error', safeObject(err));
                         }                        
 
-                    }, false);
+                    }, undefined, false);
 
                 } catch (err) {
 
