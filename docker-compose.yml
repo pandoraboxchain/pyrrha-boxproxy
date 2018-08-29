@@ -7,11 +7,11 @@ services:
       context: .
       dockerfile: ./Dockerfile
     environment:
-      - WEB3_PROTOCOL=wss
-      - WEB3_HOSTNAME=rinkeby.infura.io/ws
+      - WEB3_PROTOCOL=ws
+      - WEB3_HOSTNAME=rinkeby.pandora.network
       - WEB3_PORT=8546
-      - PAN_ADDRESS=0x09dc2389c786490c2fe03f121b6f597bac7773d9
-      - MARKET_ADDRESS=0xd66f0550800ec823e7359e755f6c4f16e62e555b
+      - PAN_ADDRESS=0xf23f45caa5c697c54d2e92ecbee48855233040e1
+      - MARKET_ADDRESS=0xd1feab2687c6beea17d8c1f728aaf54aed5c0ea9
     ports:
       - "1111:1111"
       - "1337:1337"
