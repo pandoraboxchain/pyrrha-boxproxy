@@ -8,13 +8,13 @@ services:
       dockerfile: ./Dockerfile
     environment:
       - WEB3_PROTOCOL=ws
-      - WEB3_HOSTNAME=rinkeby.pandora.network
-      - WEB3_PORT=8546
-      - PAN_ADDRESS=0xf23f45caa5c697c54d2e92ecbee48855233040e1
-      - MARKET_ADDRESS=0xd1feab2687c6beea17d8c1f728aaf54aed5c0ea9
+      - WEB3_HOSTNAME=node.rsk.pandora.network
+      - WEB3_PORT=4445
+      - PAN_ADDRESS=0xcdca0f85f696a8a8d70a6ecd74236690548bf44b
+      - MARKET_ADDRESS=0x55da07dbb7c76cb6be03f6ab6669626a83ec250d
     ports:
-      - "1111:1111"
-      - "1337:1337"
+      - "1112:1111"
+      - "1338:1337"
     volumes:
       - "./tmp:/logs"
     networks: 

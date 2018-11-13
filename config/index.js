@@ -15,8 +15,8 @@ const hosts = {
         port: 8545,
         wstimeout: 5000,
         contracts: {
-            Pandora: '0x9561c133dd8580860b6b7e504bc5aa500f0f06a7',
-            PandoraMarket: '0x2612af3a521c2df9eaf28422ca335b04adf3ac66'
+            Pandora: '',
+            PandoraMarket: ''
         }
     },
     rinkeby: {
@@ -25,8 +25,8 @@ const hosts = {
         port: 8546,
         wstimeout: 5000,
         contracts: {
-            Pandora: '0xf23f45caa5c697c54d2e92ecbee48855233040e1',
-            PandoraMarket: '0xd1feab2687c6beea17d8c1f728aaf54aed5c0ea9'
+            Pandora: '',
+            PandoraMarket: ''
         }
     },
     rinkeby_infura: {
@@ -35,13 +35,23 @@ const hosts = {
         port: 8546,
         wstimeout: 5000,
         contracts: {
-            Pandora: '0xf23f45caa5c697c54d2e92ecbee48855233040e1',
-            PandoraMarket: '0xd1feab2687c6beea17d8c1f728aaf54aed5c0ea9'
+            Pandora: '',
+            PandoraMarket: ''
+        }
+    },
+    rsktest: {
+        protocol: 'ws',
+        host: 'node.rsk.pandora.network',
+        port: 4445,
+        wstimeout: 5000,
+        contracts: {
+            Pandora: '0xcdca0f85f696a8a8d70a6ecd74236690548bf44b',
+            PandoraMarket: '0x55da07dbb7c76cb6be03f6ab6669626a83ec250d'
         }
     }
 };
 
-let defaultHost = process.env.USE_HOST || 'rinkeby';
+let defaultHost = process.env.USE_HOST || 'rsktest';
 
 module.exports = {
     port: 1111,

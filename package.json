@@ -1,6 +1,6 @@
 {
   "name": "pyrrha-boxproxy",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "private": true,
   "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
   "main": "./src/index.js",
@@ -23,17 +23,17 @@
   ],
   "dependencies": {
     "body-parser": "1.18.3",
-    "express": "4.16.3",
-    "helmet": "3.13.0",
+    "express": "4.16.4",
+    "helmet": "3.15.0",
     "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.8.0",
-    "websocket": "1.0.26",
-    "winston": "3.0.0",
-    "sequelize": "4.38.0",
-    "sqlite3": "4.0.2"
+    "websocket": "1.0.28",
+    "winston": "3.1.0",
+    "sequelize": "4.41.2",
+    "sqlite3": "4.0.4"
   },
   "devDependencies": {
-    "eslint": "^5.4.0",
-    "eslint-plugin-security": "^1.4.0"
+    "eslint": "5.9.0",
+    "eslint-plugin-security": "1.4.0"
   },
   "license": "MIT"
 }
