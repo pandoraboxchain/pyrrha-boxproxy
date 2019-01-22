@@ -4,6 +4,7 @@
 const Pandora = require('../pyrrha-consensus/build/contracts/Pandora.json');
 const PandoraMarket = require('../pyrrha-consensus/build/contracts/PandoraMarket.json');
 const CognitiveJobController = require('../pyrrha-consensus/build/contracts/CognitiveJobController.json');
+const EconomicController = require('../pyrrha-consensus/build/contracts/EconomicController.json');
 const WorkerNode = require('../pyrrha-consensus/build/contracts/WorkerNode.json');
 const Kernel = require('../pyrrha-consensus/build/contracts/Kernel.json');
 const Dataset = require('../pyrrha-consensus/build/contracts/Dataset.json');
@@ -15,33 +16,55 @@ const hosts = {
         port: 8545,
         wstimeout: 5000,
         contracts: {
-            Pandora: '0x9561c133dd8580860b6b7e504bc5aa500f0f06a7',
-            PandoraMarket: '0x2612af3a521c2df9eaf28422ca335b04adf3ac66'
+            pan: '0xa40600efcb9b69003757fb196304858f989888a1',
+            economic: '0x3c2f60a3c1dba316c1031925712339f694f0da99',
+            pandora: '0x2ac8d321cdfdc1fa5591a38ee2c2bcbe094b64d7',
+            market: '0xfd4158c461df6295229e23c7686f8684a0d26531'
+        },
+        ipfs: {
+            protocol: 'http',
+            host: 'localhost',
+            port: 5001
         }
     },
     rinkeby: {
-        protocol: 'ws', // 'http',
-        host: 'rinkeby.pandora.network',
-        port: 8546,
+        protocol: 'wss',
+        host: 'rinkeby.pandora.network/ws',
+        port: '',
+        net: 4,
         wstimeout: 5000,
         contracts: {
-            Pandora: '0xf23f45caa5c697c54d2e92ecbee48855233040e1',
-            PandoraMarket: '0xd1feab2687c6beea17d8c1f728aaf54aed5c0ea9'
+            pan: '0xa40600efcb9b69003757fb196304858f989888a1',
+            economic: '0x3c2f60a3c1dba316c1031925712339f694f0da99',
+            pandora: '0x2ac8d321cdfdc1fa5591a38ee2c2bcbe094b64d7',
+            market: '0xfd4158c461df6295229e23c7686f8684a0d26531'
+        },
+        ipfs: {
+            protocol: 'http',
+            host: 'ipfs.pandora.network',
+            port: 5001
         }
     },
-    rinkeby_infura: {
+    rikebyinfura: {
         protocol: 'wss',
         host: 'rinkeby.infura.io/ws',
-        port: 8546,
+        port: '',
         wstimeout: 5000,
         contracts: {
-            Pandora: '0xf23f45caa5c697c54d2e92ecbee48855233040e1',
-            PandoraMarket: '0xd1feab2687c6beea17d8c1f728aaf54aed5c0ea9'
+            pan: '0xa40600efcb9b69003757fb196304858f989888a1',
+            economic: '0x3c2f60a3c1dba316c1031925712339f694f0da99',
+            pandora: '0x2ac8d321cdfdc1fa5591a38ee2c2bcbe094b64d7',
+            market: '0xfd4158c461df6295229e23c7686f8684a0d26531'
+        },
+        ipfs: {
+            protocol: 'http',
+            host: 'ipfs.pandora.network',
+            port: 5001
         }
     }
 };
 
-let defaultHost = process.env.USE_HOST || 'rinkeby';
+let defaultHost = process.env.USE_HOST || 'rikebyinfura';
 
 module.exports = {
     port: 1111,
@@ -54,13 +77,16 @@ module.exports = {
         Pandora,
         PandoraMarket,
         CognitiveJobController,
+        EconomicController,
         WorkerNode,
         Kernel,
         Dataset
     },
     addresses: {
-        Pandora: process.env.PAN_ADDRESS || hosts[defaultHost].contracts.Pandora,
-        PandoraMarket: process.env.MARKET_ADDRESS || hosts[defaultHost].contracts.PandoraMarket
+        Pan:  process.env.PAN_ADDRESS || hosts[defaultHost].contracts.pan,
+        Pandora: process.env.PANDORA_ADDRESS || hosts[defaultHost].contracts.pandora,
+        EconomicController: process.env.ECONOMIC_ADDRESS || hosts[defaultHost].contracts.economic,
+        PandoraMarket: process.env.MARKET_ADDRESS || hosts[defaultHost].contracts.market
     },
     database: {
         pagination: {

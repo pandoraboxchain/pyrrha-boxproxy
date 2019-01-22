@@ -1,4 +1,4 @@
-FROM node:9
+FROM node:10
 
 LABEL maintainer="kostysh@gmail.com"
 
@@ -8,15 +8,18 @@ COPY ./package.json /pyrrha-boxproxy/package.json
 # Installing of dependencies
 WORKDIR /pyrrha-boxproxy
 RUN npm i --save-dev --silent \
-        @babel/cli@7.0.0 \
-        @babel/core@7.0.0 \
-        @babel/plugin-proposal-object-rest-spread@7.0.0 \
-        @babel/plugin-syntax-object-rest-spread@7.0.0 \
-        @babel/polyfill@7.0.0 \
-        @babel/preset-env@7.0.0 \
-        @babel/register@7.0.0 \
-        ganache-sandbox@https://github.com/pandoraboxchain/ganache-sandbox.git#v0.3.9 \
-        openzeppelin-solidity \
+        @babel/cli \
+        @babel/core \
+        @babel/plugin-proposal-class-properties \
+        @babel/plugin-syntax-class-properties \
+        @babel/plugin-transform-classes \
+        @babel/plugin-proposal-object-rest-spread \
+        @babel/plugin-syntax-object-rest-spread \
+        @babel/polyfill \
+        @babel/preset-env \
+        @babel/register \
+        ganache-sandbox@https://github.com/pandoraboxchain/ganache-sandbox.git#v0.3.11 \
+        openzeppelin-solidity@2.0.0 \
         mocha \
         mocha-lcov-reporter \
         chai \

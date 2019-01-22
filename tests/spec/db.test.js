@@ -22,6 +22,7 @@ describe('Database module tests', () => {
             clearTimeout(timeout);
             done();
         });
+        db.on('error', err => {});
         db.initialize(config).catch(done);
     });
 
@@ -68,26 +69,21 @@ describe('Database module tests', () => {
                 return;
             }
 
-            done(new Error('watchBlockNumber task not been handled during timeout'));
+            done(new Error('watchBlockNumberSimple task not been handled during timeout'));
             doneCalled = true;
         }, 7000);
 
-        db.once('error', err => {
-            clearTimeout(timeout);
+        db.on('action', async (data) => {
 
-            if (doneCalled) {
+            if (data.name !== 'watchBlockNumberSimple' || doneCalled) {
                 return;
             }
 
-            done(new Error(err.message));
-            doneCalled = true;
-        });
-        db.once('action', async (data) => {
+            clearTimeout(timeout);
 
             try {
 
-                clearTimeout(timeout);
-                expect(data.name).to.be.equal('watchBlockNumber');
+                expect(data.name).to.be.equal('watchBlockNumberSimple');
                 expect(data.event).to.be.equal('lastBlockNumber');
                 expect(data.data).to.be.an('object');
                 const bn = await db.api.system.getBlockNumber('lastBlock');
@@ -96,8 +92,6 @@ describe('Database module tests', () => {
                 done();
                 doneCalled = true;
             } catch (err) {
-
-                clearTimeout(timeout);
 
                 if (doneCalled) {
                     return;
@@ -109,7 +103,7 @@ describe('Database module tests', () => {
         });
 
         db.addTask({
-            name: 'watchBlockNumber',
+            name: 'watchBlockNumberSimple',
             source: testProv,
             event: 'lastBlockNumber',
             action: 'system.saveBlockNumber',
@@ -135,26 +129,21 @@ describe('Database module tests', () => {
                 return;
             }            
             
-            done(new Error('watchBlockNumber task not been handled during timeout useing custom action'));
+            done(new Error('watchBlockNumberCustom task not been handled during timeout useing custom action'));
             doneCalled = true;
         }, 7000);
     
-        db.once('error', err => {
-            clearTimeout(timeout);
+        db.on('action', async (data) => {
 
-            if (doneCalled) {
+            if (data.name !== 'watchBlockNumberCustom' || doneCalled) {
                 return;
             }
 
-            done(new Error(err.message));
-            doneCalled = true;
-        });
-        db.once('action', async (data) => {
+            clearTimeout(timeout);
 
             try {
 
-                clearTimeout(timeout);
-                expect(data.name).to.be.equal('watchBlockNumber');
+                expect(data.name).to.be.equal('watchBlockNumberCustom');
                 expect(data.event).to.be.equal('lastBlockNumber');
                 expect(data.data).to.be.an('object');
                 const bn = await db.api.system.getBlockNumber('veryLastBlock');
@@ -163,8 +152,6 @@ describe('Database module tests', () => {
                 done();
                 doneCalled = true;
             } catch (err) {
-
-                clearTimeout(timeout);
 
                 if (doneCalled) {
                     return;
@@ -176,7 +163,7 @@ describe('Database module tests', () => {
         });
 
         db.addTask({
-            name: 'watchBlockNumber',
+            name: 'watchBlockNumberCustom',
             source: testProv,
             event: 'lastBlockNumber',
             action: async (data) => {
@@ -185,7 +172,7 @@ describe('Database module tests', () => {
             initEvent: 'started',
             isInitialized: 'initialized',
             init: () => {
-    
+
                 testProv.emit('lastBlockNumber', {
                     name: 'veryLastBlock',
                     blockNumber: 12345

@@ -1,4 +1,3 @@
-'use strict';
 const log = require('../logger');
 const { EventEmitter } = require('events');
 const Queue = require('../utils/queue');

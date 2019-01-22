@@ -2,7 +2,7 @@
 const winston = require('winston');
 
 const createLogger = level => {
-
+    
     const config = {
         level,
         format: winston.format.combine(
