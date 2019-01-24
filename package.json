@@ -1,6 +1,6 @@
 {
   "name": "pyrrha-boxproxy",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "private": true,
   "description": "Server-side Proxy for Pyrrha Boxchain Explorer",
   "main": "./src/index.js",
