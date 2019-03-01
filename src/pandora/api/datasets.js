@@ -8,8 +8,8 @@
  */
 module.exports.getDatasetsRecords = async (pjs) => {
     
-    const blockNumber = await pjs.web3.eth.getBlockNumber();
-    const { records, error } = await pjs.api.datasets.fetchAll();
+    const blockNumber = await pjs.api.web3.eth.getBlockNumber();
+    const { records, error } = await pjs.datasets.fetchAll();
 
     return {
         records,
@@ -29,13 +29,13 @@ module.exports.getDatasetsRecords = async (pjs) => {
  */
 module.exports.subscribeDatasetAdded = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    const datasetAdded = await pjs.api.datasets.eventDatasetAdded(options);
+    const datasetAdded = await pjs.datasets.eventDatasetAdded(options);
     return datasetAdded
         .data(async ({records, event}) => {
 
             try {
 
-                const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.api.web3.eth.getBlockNumber();
 
                 dataCallback({
                     records,
@@ -60,13 +60,13 @@ module.exports.subscribeDatasetAdded = async (pjs, options = {}, dataCallback = 
  */
 module.exports.subscribeDatasetRemoved = async (pjs, options = {}, dataCallback = () => {}, errorCallback = () => {}) => {
 
-    const datasetRemoved = await pjs.api.datasets.eventDatasetRemoved(options);
+    const datasetRemoved = await pjs.datasets.eventDatasetRemoved(options);
     return datasetRemoved
         .data(async ({records, event}) => {
 
             try {
 
-                const blockNumber = await pjs.web3.eth.getBlockNumber();
+                const blockNumber = await pjs.api.web3.eth.getBlockNumber();
 
                 dataCallback({
                     records,

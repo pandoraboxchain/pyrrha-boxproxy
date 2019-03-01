@@ -2,7 +2,7 @@
 const winston = require('winston');
 
 const createLogger = level => {
-
+    
     const config = {
         level,
         format: winston.format.combine(
@@ -24,5 +24,5 @@ const createLogger = level => {
     return winston.createLogger(config);
 };
 
-module.exports = createLogger(process.env.NODE_ENV === 'testing' ? 'error' : process.env.LOG_LEVEL || 'warn');
+module.exports = createLogger('debug');//process.env.NODE_ENV === 'testing' ? 'error' : process.env.LOG_LEVEL || 'warn');
 module.exports.createLogger = createLogger;
