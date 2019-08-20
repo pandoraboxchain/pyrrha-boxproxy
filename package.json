@@ -28,7 +28,7 @@
     "pyrrha-js": "https://github.com/pandoraboxchain/pyrrha-js.git#v1.8.5",
     "websocket": "1.0.28",
     "winston": "3.1.0",
-    "sequelize": "4.42.0",
+    "sequelize": "4.44.3",
     "sqlite3": "4.0.6"
   },
   "devDependencies": {
