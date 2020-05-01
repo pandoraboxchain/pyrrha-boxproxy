@@ -15,7 +15,9 @@
     "start:docker": "docker-compose up --remove-orphans",
     "stop:docker": "docker-compose down",
     "start": "node ./src",
-    "start:dev": "NODE_ENV=development node ./src"
+    "start:dev": "NODE_ENV=development node ./src",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "author": "Kostiantyn Smyrnov <kostysh@gmail.com>",
   "contributors": [
@@ -29,11 +31,13 @@
     "websocket": "1.0.28",
     "winston": "3.1.0",
     "sequelize": "4.42.0",
-    "sqlite3": "4.0.6"
+    "sqlite3": "4.0.6",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "eslint": "5.12.1",
     "eslint-plugin-security": "1.4.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "snyk": true
 }
